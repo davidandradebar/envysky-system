@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 import type { Aircraft, Flight, Pilot } from "@/lib/types"
-import { getAircraftById, getFlights, getPilots, saveAircrafts, setAircraftStatus } from "@/lib/local-db"
+import { getAircrafts, getFlights, getPilots } from "@/lib/db"
 import { calcAircraftAccumulatedHours, calcAircraftMaintenance } from "@/lib/aggregates"
 import { cn } from "@/lib/utils"
 
@@ -19,9 +19,19 @@ export default function AircraftPage({ params }: { params: { id: string } }) {
   const [pilots, setPilots] = useState<Pilot[]>([])
 
   useEffect(() => {
-    setAircraft(getAircraftById(params.id) || null)
-    setFlights(getFlights())
-    setPilots(getPilots())
+    const loadData = async () => {
+      try {
+        const [aircraftsData, flightsData, pilotsData] = await Promise.all([getAircrafts(), getFlights(), getPilots()])
+
+        const foundAircraft = aircraftsData.find((a) => a.id === params.id) || null
+        setAircraft(foundAircraft)
+        setFlights(flightsData)
+        setPilots(pilotsData)
+      } catch (error) {
+        console.error("Error loading aircraft data:", error)
+      }
+    }
+    loadData()
   }, [params.id])
 
   const { accumulated } = useMemo(
@@ -41,10 +51,9 @@ export default function AircraftPage({ params }: { params: { id: string } }) {
     return map
   }, [pilots])
 
-  const handleSetStatus = (status: "active" | "maintenance") => {
+  const handleSetStatus = async (status: "active" | "maintenance") => {
     if (!aircraft) return
-    const updated = setAircraftStatus(aircraft.id, status)
-    saveAircrafts(updated)
+    // TODO: Implement aircraft status update API call
     setAircraft({ ...aircraft, status })
   }
 
