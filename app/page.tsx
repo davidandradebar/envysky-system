@@ -4,7 +4,17 @@ import type React from "react"
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { BadgeCheck, Calendar, CheckCircle2, Clock, Plane, PlusCircle, Rocket, ShieldAlert, UserPlus } from 'lucide-react'
+import {
+  BadgeCheck,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  Plane,
+  PlusCircle,
+  Rocket,
+  ShieldAlert,
+  UserPlus,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -212,45 +222,43 @@ export default function Page() {
 
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-8 space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold">ENVYSKY</h1>
-          <p className="text-muted-foreground">Gestión de pilotos, aviones, horas, vuelos y mantenimiento.</p>
-        </div>
-        <div className="flex gap-2">
-          <Button asChild variant="outline">
-            <Link href="https://vercel.com/docs/deploy" target="_blank" rel="noreferrer">
-              Publicar en Vercel
-            </Link>
-          </Button>
-          <Button asChild>
-            <Link href="https://vercel.com/help" target="_blank" rel="noreferrer">
-              Soporte
-            </Link>
-          </Button>
-        </div>
+      <div className="text-center py-8 bg-gradient-to-r from-blue-50 via-sky-50 to-blue-50 rounded-lg border border-blue-100 mb-6">
+        <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent">
+          ENVYSKY
+        </h1>
+        <p className="text-blue-700/80 mt-2 text-lg">Gestión de pilotos, aviones, horas, vuelos y mantenimiento.</p>
       </div>
 
       <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="flex w-full justify-start overflow-x-auto">
-          <TabsTrigger value="dashboard">Panel</TabsTrigger>
-          <TabsTrigger value="pilots">Pilotos</TabsTrigger>
-          <TabsTrigger value="aircraft">Aviones</TabsTrigger>
-          <TabsTrigger value="schedule">Agenda</TabsTrigger>
-          <TabsTrigger value="settings">Instalación</TabsTrigger>
+        <TabsList className="flex w-full justify-center overflow-x-auto bg-blue-50 border border-blue-200">
+          <TabsTrigger value="dashboard" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            Panel
+          </TabsTrigger>
+          <TabsTrigger value="pilots" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            Pilotos
+          </TabsTrigger>
+          <TabsTrigger value="aircraft" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            Aviones
+          </TabsTrigger>
+          <TabsTrigger value="schedule" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            Agenda
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            Guía rápida
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6">
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <Card className="xl:col-span-2">
-              <CardHeader>
+            <Card className="xl:col-span-2 shadow-sm">
+              <CardHeader className="bg-gradient-to-r from-blue-100 to-sky-100 border-b border-blue-200">
                 <SectionHeader
                   title="Acciones rápidas"
                   description="Registrar compra, crear avión, agendar vuelo"
-                  icon={<PlusCircle className="h-4 w-4" />}
+                  icon={<PlusCircle className="h-4 w-4 text-blue-700" />}
                 />
               </CardHeader>
-              <CardContent className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <CardContent className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
                 <div className="space-y-3">
                   <div className="font-medium">Compra de horas (crea piloto si no existe)</div>
                   <div className="space-y-2">
@@ -323,7 +331,7 @@ export default function Page() {
                       onChange={(e) => setPurchaseForm((s) => ({ ...s, hours: e.target.value }))}
                     />
                   </div>
-                  <Button onClick={handlePurchase} className="w-full">
+                  <Button onClick={handlePurchase} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                     <UserPlus className="mr-2 h-4 w-4" />
                     Registrar compra
                   </Button>
@@ -392,7 +400,7 @@ export default function Page() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button onClick={handleAddAircraft} className="w-full">
+                  <Button onClick={handleAddAircraft} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                     <Plane className="mr-2 h-4 w-4" />
                     Crear avión
                   </Button>
@@ -482,7 +490,7 @@ export default function Page() {
                       />
                     </div>
                   </div>
-                  <Button onClick={handleSchedule} className="w-full">
+                  <Button onClick={handleSchedule} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                     <Calendar className="mr-2 h-4 w-4" />
                     Agendar
                   </Button>
@@ -490,12 +498,12 @@ export default function Page() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
+            <Card className="shadow-sm">
+              <CardHeader className="bg-gradient-to-r from-red-50 to-orange-50 border-b border-red-200">
                 <SectionHeader
                   title="Alertas de mantenimiento"
                   description="Aviones cercanos o en mantenimiento"
-                  icon={<ShieldAlert className="h-4 w-4" />}
+                  icon={<ShieldAlert className="h-4 w-4 text-red-600" />}
                 />
               </CardHeader>
               <CardContent className="space-y-3">
@@ -572,18 +580,22 @@ export default function Page() {
                               {f.date} {f.time}
                             </TableCell>
                             <TableCell>
-                              <Link className="underline" href={`/pilots/${p?.id || ""}`}>
+                              <Link className="underline hover:text-primary" href={`/pilots/${p?.id || ""}`}>
                                 {p?.fullName || "—"}
                               </Link>
                             </TableCell>
                             <TableCell>
-                              <Link className="underline" href={`/aircrafts/${a?.id || ""}`}>
+                              <Link className="underline hover:text-primary" href={`/aircrafts/${a?.id || ""}`}>
                                 {a?.tailNumber || "—"}
                               </Link>
                             </TableCell>
                             <TableCell>{f.duration.toFixed(1)} hs</TableCell>
                             <TableCell className="text-right">
-                              <Button size="sm" onClick={() => handleCompleteFlight(f.id)}>
+                              <Button
+                                size="sm"
+                                onClick={() => handleCompleteFlight(f.id)}
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                              >
                                 <CheckCircle2 className="mr-2 h-4 w-4" />
                                 Completar
                               </Button>
@@ -814,13 +826,26 @@ export default function Page() {
                             <TableCell>
                               {f.date} {f.time}
                             </TableCell>
-                            <TableCell>{p?.fullName || "—"}</TableCell>
-                            <TableCell>{a?.tailNumber || "—"}</TableCell>
+                            <TableCell>
+                              <Link className="underline hover:text-primary" href={`/pilots/${p?.id || ""}`}>
+                                {p?.fullName || "—"}
+                              </Link>
+                            </TableCell>
+                            <TableCell>
+                              <Link className="underline hover:text-primary" href={`/aircrafts/${a?.id || ""}`}>
+                                {a?.tailNumber || "—"}
+                              </Link>
+                            </TableCell>
                             <TableCell>{f.duration.toFixed(1)} hs</TableCell>
                             <TableCell className="max-w-[240px] truncate">{f.notes}</TableCell>
                             <TableCell className="text-right">
                               <div className="flex gap-2 justify-end">
-                                <Button variant="default" size="sm" onClick={() => handleCompleteFlight(f.id)}>
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  onClick={() => handleCompleteFlight(f.id)}
+                                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                                >
                                   <CheckCircle2 className="mr-2 h-4 w-4" />
                                   Completar
                                 </Button>
@@ -837,61 +862,136 @@ export default function Page() {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Instalación y publicación</CardTitle>
-              <CardDescription>Cómo usar ENVYSKY con datos persistentes.</CardDescription>
+          <Card className="bg-gradient-to-br from-blue-50 to-sky-50 border-blue-200">
+            <CardHeader className="bg-gradient-to-r from-blue-100 to-sky-100 border-b border-blue-200">
+              <CardTitle className="flex items-center gap-2 text-blue-900">
+                <Rocket className="h-5 w-5" />
+                Guía rápida de ENVYSKY
+              </CardTitle>
+              <CardDescription className="text-blue-700">Aprende a usar el sistema en 5 minutos.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 text-sm">
-              <ol className="list-decimal pl-5 space-y-2">
-                <li>
-                  Uso inmediato en computadoras: este sistema ya guarda los datos localmente en el navegador
-                  (localStorage). Si abre ENVYSKY desde el mismo equipo/navegador, su información persiste aunque cierre
-                  la pestaña o reinicie.
-                </li>
-                <li>
-                  Publicar en la web (recomendado): en el botón "Publicar en Vercel" arriba o desde su cuenta de Vercel,
-                  despliegue el proyecto. Así puede acceder desde cualquier equipo.
-                </li>
-                <li>
-                  Base de datos central (nunca perder datos): configure Neon (PostgreSQL) y la variable de entorno
-                  DATABASE_URL en Vercel. En "Acciones" de este chat puedo automatizarlo. El sistema trae rutas API y
-                  scripts SQL listos (ver scripts/001_init.sql).
-                </li>
-                <li>
-                  Escritorio: puede instalarlo como PWA (Agregar a inicio) desde el navegador, o empaquetarlo con
-                  Electron para uso solo-desktop. Si quiere, lo preparo.
-                </li>
-              </ol>
+            <CardContent className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card className="border-l-4 border-l-blue-500">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <UserPlus className="h-4 w-4" />
+                      1. Registrar pilotos
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-sm space-y-2">
+                    <p>
+                      • Ve a <strong>"Panel"</strong> → <strong>"Acciones rápidas"</strong>
+                    </p>
+                    <p>
+                      • Completa el formulario <strong>"Compra de horas"</strong>
+                    </p>
+                    <p>• Si el piloto no existe, se crea automáticamente</p>
+                    <p>• Las horas compradas se suman a su cuenta</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-l-4 border-l-green-500">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Plane className="h-4 w-4" />
+                      2. Agregar aviones
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-sm space-y-2">
+                    <p>
+                      • En <strong>"Acciones rápidas"</strong> → <strong>"Crear avión"</strong>
+                    </p>
+                    <p>• Ingresa matrícula, modelo y horas iniciales</p>
+                    <p>• Define intervalo de mantenimiento (ej: cada 100 hs)</p>
+                    <p>• El sistema calculará automáticamente cuándo necesita servicio</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-l-4 border-l-purple-500">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      3. Agendar vuelos
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-sm space-y-2">
+                    <p>
+                      • En <strong>"Acciones rápidas"</strong> → <strong>"Agendar vuelo"</strong>
+                    </p>
+                    <p>• Selecciona piloto, avión, fecha y hora</p>
+                    <p>• Define duración estimada del vuelo</p>
+                    <p>
+                      • Los vuelos aparecen en <strong>"Próximos vuelos"</strong>
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-l-4 border-l-orange-500">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4" />
+                      4. Completar vuelos
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-sm space-y-2">
+                    <p>
+                      • Ve a <strong>"Agenda"</strong> para ver vuelos programados
+                    </p>
+                    <p>
+                      • Click en <strong>"Completar"</strong> cuando termine el vuelo
+                    </p>
+                    <p>• Las horas se descuentan automáticamente del piloto</p>
+                    <p>• Se suman a las horas acumuladas del avión</p>
+                  </CardContent>
+                </Card>
+              </div>
+
               <Separator />
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <div className="font-medium mb-1">Modo actual</div>
-                  <div className="text-muted-foreground">
-                    Local (navegador). Para pasar a base de datos, configure ENV y despliegue en Vercel.
+
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <BadgeCheck className="h-8 w-8 mx-auto mb-2 text-green-600" />
+                  <div className="font-medium">Alertas automáticas</div>
+                  <div className="text-sm text-muted-foreground">
+                    El sistema te avisa cuando un avión necesita mantenimiento
                   </div>
                 </div>
-                <div>
-                  <div className="font-medium mb-1">Tablas requeridas (Neon)</div>
-                  <div className="text-muted-foreground">pilots, aircrafts, purchases, flights</div>
-                  <div className="mt-2">
-                    <a
-                      className="underline"
-                      href="#sql"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        const el = document.getElementById("sql-anchor")
-                        if (el) el.scrollIntoView({ behavior: "smooth" })
-                      }}
-                    >
-                      Ver SQL
-                    </a>
+                <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <Clock className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+                  <div className="font-medium">Control de horas</div>
+                  <div className="text-sm text-muted-foreground">
+                    Seguimiento automático de horas compradas vs. voladas
                   </div>
+                </div>
+                <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <ShieldAlert className="h-8 w-8 mx-auto mb-2 text-orange-600" />
+                  <div className="font-medium">Gestión de flota</div>
+                  <div className="text-sm text-muted-foreground">Control de estado y mantenimiento de aeronaves</div>
                 </div>
               </div>
+
+              <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+                <CardHeader>
+                  <CardTitle className="text-lg text-blue-900">💡 Consejos útiles</CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm space-y-2 text-blue-800">
+                  <p>
+                    • <strong>Click en nombres y matrículas</strong> para ver detalles completos
+                  </p>
+                  <p>
+                    • <strong>Revisa las alertas</strong> de mantenimiento regularmente
+                  </p>
+                  <p>
+                    • <strong>Los datos se guardan</strong> automáticamente en tu navegador
+                  </p>
+                  <p>
+                    • <strong>Para uso empresarial</strong>, configura una base de datos (Neon)
+                  </p>
+                </CardContent>
+              </Card>
             </CardContent>
           </Card>
-          <div id="sql-anchor" />
         </TabsContent>
       </Tabs>
     </main>
