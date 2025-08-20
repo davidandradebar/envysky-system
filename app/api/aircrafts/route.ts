@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { neon } from "@neondatabase/serverless"
 
 export async function GET() {
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   const sql = neon(process.env.DATABASE_URL!)
   const rows = await sql`
     INSERT INTO aircrafts (tail_number, model, initial_hours, maintenance_interval_hours, status)
-    VALUES (, , , , )
+    VALUES (${body.tailNumber}, ${body.model}, ${body.initialHours}, ${body.maintenanceIntervalHours}, ${body.status})
     RETURNING id, tail_number as "tailNumber", model, initial_hours as "initialHours",
               maintenance_interval_hours as "maintenanceIntervalHours", status, created_at as "createdAt"
   `
