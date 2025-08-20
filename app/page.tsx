@@ -25,6 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
+import { PilotReportButton } from "@/components/pilot-report-button"
 
 import type { Aircraft, Flight, Pilot, Purchase } from "@/lib/types"
 import {
@@ -39,6 +40,12 @@ import {
 } from "@/lib/db"
 import { calcAircraftAccumulatedHours, calcAircraftMaintenance, calcPilotHours } from "@/lib/aggregates"
 import { cn } from "@/lib/utils"
+
+// Helper function to safely format numbers
+const safeToFixed = (value: any, decimals = 1): string => {
+  const num = typeof value === "number" ? value : Number.parseFloat(value) || 0
+  return num.toFixed(decimals)
+}
 
 function SectionHeader(props: { title: string; description?: string; icon?: React.ReactNode }) {
   return (
@@ -527,12 +534,13 @@ export default function Page() {
                         <BadgeCheck className={cn("h-4 w-4", maint.dueNow ? "text-red-600" : "text-amber-600")} />
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        Acumuladas: {accumulated.toFixed(1)} hs • Intervalo: {ac.maintenanceIntervalHours} hs
+                        Acumuladas: {safeToFixed(accumulated)} hs • Intervalo:{" "}
+                        {safeToFixed(ac.maintenanceIntervalHours)} hs
                       </div>
                       <div className={cn("text-sm", maint.dueNow ? "text-red-600" : "text-amber-600")}>
                         {maint.dueNow
                           ? "Mantenimiento requerido ahora"
-                          : `Próximo en ~${maint.dueInHours.toFixed(1)} hs`}
+                          : `Próximo en ~${safeToFixed(maint.dueInHours)} hs`}
                       </div>
                       <div className="pt-2">
                         <Select
@@ -597,7 +605,7 @@ export default function Page() {
                                 {a?.tailNumber || "—"}
                               </Link>
                             </TableCell>
-                            <TableCell>{f.duration.toFixed(1)} hs</TableCell>
+                            <TableCell>{safeToFixed(f.duration)} hs</TableCell>
                             <TableCell className="text-right">
                               <Button
                                 size="sm"
@@ -632,11 +640,16 @@ export default function Page() {
                         <TableHead>Compradas</TableHead>
                         <TableHead>Voladas</TableHead>
                         <TableHead>Restantes</TableHead>
+                        <TableHead>Acciones</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {pilots.map((p) => {
                         const hours = calcPilotHours(p.id, purchases, flights)
+                        const purchased = typeof hours.purchased === "number" ? hours.purchased : 0
+                        const flown = typeof hours.flown === "number" ? hours.flown : 0
+                        const remaining = typeof hours.remaining === "number" ? hours.remaining : 0
+
                         return (
                           <TableRow key={p.id}>
                             <TableCell>
@@ -645,10 +658,20 @@ export default function Page() {
                               </Link>
                               <div className="text-xs text-muted-foreground">{p.email}</div>
                             </TableCell>
-                            <TableCell>{hours.purchased.toFixed(1)}</TableCell>
-                            <TableCell>{hours.flown.toFixed(1)}</TableCell>
-                            <TableCell className={cn(hours.remaining <= 0 ? "text-red-600" : "")}>
-                              {hours.remaining.toFixed(1)}
+                            <TableCell>{safeToFixed(purchased)}</TableCell>
+                            <TableCell>{safeToFixed(flown)}</TableCell>
+                            <TableCell className={cn(remaining <= 0 ? "text-red-600" : "")}>
+                              {safeToFixed(remaining)}
+                            </TableCell>
+                            <TableCell>
+                              <PilotReportButton
+                                pilot={p}
+                                flights={flights}
+                                purchases={purchases}
+                                aircrafts={aircrafts}
+                                variant="outline"
+                                size="sm"
+                              />
                             </TableCell>
                           </TableRow>
                         )
@@ -693,8 +716,8 @@ export default function Page() {
                             </Link>
                           </TableCell>
                           <TableCell>{a.model}</TableCell>
-                          <TableCell>{accumulated.toFixed(1)} hs</TableCell>
-                          <TableCell>{a.maintenanceIntervalHours} hs</TableCell>
+                          <TableCell>{safeToFixed(accumulated)} hs</TableCell>
+                          <TableCell>{safeToFixed(a.maintenanceIntervalHours)} hs</TableCell>
                           <TableCell className="capitalize">{a.status}</TableCell>
                         </TableRow>
                       )
@@ -725,11 +748,16 @@ export default function Page() {
                       <TableHead>Horas compradas</TableHead>
                       <TableHead>Voladas</TableHead>
                       <TableHead>Restantes</TableHead>
+                      <TableHead>Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {pilots.map((p) => {
                       const hours = calcPilotHours(p.id, purchases, flights)
+                      const purchased = typeof hours.purchased === "number" ? hours.purchased : 0
+                      const flown = typeof hours.flown === "number" ? hours.flown : 0
+                      const remaining = typeof hours.remaining === "number" ? hours.remaining : 0
+
                       return (
                         <TableRow key={p.id}>
                           <TableCell>
@@ -739,10 +767,20 @@ export default function Page() {
                           </TableCell>
                           <TableCell>{p.email}</TableCell>
                           <TableCell>{p.licenseType || "—"}</TableCell>
-                          <TableCell>{hours.purchased.toFixed(1)}</TableCell>
-                          <TableCell>{hours.flown.toFixed(1)}</TableCell>
-                          <TableCell className={cn(hours.remaining <= 0 ? "text-red-600" : "")}>
-                            {hours.remaining.toFixed(1)}
+                          <TableCell>{safeToFixed(purchased)}</TableCell>
+                          <TableCell>{safeToFixed(flown)}</TableCell>
+                          <TableCell className={cn(remaining <= 0 ? "text-red-600" : "")}>
+                            {safeToFixed(remaining)}
+                          </TableCell>
+                          <TableCell>
+                            <PilotReportButton
+                              pilot={p}
+                              flights={flights}
+                              purchases={purchases}
+                              aircrafts={aircrafts}
+                              variant="outline"
+                              size="sm"
+                            />
                           </TableCell>
                         </TableRow>
                       )
@@ -786,10 +824,10 @@ export default function Page() {
                             </Link>
                           </TableCell>
                           <TableCell>{a.model}</TableCell>
-                          <TableCell>{accumulated.toFixed(1)} hs</TableCell>
+                          <TableCell>{safeToFixed(accumulated)} hs</TableCell>
                           <TableCell className="capitalize">{a.status}</TableCell>
                           <TableCell className={cn(maint.dueNow ? "text-red-600" : "text-amber-600")}>
-                            {maint.dueNow ? "Ahora" : `${maint.dueInHours.toFixed(1)} hs`}
+                            {maint.dueNow ? "Ahora" : `${safeToFixed(maint.dueInHours)} hs`}
                           </TableCell>
                         </TableRow>
                       )
@@ -844,7 +882,7 @@ export default function Page() {
                                 {a?.tailNumber || "—"}
                               </Link>
                             </TableCell>
-                            <TableCell>{f.duration.toFixed(1)} hs</TableCell>
+                            <TableCell>{safeToFixed(f.duration)} hs</TableCell>
                             <TableCell className="max-w-[240px] truncate">{f.notes}</TableCell>
                             <TableCell className="text-right">
                               <div className="flex gap-2 justify-end">
@@ -925,13 +963,13 @@ export default function Page() {
                   </CardHeader>
                   <CardContent className="text-sm space-y-2">
                     <p>
-                      • En <strong>"Acciones rápidas"</strong> → <strong>"Agendar vuelo"</strong>
+                      • Ve a <strong>"Agenda"</strong> para ver vuelos programados
                     </p>
-                    <p>• Selecciona piloto, avión, fecha y hora</p>
-                    <p>• Define duración estimada del vuelo</p>
                     <p>
-                      • Los vuelos aparecen en <strong>"Próximos vuelos"</strong>
+                      • Click en <strong>"Completar"</strong> cuando termine el vuelo
                     </p>
+                    <p>• Las horas se descuentan automáticamente del piloto</p>
+                    <p>• Se suman a las horas acumuladas del avión</p>
                   </CardContent>
                 </Card>
 
