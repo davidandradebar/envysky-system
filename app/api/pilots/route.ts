@@ -1,215 +1,39 @@
-"use client"
+import { NextResponse } from "next/server"
+import { neon } from "@neondatabase/serverless"
 
-import { useEffect, useMemo, useState } from "react"
-import Link from "next/link"
-import { ArrowLeft, Calendar, Plane } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { PilotReportButton } from "@/components/pilot-report-button"
+// NOTE: These API endpoints are optional for production use with Neon (PostgreSQL).
+// They require process.env.DATABASE_URL to be set in Vercel.
+// In preview (Next.js) without env, use the local mode already implemented.
 
-import type { Pilot, Flight, Purchase, Aircraft } from "@/lib/types"
-import { getPilots, getFlights, getPurchases, getAircrafts } from "@/lib/db"
-import { calcPilotHours } from "@/lib/aggregates"
-
-// Helper function to safely format numbers
-const safeToFixed = (value: any, decimals = 1): string => {
-  const num = typeof value === "number" ? value : Number.parseFloat(value) || 0
-  return num.toFixed(decimals)
+export async function GET() {
+  if (!process.env.DATABASE_URL) {
+    return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 400 })
+  }
+  const sql = neon(process.env.DATABASE_URL!)
+  const rows = await sql`
+    SELECT id, full_name as "fullName", email, phone, country, birth_date as "birthDate", license_type as "licenseType", created_at as "createdAt"
+    FROM pilots
+    ORDER BY created_at DESC
+  `
+  return NextResponse.json(rows)
 }
 
-export default function PilotPage({ params }: { params: { id: string } }) {
-  const [pilot, setPilot] = useState<Pilot | null>(null)
-  const [flights, setFlights] = useState<Flight[]>([])
-  const [purchases, setPurchases] = useState<Purchase[]>([])
-  const [aircrafts, setAircrafts] = useState<Aircraft[]>([])
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [pilotsData, flightsData, purchasesData, aircraftsData] = await Promise.all([
-          getPilots(),
-          getFlights(),
-          getPurchases(),
-          getAircrafts(),
-        ])
-
-        const foundPilot = pilotsData.find((p) => p.id === params.id) || null
-        setPilot(foundPilot)
-        setFlights(flightsData)
-        setPurchases(purchasesData)
-        setAircrafts(aircraftsData)
-      } catch (error) {
-        console.error("Error loading pilot data:", error)
-      }
-    }
-    loadData()
-  }, [params.id])
-
-  const hours = useMemo(() => {
-    if (!pilot) return null
-    const result = calcPilotHours(pilot.id, purchases, flights)
-    return {
-      purchased: typeof result.purchased === "number" ? result.purchased : 0,
-      flown: typeof result.flown === "number" ? result.flown : 0,
-      remaining: typeof result.remaining === "number" ? result.remaining : 0,
-    }
-  }, [pilot, purchases, flights])
-
-  const pilotFlights = useMemo(() => flights.filter((f) => f.pilotId === pilot?.id), [flights, pilot])
-
-  const getAircraft = (id: string) => {
-    return aircrafts.find((a) => a.id === id) || null
+export async function POST(req: Request) {
+  if (!process.env.DATABASE_URL) {
+    return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 400 })
   }
-
-  if (!pilot) {
-    return (
-      <main className="mx-auto max-w-5xl p-4 md:p-8">
-        <div className="mb-4">
-          <Button asChild variant="outline" size="sm">
-            <Link href="/">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Volver
-            </Link>
-          </Button>
-        </div>
-        <Card>
-          <CardHeader>
-            <CardTitle>Piloto no encontrado</CardTitle>
-            <CardDescription>El perfil solicitado no existe.</CardDescription>
-          </CardHeader>
-        </Card>
-      </main>
-    )
-  }
-
-  return (
-    <main className="mx-auto max-w-5xl p-4 md:p-8 space-y-6">
-      <div className="mb-2 flex gap-2">
-        <Button asChild variant="outline" size="sm">
-          <Link href="/">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver
-          </Link>
-        </Button>
-        <PilotReportButton
-          pilot={pilot}
-          flights={flights}
-          purchases={purchases}
-          aircrafts={aircrafts}
-          variant="default"
-          size="sm"
-        />
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{pilot.fullName}</CardTitle>
-          <CardDescription>
-            {pilot.email} • {pilot.licenseType || "Sin licencia"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="rounded-lg border p-3">
-            <div className="text-sm text-muted-foreground">Horas compradas</div>
-            <div className="text-2xl font-semibold">{safeToFixed(hours?.purchased)}</div>
-          </div>
-          <div className="rounded-lg border p-3">
-            <div className="text-sm text-muted-foreground">Horas voladas</div>
-            <div className="text-2xl font-semibold">{safeToFixed(hours?.flown)}</div>
-          </div>
-          <div className="rounded-lg border p-3">
-            <div className="text-sm text-muted-foreground">Horas restantes</div>
-            <div className="text-2xl font-semibold">{safeToFixed(hours?.remaining)}</div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <Calendar className="h-4 w-4 inline mr-2" />
-              Vuelos programados
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {pilotFlights.filter((f) => f.status === "scheduled").length === 0 ? (
-              <div className="text-sm text-muted-foreground">Sin vuelos programados.</div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Avión</TableHead>
-                    <TableHead>Duración</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pilotFlights
-                    .filter((f) => f.status === "scheduled")
-                    .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
-                    .map((f) => {
-                      const ac = getAircraft(f.aircraftId)
-                      return (
-                        <TableRow key={f.id}>
-                          <TableCell>
-                            {f.date} {f.time}
-                          </TableCell>
-                          <TableCell>{ac?.tailNumber || "—"}</TableCell>
-                          <TableCell>{safeToFixed(f.duration)} hs</TableCell>
-                        </TableRow>
-                      )
-                    })}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <Plane className="h-4 w-4 inline mr-2" />
-              Vuelos realizados
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {pilotFlights.filter((f) => f.status === "completed").length === 0 ? (
-              <div className="text-sm text-muted-foreground">Sin vuelos realizados.</div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Avión</TableHead>
-                    <TableHead>Duración</TableHead>
-                    <TableHead>Notas</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pilotFlights
-                    .filter((f) => f.status === "completed")
-                    .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time))
-                    .map((f) => {
-                      const ac = getAircraft(f.aircraftId)
-                      return (
-                        <TableRow key={f.id}>
-                          <TableCell>
-                            {f.date} {f.time}
-                          </TableCell>
-                          <TableCell>{ac?.tailNumber || "—"}</TableCell>
-                          <TableCell>{safeToFixed(f.duration)} hs</TableCell>
-                          <TableCell className="max-w-[360px] truncate">{f.notes || "—"}</TableCell>
-                        </TableRow>
-                      )
-                    })}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </main>
-  )
+  const body = await req.json()
+  const sql = neon(process.env.DATABASE_URL!)
+  const rows = await sql`
+    INSERT INTO pilots (full_name, email, phone, country, birth_date, license_type)
+    VALUES (${body.fullName}, ${body.email}, ${body.phone}, ${body.country}, ${body.birthDate}, ${body.licenseType})
+    ON CONFLICT (email) DO UPDATE SET
+      full_name = EXCLUDED.full_name,
+      phone = EXCLUDED.phone,
+      country = EXCLUDED.country,
+      birth_date = EXCLUDED.birth_date,
+      license_type = EXCLUDED.license_type
+    RETURNING id, full_name as "fullName", email, phone, country, birth_date as "birthDate", license_type as "licenseType", created_at as "createdAt"
+  `
+  return NextResponse.json(rows[0])
 }
