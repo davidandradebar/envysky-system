@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { neon } from "@neondatabase/serverless"
 
 export async function GET() {
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   const sql = neon(process.env.DATABASE_URL!)
   const rows = await sql`
     INSERT INTO flights (pilot_id, aircraft_id, date, time, duration, status, notes)
-    VALUES (, , , , , , )
+    VALUES (${body.pilotId}, ${body.aircraftId}, ${body.date}, ${body.time}, ${body.duration}, ${body.status}, ${body.notes || ""})
     RETURNING id, pilot_id as "pilotId", aircraft_id as "aircraftId", date, time, duration, status, notes, created_at as "createdAt"
   `
   return NextResponse.json(rows[0])
@@ -30,8 +30,8 @@ export async function PUT(req: Request) {
   const sql = neon(process.env.DATABASE_URL!)
   const rows = await sql`
     UPDATE flights
-    SET status = 
-    WHERE id = 
+    SET status = ${body.status}
+    WHERE id = ${body.id}
     RETURNING id, pilot_id as "pilotId", aircraft_id as "aircraftId", date, time, duration, status, notes, created_at as "createdAt"
   `
   return NextResponse.json(rows[0])
