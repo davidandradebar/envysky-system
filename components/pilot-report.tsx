@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
-import { Download, Printer, Plane } from 'lucide-react'
+import { Download, Printer, Plane } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 import type { Pilot, Flight, Purchase, Aircraft } from "@/lib/types"
