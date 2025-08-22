@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, BadgeCheck, Users } from 'lucide-react'
+import { ArrowLeft, BadgeCheck, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { AircraftReportButton } from "@/components/aircraft-report-button"
 
 import type { Aircraft, Flight, Pilot } from "@/lib/types"
 import { getAircrafts, getFlights, getPilots } from "@/lib/db"
@@ -86,13 +87,14 @@ export default function AircraftPage({ params }: { params: { id: string } }) {
 
   return (
     <main className="mx-auto max-w-5xl p-4 md:p-8 space-y-6">
-      <div className="mb-2">
+      <div className="mb-2 flex gap-2">
         <Button asChild variant="outline" size="sm">
           <Link href="/">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Volver
           </Link>
         </Button>
+        <AircraftReportButton aircraft={aircraft} flights={flights} pilots={pilots} variant="default" size="sm" />
       </div>
 
       <Card>
