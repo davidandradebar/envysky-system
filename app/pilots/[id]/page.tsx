@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, Calendar, Plane } from 'lucide-react'
+import { ArrowLeft, Calendar, Plane } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -23,6 +23,7 @@ export default function PilotPage({ params }: { params: { id: string } }) {
   const [flights, setFlights] = useState<Flight[]>([])
   const [purchases, setPurchases] = useState<Purchase[]>([])
   const [aircrafts, setAircrafts] = useState<Aircraft[]>([])
+  const [pilots, setPilots] = useState<Pilot[]>([])
 
   useEffect(() => {
     const loadData = async () => {
@@ -39,6 +40,7 @@ export default function PilotPage({ params }: { params: { id: string } }) {
         setFlights(flightsData)
         setPurchases(purchasesData)
         setAircrafts(aircraftsData)
+        setPilots(pilotsData)
       } catch (error) {
         console.error("Error loading pilot data:", error)
       }
@@ -56,7 +58,10 @@ export default function PilotPage({ params }: { params: { id: string } }) {
     }
   }, [pilot, purchases, flights])
 
-  const pilotFlights = useMemo(() => flights.filter((f) => f.pilotId === pilot?.id), [flights, pilot])
+  const pilotFlights = useMemo(
+    () => flights.filter((f) => f.pilotId === pilot?.id || f.pilotId2 === pilot?.id),
+    [flights, pilot],
+  )
 
   const getAircraft = (id: string) => {
     return aircrafts.find((a) => a.id === id) || null
@@ -97,6 +102,7 @@ export default function PilotPage({ params }: { params: { id: string } }) {
           flights={flights}
           purchases={purchases}
           aircrafts={aircrafts}
+          allPilots={pilots} // ✅ Agregar esta línea
           variant="default"
           size="sm"
         />
@@ -182,6 +188,7 @@ export default function PilotPage({ params }: { params: { id: string } }) {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Fecha</TableHead>
+                    <TableHead>Piloto(s)</TableHead>
                     <TableHead>Avión</TableHead>
                     <TableHead>Duración</TableHead>
                     <TableHead>Notas</TableHead>
@@ -193,10 +200,27 @@ export default function PilotPage({ params }: { params: { id: string } }) {
                     .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time))
                     .map((f) => {
                       const ac = getAircraft(f.aircraftId)
+                      const pilot1 = pilots.find((p) => p.id === f.pilotId)
+                      const pilot2 = f.pilotId2 ? pilots.find((p) => p.id === f.pilotId2) : null
+
                       return (
                         <TableRow key={f.id}>
                           <TableCell>
                             {f.date} {f.time}
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-1">
+                                <span className="text-xs text-muted-foreground font-medium">P1:</span>
+                                <span className="text-sm">{pilot1?.fullName || "—"}</span>
+                              </div>
+                              {pilot2 && (
+                                <div className="flex items-center gap-1">
+                                  <span className="text-xs text-muted-foreground font-medium">P2:</span>
+                                  <span className="text-sm">{pilot2.fullName}</span>
+                                </div>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>{ac?.tailNumber || "—"}</TableCell>
                           <TableCell>{safeToFixed(f.duration)} hs</TableCell>
