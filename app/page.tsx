@@ -1,6 +1,6 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
@@ -14,6 +14,7 @@ import {
   Rocket,
   ShieldAlert,
   UserPlus,
+  Gauge,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -25,9 +26,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { PilotReportButton } from "@/components/pilot-report-button"
+import { AircraftReportButton } from "@/components/aircraft-report-button"
 
 import type { Aircraft, Flight, Pilot, Purchase } from "@/lib/types"
+import { calculateFlightHours } from "@/lib/types"
 import {
   getAircrafts,
   getFlights,
@@ -59,6 +63,234 @@ function SectionHeader(props: { title: string; description?: string; icon?: Reac
   )
 }
 
+// Component for completing flights with tachometer - IMPROVED VERSION
+function CompleteFlightDialog({
+  flight,
+  aircrafts,
+  pilots,
+  onComplete,
+}: {
+  flight: Flight
+  aircrafts: Aircraft[]
+  pilots: Pilot[]
+  onComplete: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [tachometerStart, setTachometerStart] = useState(flight.tachometerStart?.toString() || "")
+  const [tachometerEnd, setTachometerEnd] = useState(flight.tachometerEnd?.toString() || "")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const aircraft = aircrafts.find((a) => a.id === flight.aircraftId)
+  const pilot1 = pilots.find((p) => p.id === flight.pilotId)
+  const pilot2 = flight.pilotId2 ? pilots.find((p) => p.id === flight.pilotId2) : null
+
+  const calculatedHours = useMemo(() => {
+    const start = Number.parseFloat(tachometerStart) || 0
+    const end = Number.parseFloat(tachometerEnd) || 0
+    return end > start ? end - start : 0
+  }, [tachometerStart, tachometerEnd])
+
+  const handleComplete = async () => {
+    if (!tachometerStart || !tachometerEnd) {
+      alert("Por favor ingresa ambos valores del tacómetro")
+      return
+    }
+
+    const start = Number.parseFloat(tachometerStart)
+    const end = Number.parseFloat(tachometerEnd)
+
+    if (isNaN(start) || isNaN(end)) {
+      alert("Por favor ingresa valores numéricos válidos")
+      return
+    }
+
+    if (end <= start) {
+      alert("El tacómetro final debe ser mayor al inicial")
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      console.log("Completing flight with tachometer data:", {
+        flightId: flight.id,
+        tachometerStart: start,
+        tachometerEnd: end,
+        calculatedHours: end - start,
+      })
+
+      await updateFlightStatus(flight.id, "completed", {
+        tachometerStart: start,
+        tachometerEnd: end,
+      })
+
+      console.log("Flight completed successfully")
+      setOpen(false)
+      onComplete()
+    } catch (error) {
+      console.error("Error completing flight:", error)
+      alert("Error al completar el vuelo. Por favor intenta de nuevo.")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Reset form when dialog opens
+  React.useEffect(() => {
+    if (open) {
+      setTachometerStart(flight.tachometerStart?.toString() || "")
+      setTachometerEnd(flight.tachometerEnd?.toString() || "")
+    }
+  }, [open, flight.tachometerStart, flight.tachometerEnd])
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+          <CheckCircle2 className="mr-2 h-4 w-4" />
+          Completar
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md bg-white">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-gray-900">
+            <Gauge className="h-5 w-5 text-blue-600" />
+            Completar Vuelo
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* Flight Info */}
+          <div className="bg-gray-50 p-4 rounded-lg space-y-2 border">
+            <div className="text-sm">
+              <span className="font-medium text-gray-700">Fecha:</span> {flight.date} a las {flight.time}
+            </div>
+            <div className="text-sm">
+              <span className="font-medium text-gray-700">Avión:</span> {aircraft?.tailNumber} - {aircraft?.model}
+            </div>
+            <div className="text-sm">
+              <span className="font-medium text-gray-700">Piloto 1:</span> {pilot1?.fullName}
+            </div>
+            {pilot2 && (
+              <div className="text-sm">
+                <span className="font-medium text-gray-700">Piloto 2:</span> {pilot2.fullName}
+              </div>
+            )}
+          </div>
+
+          {/* Tachometer Inputs */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="tach-start" className="text-sm font-medium text-gray-700">
+                Tacómetro inicial
+              </Label>
+              <Input
+                id="tach-start"
+                type="number"
+                step="0.1"
+                placeholder="1500.0"
+                value={tachometerStart}
+                onChange={(e) => setTachometerStart(e.target.value)}
+                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="tach-end" className="text-sm font-medium text-gray-700">
+                Tacómetro final
+              </Label>
+              <Input
+                id="tach-end"
+                type="number"
+                step="0.1"
+                placeholder="1502.5"
+                value={tachometerEnd}
+                onChange={(e) => setTachometerEnd(e.target.value)}
+                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          {/* Calculated Hours Display */}
+          {calculatedHours > 0 && (
+            <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
+              <div className="text-sm text-green-800">
+                <span className="font-medium">Horas calculadas:</span> {safeToFixed(calculatedHours)} hs
+              </div>
+              <div className="text-xs text-green-600 mt-1">
+                Se descontarán automáticamente del Piloto 1: {pilot1?.fullName}
+              </div>
+            </div>
+          )}
+
+          {/* Error Display */}
+          {tachometerStart && tachometerEnd && calculatedHours <= 0 && (
+            <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
+              <div className="text-sm text-red-800">⚠️ El tacómetro final debe ser mayor al inicial</div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex gap-3 pt-2">
+            <Button variant="outline" onClick={() => setOpen(false)} className="flex-1" disabled={isSubmitting}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleComplete}
+              disabled={isSubmitting || !tachometerStart || !tachometerEnd || calculatedHours <= 0}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white disabled:bg-gray-400"
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Completando...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  Completar vuelo
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// Datos de ejemplo para el preview
+const samplePilots = [
+  { id: "1", fullName: "Juan Pérez", email: "juan@email.com", licenseType: "PPL" },
+  { id: "2", fullName: "María García", email: "maria@email.com", licenseType: "CPL" },
+]
+
+const sampleAircrafts = [
+  { id: "1", tailNumber: "LV-ABC", model: "Cessna 172", status: "active" },
+  { id: "2", tailNumber: "LV-XYZ", model: "Piper Cherokee", status: "maintenance" },
+]
+
+const sampleFlights = [
+  {
+    id: "1",
+    date: "2024-01-15",
+    time: "10:00",
+    pilotId: "1",
+    pilotId2: "2",
+    aircraftId: "1",
+    status: "scheduled",
+    tachometerStart: 1500.0,
+  },
+  {
+    id: "2",
+    date: "2024-01-14",
+    time: "14:30",
+    pilotId: "2",
+    aircraftId: "2",
+    status: "completed",
+    tachometerStart: 1200.0,
+    tachometerEnd: 1202.5,
+  },
+]
+
 export default function Page() {
   const [pilots, setPilots] = useState<Pilot[]>([])
   const [aircrafts, setAircrafts] = useState<Aircraft[]>([])
@@ -78,6 +310,21 @@ export default function Page() {
         setAircrafts(aircraftsData)
         setFlights(flightsData)
         setPurchases(purchasesData)
+
+        // Debug: Log flight data to see if pilotId2 exists
+        console.log("Flights data:", flightsData)
+        flightsData.forEach((flight, index) => {
+          console.log(`Flight ${index}:`, {
+            id: flight.id,
+            pilotId: flight.pilotId,
+            pilotId2: flight.pilotId2,
+            date: flight.date,
+            time: flight.time,
+            tachometerStart: flight.tachometerStart,
+            tachometerEnd: flight.tachometerEnd,
+            calculatedHours: calculateFlightHours(flight),
+          })
+        })
       } catch (error) {
         console.error("Error loading data:", error)
       }
@@ -146,31 +393,43 @@ export default function Page() {
 
   const handleSchedule = async () => {
     if (!scheduleForm.pilotId || !scheduleForm.aircraftId || !scheduleForm.date || !scheduleForm.time) return
-    const dur = Number.parseFloat(scheduleForm.duration || "1")
+
+    console.log("Scheduling flight with:", {
+      pilotId: scheduleForm.pilotId,
+      pilotId2: scheduleForm.pilotId2,
+      aircraftId: scheduleForm.aircraftId,
+      date: scheduleForm.date,
+      time: scheduleForm.time,
+      tachometerStart: scheduleForm.tachometerStart,
+    })
 
     try {
-      await saveFlight({
+      const newFlight = await saveFlight({
         pilotId: scheduleForm.pilotId,
+        pilotId2: scheduleForm.pilotId2 || undefined, // Piloto 2 opcional
         aircraftId: scheduleForm.aircraftId,
         date: scheduleForm.date,
         time: scheduleForm.time,
-        duration: isNaN(dur) ? 1 : dur,
+        duration: 0, // Will be calculated from tachometer
+        tachometerStart: scheduleForm.tachometerStart ? Number.parseFloat(scheduleForm.tachometerStart) : undefined,
         status: "scheduled",
         notes: scheduleForm.notes || "",
       })
+
+      console.log("Flight created:", newFlight)
+
       await reload()
-      setScheduleForm({ pilotId: "", aircraftId: "", date: "", time: "", duration: "", notes: "" })
+      setScheduleForm({
+        pilotId: "",
+        pilotId2: "",
+        aircraftId: "",
+        date: "",
+        time: "",
+        tachometerStart: "",
+        notes: "",
+      })
     } catch (error) {
       console.error("Error saving flight:", error)
-    }
-  }
-
-  const handleCompleteFlight = async (flightId: string) => {
-    try {
-      await updateFlightStatus(flightId, "completed")
-      await reload()
-    } catch (error) {
-      console.error("Error completing flight:", error)
     }
   }
 
@@ -224,15 +483,116 @@ export default function Page() {
 
   const [scheduleForm, setScheduleForm] = useState<{
     pilotId: string
+    pilotId2: string // Piloto 2
     aircraftId: string
     date: string
     time: string
-    duration: string
+    tachometerStart: string // Tacómetro inicial (opcional al programar)
     notes: string
-  }>({ pilotId: "", aircraftId: "", date: "", time: "", duration: "", notes: "" })
+  }>({ pilotId: "", pilotId2: "", aircraftId: "", date: "", time: "", tachometerStart: "", notes: "" })
 
   const handleSetAircraftStatus = (aircraftId: string, status: "active" | "maintenance") => {
     // This function is not updated as per the provided updates
+  }
+
+  // Helper function to get pilot name by ID
+  const getPilotName = (pilotId: string) => {
+    const pilot = pilots.find((p) => p.id === pilotId)
+    return pilot ? pilot.fullName : "—"
+  }
+
+  // Helper function to render pilots for a flight - IMPROVED VERSION
+  const renderFlightPilots = (flight: Flight) => {
+    console.log("Rendering pilots for flight:", flight.id, {
+      pilotId: flight.pilotId,
+      pilotId2: flight.pilotId2,
+    })
+
+    const pilot1 = pilots.find((p) => p.id === flight.pilotId)
+    const pilot2 = flight.pilotId2 ? pilots.find((p) => p.id === flight.pilotId2) : null
+
+    console.log("Found pilots:", {
+      pilot1: pilot1?.fullName,
+      pilot2: pilot2?.fullName,
+    })
+
+    return (
+      <div className="space-y-1">
+        <div className="flex items-center gap-1">
+          <span className="text-xs text-muted-foreground font-medium">P1:</span>
+          <Link className="underline hover:text-primary text-sm" href={`/pilots/${pilot1?.id || ""}`}>
+            {pilot1?.fullName || "—"}
+          </Link>
+        </div>
+        {pilot2 && (
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-muted-foreground font-medium">P2:</span>
+            <Link className="underline hover:text-primary text-sm" href={`/pilots/${pilot2.id}`}>
+              {pilot2.fullName}
+            </Link>
+          </div>
+        )}
+        {flight.pilotId2 && !pilot2 && (
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-muted-foreground font-medium">P2:</span>
+            <span className="text-sm text-red-500">Piloto no encontrado (ID: {flight.pilotId2})</span>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // Helper function to render flight hours (tachometer or duration)
+  const renderFlightHours = (flight: Flight) => {
+    const hours = calculateFlightHours(flight)
+    const hasTachometer = flight.tachometerStart !== undefined || flight.tachometerEnd !== undefined
+
+    if (flight.status === "completed" && hasTachometer) {
+      return (
+        <div className="space-y-1">
+          <div className="text-sm font-medium">{safeToFixed(hours)} hs</div>
+          <div className="text-xs text-muted-foreground">
+            {flight.tachometerStart !== undefined && flight.tachometerEnd !== undefined
+              ? `${safeToFixed(flight.tachometerStart)} → ${safeToFixed(flight.tachometerEnd)}`
+              : "Tacómetro"}
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="space-y-1">
+        <div className="text-sm font-medium">{safeToFixed(hours)} hs</div>
+        {flight.status === "scheduled" && flight.tachometerStart !== undefined && (
+          <div className="text-xs text-muted-foreground">Inicial: {safeToFixed(flight.tachometerStart)}</div>
+        )}
+      </div>
+    )
+  }
+
+  const getAircraftName = (aircraftId: string) => {
+    const aircraft = sampleAircrafts.find((a) => a.id === aircraftId)
+    return aircraft ? aircraft.tailNumber : "—"
+  }
+
+  const renderFlightPilotsSample = (flight: any) => {
+    const pilot1 = samplePilots.find((p) => p.id === flight.pilotId)
+    const pilot2 = flight.pilotId2 ? samplePilots.find((p) => p.id === flight.pilotId2) : null
+
+    return (
+      <div className="space-y-1">
+        <div className="flex items-center gap-1">
+          <span className="text-xs text-muted-foreground font-medium">P1:</span>
+          <span className="text-sm">{pilot1?.fullName || "—"}</span>
+        </div>
+        {pilot2 && (
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-muted-foreground font-medium">P2:</span>
+            <span className="text-sm">{pilot2.fullName}</span>
+          </div>
+        )}
+      </div>
+    )
   }
 
   return (
@@ -424,15 +784,18 @@ export default function Page() {
                 <Separator className="lg:hidden" />
 
                 <div className="space-y-3">
-                  <div className="font-medium">Agendar vuelo</div>
+                  <div className="font-medium flex items-center gap-2">
+                    <Gauge className="h-4 w-4" />
+                    Agendar vuelo (con tacómetro)
+                  </div>
                   <div className="space-y-2">
-                    <Label>Piloto</Label>
+                    <Label>Piloto 1 (Principal)</Label>
                     <Select
                       value={scheduleForm.pilotId}
                       onValueChange={(v) => setScheduleForm((s) => ({ ...s, pilotId: v }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar piloto" />
+                        <SelectValue placeholder="Seleccionar piloto principal" />
                       </SelectTrigger>
                       <SelectContent>
                         {pilots.length === 0 ? <SelectItem value="no-pilots">{"No hay pilotos"}</SelectItem> : null}
@@ -441,6 +804,33 @@ export default function Page() {
                             {p.fullName} ({p.email})
                           </SelectItem>
                         ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Piloto 2 (Opcional)</Label>
+                    <Select
+                      value={scheduleForm.pilotId2}
+                      onValueChange={(v) => setScheduleForm((s) => ({ ...s, pilotId2: v === "none" ? "" : v }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar piloto 2 (opcional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Sin piloto 2</SelectItem>
+                        {pilots
+                          .filter((p) => p.id !== scheduleForm.pilotId) // ✅ FILTRAR para evitar el mismo piloto
+                          .map((p) => (
+                            <SelectItem key={p.id} value={p.id}>
+                              {p.fullName} ({p.email})
+                            </SelectItem>
+                          ))}
+                        {/* Mostrar mensaje si no hay otros pilotos disponibles */}
+                        {pilots.filter((p) => p.id !== scheduleForm.pilotId).length === 0 && scheduleForm.pilotId && (
+                          <SelectItem value="no-other-pilots" disabled>
+                            No hay otros pilotos disponibles
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -483,27 +873,25 @@ export default function Page() {
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-2">
-                      <Label>Duración (hs)</Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.1"
-                        placeholder="1.5"
-                        value={scheduleForm.duration}
-                        onChange={(e) => setScheduleForm((s) => ({ ...s, duration: e.target.value }))}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Notas</Label>
-                      <Textarea
-                        placeholder="Opcional"
-                        value={scheduleForm.notes}
-                        onChange={(e) => setScheduleForm((s) => ({ ...s, notes: e.target.value }))}
-                        className="min-h-[40px]"
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label>Tacómetro inicial (opcional)</Label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      placeholder="1500.0"
+                      value={scheduleForm.tachometerStart}
+                      onChange={(e) => setScheduleForm((s) => ({ ...s, tachometerStart: e.target.value }))}
+                    />
+                    <div className="text-xs text-muted-foreground">Puedes ingresarlo ahora o al completar el vuelo</div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Notas</Label>
+                    <Textarea
+                      placeholder="Opcional"
+                      value={scheduleForm.notes}
+                      onChange={(e) => setScheduleForm((s) => ({ ...s, notes: e.target.value }))}
+                      className="min-h-[40px]"
+                    />
                   </div>
                   <Button onClick={handleSchedule} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                     <Calendar className="mr-2 h-4 w-4" />
@@ -580,41 +968,40 @@ export default function Page() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Fecha</TableHead>
-                        <TableHead>Piloto</TableHead>
+                        <TableHead>Piloto(s)</TableHead>
                         <TableHead>Avión</TableHead>
-                        <TableHead>Duración</TableHead>
+                        <TableHead>Tacómetro</TableHead>
                         <TableHead />
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {upcomingFlights.map((f) => {
-                        const p = pilots.find((x) => x.id === f.pilotId)
                         const a = aircrafts.find((x) => x.id === f.aircraftId)
                         return (
                           <TableRow key={f.id}>
                             <TableCell>
                               {f.date} {f.time}
                             </TableCell>
-                            <TableCell>
-                              <Link className="underline hover:text-primary" href={`/pilots/${p?.id || ""}`}>
-                                {p?.fullName || "—"}
-                              </Link>
-                            </TableCell>
+                            <TableCell>{renderFlightPilots(f)}</TableCell>
                             <TableCell>
                               <Link className="underline hover:text-primary" href={`/aircrafts/${a?.id || ""}`}>
                                 {a?.tailNumber || "—"}
                               </Link>
                             </TableCell>
-                            <TableCell>{safeToFixed(f.duration)} hs</TableCell>
+                            <TableCell>
+                              {f.tachometerStart !== undefined ? (
+                                <div className="text-sm">Inicial: {safeToFixed(f.tachometerStart)}</div>
+                              ) : (
+                                <div className="text-xs text-muted-foreground">Se ingresará al completar</div>
+                              )}
+                            </TableCell>
                             <TableCell className="text-right">
-                              <Button
-                                size="sm"
-                                onClick={() => handleCompleteFlight(f.id)}
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                              >
-                                <CheckCircle2 className="mr-2 h-4 w-4" />
-                                Completar
-                              </Button>
+                              <CompleteFlightDialog
+                                flight={f}
+                                aircrafts={aircrafts}
+                                pilots={pilots}
+                                onComplete={reload}
+                              />
                             </TableCell>
                           </TableRow>
                         )
@@ -669,6 +1056,7 @@ export default function Page() {
                                 flights={flights}
                                 purchases={purchases}
                                 aircrafts={aircrafts}
+                                allPilots={pilots} // ✅ Agregar esta línea
                                 variant="outline"
                                 size="sm"
                               />
@@ -703,6 +1091,7 @@ export default function Page() {
                       <TableHead>Acumuladas</TableHead>
                       <TableHead>Intervalo mant.</TableHead>
                       <TableHead>Estado</TableHead>
+                      <TableHead>Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -719,6 +1108,15 @@ export default function Page() {
                           <TableCell>{safeToFixed(accumulated)} hs</TableCell>
                           <TableCell>{safeToFixed(a.maintenanceIntervalHours)} hs</TableCell>
                           <TableCell className="capitalize">{a.status}</TableCell>
+                          <TableCell>
+                            <AircraftReportButton
+                              aircraft={a}
+                              flights={flights}
+                              pilots={pilots}
+                              variant="outline"
+                              size="sm"
+                            />
+                          </TableCell>
                         </TableRow>
                       )
                     })}
@@ -778,6 +1176,7 @@ export default function Page() {
                               flights={flights}
                               purchases={purchases}
                               aircrafts={aircrafts}
+                              allPilots={pilots} // ✅ Agregar esta línea
                               variant="outline"
                               size="sm"
                             />
@@ -810,6 +1209,7 @@ export default function Page() {
                       <TableHead>Acumuladas</TableHead>
                       <TableHead>Estado</TableHead>
                       <TableHead>Próx. mant.</TableHead>
+                      <TableHead>Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -829,6 +1229,15 @@ export default function Page() {
                           <TableCell className={cn(maint.dueNow ? "text-red-600" : "text-amber-600")}>
                             {maint.dueNow ? "Ahora" : `${safeToFixed(maint.dueInHours)} hs`}
                           </TableCell>
+                          <TableCell>
+                            <AircraftReportButton
+                              aircraft={a}
+                              flights={flights}
+                              pilots={pilots}
+                              variant="outline"
+                              size="sm"
+                            />
+                          </TableCell>
                         </TableRow>
                       )
                     })}
@@ -842,8 +1251,11 @@ export default function Page() {
         <TabsContent value="schedule" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Agenda de vuelos</CardTitle>
-              <CardDescription>Completar vuelos realizados o cancelar.</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <Gauge className="h-5 w-5" />
+                Agenda de vuelos (Sistema de tacómetro)
+              </CardTitle>
+              <CardDescription>Completar vuelos con tacómetro inicial y final.</CardDescription>
             </CardHeader>
             <CardContent>
               {flights.filter((f) => f.status === "scheduled").length === 0 ? (
@@ -853,9 +1265,9 @@ export default function Page() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Fecha</TableHead>
-                      <TableHead>Piloto</TableHead>
+                      <TableHead>Piloto(s)</TableHead>
                       <TableHead>Avión</TableHead>
-                      <TableHead>Duración</TableHead>
+                      <TableHead>Tacómetro</TableHead>
                       <TableHead>Notas</TableHead>
                       <TableHead />
                     </TableRow>
@@ -865,37 +1277,101 @@ export default function Page() {
                       .filter((f) => f.status === "scheduled")
                       .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
                       .map((f) => {
-                        const p = pilots.find((x) => x.id === f.pilotId)
                         const a = aircrafts.find((x) => x.id === f.aircraftId)
                         return (
                           <TableRow key={f.id}>
                             <TableCell>
                               {f.date} {f.time}
                             </TableCell>
-                            <TableCell>
-                              <Link className="underline hover:text-primary" href={`/pilots/${p?.id || ""}`}>
-                                {p?.fullName || "—"}
-                              </Link>
-                            </TableCell>
+                            <TableCell>{renderFlightPilots(f)}</TableCell>
                             <TableCell>
                               <Link className="underline hover:text-primary" href={`/aircrafts/${a?.id || ""}`}>
                                 {a?.tailNumber || "—"}
                               </Link>
                             </TableCell>
-                            <TableCell>{safeToFixed(f.duration)} hs</TableCell>
+                            <TableCell>
+                              {f.tachometerStart !== undefined ? (
+                                <div className="text-sm">
+                                  <div className="font-medium">Inicial: {safeToFixed(f.tachometerStart)}</div>
+                                  <div className="text-xs text-muted-foreground">Listo para completar</div>
+                                </div>
+                              ) : (
+                                <div className="text-xs text-muted-foreground">Se ingresará al completar</div>
+                              )}
+                            </TableCell>
                             <TableCell className="max-w-[240px] truncate">{f.notes}</TableCell>
                             <TableCell className="text-right">
-                              <div className="flex gap-2 justify-end">
-                                <Button
-                                  variant="default"
-                                  size="sm"
-                                  onClick={() => handleCompleteFlight(f.id)}
-                                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                                >
-                                  <CheckCircle2 className="mr-2 h-4 w-4" />
-                                  Completar
-                                </Button>
-                              </div>
+                              <CompleteFlightDialog
+                                flight={f}
+                                aircrafts={aircrafts}
+                                pilots={pilots}
+                                onComplete={reload}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Vuelos completados */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Vuelos completados recientes</CardTitle>
+              <CardDescription>Historial de vuelos con datos de tacómetro.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {flights.filter((f) => f.status === "completed").length === 0 ? (
+                <div className="text-sm text-muted-foreground">No hay vuelos completados.</div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Fecha</TableHead>
+                      <TableHead>Piloto(s)</TableHead>
+                      <TableHead>Avión</TableHead>
+                      <TableHead>Horas voladas</TableHead>
+                      <TableHead>Tacómetro</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {flights
+                      .filter((f) => f.status === "completed")
+                      .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time))
+                      .slice(0, 10)
+                      .map((f) => {
+                        const a = aircrafts.find((x) => x.id === f.aircraftId)
+                        const hours = calculateFlightHours(f)
+                        return (
+                          <TableRow key={f.id}>
+                            <TableCell>
+                              {f.date} {f.time}
+                            </TableCell>
+                            <TableCell>{renderFlightPilots(f)}</TableCell>
+                            <TableCell>
+                              <Link className="underline hover:text-primary" href={`/aircrafts/${a?.id || ""}`}>
+                                {a?.tailNumber || "—"}
+                              </Link>
+                            </TableCell>
+                            <TableCell>
+                              <div className="font-medium">{safeToFixed(hours)} hs</div>
+                            </TableCell>
+                            <TableCell>
+                              {f.tachometerStart !== undefined && f.tachometerEnd !== undefined ? (
+                                <div className="text-sm">
+                                  <div>
+                                    {safeToFixed(f.tachometerStart)} → {safeToFixed(f.tachometerEnd)}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    Diferencia: {safeToFixed(f.tachometerEnd - f.tachometerStart)}
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="text-xs text-muted-foreground">Vuelo legacy (sin tacómetro)</div>
+                              )}
                             </TableCell>
                           </TableRow>
                         )
@@ -963,37 +1439,64 @@ export default function Page() {
                   </CardHeader>
                   <CardContent className="text-sm space-y-2">
                     <p>
-                      • Ve a <strong>"Agenda"</strong> para ver vuelos programados
+                      • Ahora puedes seleccionar <strong>hasta 2 pilotos</strong> por vuelo
                     </p>
                     <p>
-                      • Click en <strong>"Completar"</strong> cuando termine el vuelo
+                      • El <strong>Piloto 1</strong> es obligatorio (principal)
                     </p>
-                    <p>• Las horas se descuentan automáticamente del piloto</p>
-                    <p>• Se suman a las horas acumuladas del avión</p>
+                    <p>
+                      • El <strong>Piloto 2</strong> es opcional
+                    </p>
+                    <p>
+                      • Opcionalmente ingresa el <strong>tacómetro inicial</strong>
+                    </p>
                   </CardContent>
                 </Card>
 
                 <Card className="border-l-4 border-l-orange-500">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4" />
-                      4. Completar vuelos
+                      <Gauge className="h-4 w-4" />
+                      4. Completar vuelos (NUEVO)
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="text-sm space-y-2">
                     <p>
-                      • Ve a <strong>"Agenda"</strong> para ver vuelos programados
+                      • Ve a <strong>"Agenda"</strong> y click en <strong>"Completar"</strong>
                     </p>
                     <p>
-                      • Click en <strong>"Completar"</strong> cuando termine el vuelo
+                      • Ingresa <strong>tacómetro inicial y final</strong>
                     </p>
-                    <p>• Las horas se descuentan automáticamente del piloto</p>
-                    <p>• Se suman a las horas acumuladas del avión</p>
+                    <p>
+                      • Las horas se calculan automáticamente: <strong>final - inicial</strong>
+                    </p>
+                    <p>• Se descuentan del Piloto 1 y se suman al avión</p>
                   </CardContent>
                 </Card>
               </div>
 
               <Separator />
+
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Gauge className="h-5 w-5 text-green-600" />
+                  <div className="font-semibold text-green-800">🆕 NUEVO: Sistema de tacómetro</div>
+                </div>
+                <div className="text-sm text-green-700 space-y-1">
+                  <p>
+                    • <strong>Más preciso:</strong> Las horas se calculan desde el tacómetro del avión
+                  </p>
+                  <p>
+                    • <strong>Automático:</strong> No más cálculos manuales de duración
+                  </p>
+                  <p>
+                    • <strong>Compatible:</strong> Los vuelos antiguos siguen funcionando
+                  </p>
+                  <p>
+                    • <strong>Flexible:</strong> Puedes ingresar el tacómetro inicial al agendar o al completar
+                  </p>
+                </div>
+              </div>
 
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="text-center p-4 bg-muted/50 rounded-lg">
@@ -1011,9 +1514,9 @@ export default function Page() {
                   </div>
                 </div>
                 <div className="text-center p-4 bg-muted/50 rounded-lg">
-                  <ShieldAlert className="h-8 w-8 mx-auto mb-2 text-orange-600" />
-                  <div className="font-medium">Gestión de flota</div>
-                  <div className="text-sm text-muted-foreground">Control de estado y mantenimiento de aeronaves</div>
+                  <Gauge className="h-8 w-8 mx-auto mb-2 text-purple-600" />
+                  <div className="font-medium">Tacómetro preciso</div>
+                  <div className="text-sm text-muted-foreground">Cálculo automático basado en tacómetro real</div>
                 </div>
               </div>
 
@@ -1029,10 +1532,10 @@ export default function Page() {
                     • <strong>Revisa las alertas</strong> de mantenimiento regularmente
                   </p>
                   <p>
-                    • <strong>Los datos se guardan</strong> automáticamente en tu navegador
+                    • <strong>El tacómetro inicial</strong> es opcional al agendar, obligatorio al completar
                   </p>
                   <p>
-                    • <strong>Para uso empresarial</strong>, configura una base de datos (Neon)
+                    • <strong>Los datos se sincronizan</strong> automáticamente con la base de datos
                   </p>
                 </CardContent>
               </Card>
