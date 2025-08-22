@@ -4,29 +4,25 @@ import { useState } from "react"
 import { FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { PilotReport } from "./pilot-report"
+import { AircraftReport } from "./aircraft-report"
 
-import type { Pilot, Flight, Purchase, Aircraft } from "@/lib/types"
+import type { Aircraft, Flight, Pilot } from "@/lib/types"
 
-interface PilotReportButtonProps {
-  pilot: Pilot
+interface AircraftReportButtonProps {
+  aircraft: Aircraft
   flights: Flight[]
-  purchases: Purchase[]
-  aircrafts: Aircraft[]
-  allPilots?: Pilot[] // Agregar lista de todos los pilotos
+  pilots: Pilot[]
   variant?: "default" | "outline" | "ghost"
   size?: "default" | "sm" | "lg"
 }
 
-export function PilotReportButton({
-  pilot,
+export function AircraftReportButton({
+  aircraft,
   flights,
-  purchases,
-  aircrafts,
-  allPilots = [],
+  pilots,
   variant = "outline",
   size = "sm",
-}: PilotReportButtonProps) {
+}: AircraftReportButtonProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -43,15 +39,11 @@ export function PilotReportButton({
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl text-blue-900">📋 Informe Completo - {pilot.fullName}</DialogTitle>
+          <DialogTitle className="text-xl text-blue-900">
+            📋 Informe Completo - {aircraft.tailNumber} ({aircraft.model})
+          </DialogTitle>
         </DialogHeader>
-        <PilotReport
-          pilot={pilot}
-          flights={flights}
-          purchases={purchases}
-          aircrafts={aircrafts}
-          allPilots={allPilots}
-        />
+        <AircraftReport aircraft={aircraft} flights={flights} pilots={pilots} />
       </DialogContent>
     </Dialog>
   )
