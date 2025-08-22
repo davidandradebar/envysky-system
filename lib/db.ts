@@ -19,7 +19,9 @@ async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
     })
 
     if (!response.ok) {
-      throw new Error(`API call failed: ${response.statusText}`)
+      const errorText = await response.text()
+      console.error(`API call to ${endpoint} failed:`, response.status, errorText)
+      throw new Error(`API call failed: ${response.status} ${response.statusText}`)
     }
 
     return await response.json()
@@ -50,8 +52,8 @@ export async function getPilots(): Promise<Pilot[]> {
   if (hasDatabase()) {
     try {
       return await apiCall<Pilot[]>("/pilots")
-    } catch {
-      // Fallback to localStorage
+    } catch (error) {
+      console.warn("Database unavailable, using localStorage:", error)
       return readLocal<Pilot[]>("envysky:pilots", [])
     }
   }
@@ -65,7 +67,8 @@ export async function savePilot(pilot: Omit<Pilot, "id" | "createdAt">): Promise
         method: "POST",
         body: JSON.stringify(pilot),
       })
-    } catch {
+    } catch (error) {
+      console.warn("Database unavailable, using localStorage:", error)
       // Fallback to localStorage
       const newPilot: Pilot = {
         ...pilot,
@@ -96,7 +99,8 @@ export async function getAircrafts(): Promise<Aircraft[]> {
   if (hasDatabase()) {
     try {
       return await apiCall<Aircraft[]>("/aircrafts")
-    } catch {
+    } catch (error) {
+      console.warn("Database unavailable, using localStorage:", error)
       return readLocal<Aircraft[]>("envysky:aircrafts", [])
     }
   }
@@ -110,7 +114,8 @@ export async function saveAircraft(aircraft: Omit<Aircraft, "id" | "createdAt">)
         method: "POST",
         body: JSON.stringify(aircraft),
       })
-    } catch {
+    } catch (error) {
+      console.warn("Database unavailable, using localStorage:", error)
       const newAircraft: Aircraft = {
         ...aircraft,
         id: newId(),
@@ -139,7 +144,8 @@ export async function getPurchases(): Promise<Purchase[]> {
   if (hasDatabase()) {
     try {
       return await apiCall<Purchase[]>("/purchases")
-    } catch {
+    } catch (error) {
+      console.warn("Database unavailable, using localStorage:", error)
       return readLocal<Purchase[]>("envysky:purchases", [])
     }
   }
@@ -162,7 +168,8 @@ export async function savePurchase(purchase: {
         method: "POST",
         body: JSON.stringify(purchase),
       })
-    } catch {
+    } catch (error) {
+      console.warn("Database unavailable, using localStorage:", error)
       // Fallback logic for localStorage
       const pilots = readLocal<Pilot[]>("envysky:pilots", [])
       let pilot = pilots.find((p) => p.email.toLowerCase() === purchase.pilotEmail.toLowerCase())
@@ -233,7 +240,8 @@ export async function getFlights(): Promise<Flight[]> {
   if (hasDatabase()) {
     try {
       return await apiCall<Flight[]>("/flights")
-    } catch {
+    } catch (error) {
+      console.warn("Database unavailable, using localStorage:", error)
       return readLocal<Flight[]>("envysky:flights", [])
     }
   }
@@ -247,7 +255,8 @@ export async function saveFlight(flight: Omit<Flight, "id" | "createdAt">): Prom
         method: "POST",
         body: JSON.stringify(flight),
       })
-    } catch {
+    } catch (error) {
+      console.warn("Database unavailable, using localStorage:", error)
       const newFlight: Flight = {
         ...flight,
         id: newId(),
@@ -271,23 +280,65 @@ export async function saveFlight(flight: Omit<Flight, "id" | "createdAt">): Prom
   return newFlight
 }
 
-export async function updateFlightStatus(flightId: string, status: "scheduled" | "completed"): Promise<Flight> {
+export async function updateFlightStatus(
+  flightId: string,
+  status: "scheduled" | "completed",
+  tachometerData?: {
+    tachometerStart?: number
+    tachometerEnd?: number
+  },
+): Promise<Flight> {
   if (hasDatabase()) {
     try {
       return await apiCall<Flight>("/flights", {
         method: "PUT",
-        body: JSON.stringify({ id: flightId, status }),
+        body: JSON.stringify({
+          id: flightId,
+          status,
+          ...tachometerData,
+        }),
       })
-    } catch {
+    } catch (error) {
+      console.warn("Database unavailable, using localStorage:", error)
       const flights = readLocal<Flight[]>("envysky:flights", [])
-      const updated = flights.map((f) => (f.id === flightId ? { ...f, status } : f))
+      const updated = flights.map((f) =>
+        f.id === flightId
+          ? {
+              ...f,
+              status,
+              ...(tachometerData?.tachometerStart !== undefined && {
+                tachometerStart: tachometerData.tachometerStart,
+              }),
+              ...(tachometerData?.tachometerEnd !== undefined && { tachometerEnd: tachometerData.tachometerEnd }),
+              // Update duration based on tachometer if both values are available
+              ...(tachometerData?.tachometerStart !== undefined &&
+                tachometerData?.tachometerEnd !== undefined && {
+                  duration: tachometerData.tachometerEnd - tachometerData.tachometerStart,
+                }),
+            }
+          : f,
+      )
       writeLocal("envysky:flights", updated)
       return updated.find((f) => f.id === flightId)!
     }
   }
 
   const flights = readLocal<Flight[]>("envysky:flights", [])
-  const updated = flights.map((f) => (f.id === flightId ? { ...f, status } : f))
+  const updated = flights.map((f) =>
+    f.id === flightId
+      ? {
+          ...f,
+          status,
+          ...(tachometerData?.tachometerStart !== undefined && { tachometerStart: tachometerData.tachometerStart }),
+          ...(tachometerData?.tachometerEnd !== undefined && { tachometerEnd: tachometerData.tachometerEnd }),
+          // Update duration based on tachometer if both values are available
+          ...(tachometerData?.tachometerStart !== undefined &&
+            tachometerData?.tachometerEnd !== undefined && {
+              duration: tachometerData.tachometerEnd - tachometerData.tachometerStart,
+            }),
+        }
+      : f,
+  )
   writeLocal("envysky:flights", updated)
   return updated.find((f) => f.id === flightId)!
 }

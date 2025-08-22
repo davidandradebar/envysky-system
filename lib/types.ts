@@ -30,11 +30,24 @@ export type Purchase = {
 export type Flight = {
   id: string
   pilotId: string
+  pilotId2?: string // Copiloto opcional
   aircraftId: string
   date: string // YYYY-MM-DD
   time: string // HH:mm
-  duration: number // hours (decimal)
+  duration: number // hours (decimal) - DEPRECATED: usar tacómetro
+  tachometerStart?: number // Tacómetro inicial
+  tachometerEnd?: number // Tacómetro final
   status: "scheduled" | "completed"
   notes?: string
   createdAt: string
+}
+
+// Helper function para calcular horas desde tacómetro
+export function calculateFlightHours(flight: Flight): number {
+  // Si tiene tacómetros, usar esos
+  if (flight.tachometerEnd !== undefined && flight.tachometerStart !== undefined) {
+    return flight.tachometerEnd - flight.tachometerStart
+  }
+  // Fallback a duration para compatibilidad con vuelos antiguos
+  return flight.duration || 0
 }
