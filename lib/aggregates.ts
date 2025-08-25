@@ -54,49 +54,35 @@ export function calcPilotHours(pilotId: string, purchases: Purchase[], flights: 
   }
 }
 
-// Aircraft accumulated hours and maintenance
+// Calculate aircraft accumulated hours
 export function calcAircraftAccumulatedHours(aircraft: Aircraft, flights: Flight[]) {
-  // Ensure we have valid data
-  if (!aircraft || !Array.isArray(flights)) {
-    return { accumulated: 0 }
-  }
+  const flownHours = flights
+    .filter((f) => f.aircraftId === aircraft.id && f.status === "completed")
+    .reduce((sum, f) => sum + calculateFlightHours(f), 0)
 
-  const flown = flights
-    .filter((f) => f && f.aircraftId === aircraft.id && f.status === "completed")
-    .reduce((sum, f) => {
-      // Use new tachometer calculation
-      const duration = calculateFlightHours(f)
-      return sum + duration
-    }, 0)
-
-  const initialHours =
-    typeof aircraft.initialHours === "number" ? aircraft.initialHours : Number.parseFloat(aircraft.initialHours) || 0
-  const accumulated = initialHours + flown
-
-  return { accumulated: Number(accumulated) || 0 }
-}
-
-export function calcAircraftMaintenance(aircraft: Aircraft, accumulated: number) {
-  // Ensure we have valid data
-  if (!aircraft) {
-    return { dueNow: false, dueInHours: 0 }
-  }
-
-  const interval =
-    typeof aircraft.maintenanceIntervalHours === "number"
-      ? aircraft.maintenanceIntervalHours
-      : Number.parseFloat(aircraft.maintenanceIntervalHours) || 100
-
-  const validAccumulated = typeof accumulated === "number" ? accumulated : Number.parseFloat(accumulated) || 0
-
-  if (interval <= 0) return { dueNow: false, dueInHours: Number.POSITIVE_INFINITY }
-
-  const remainder = validAccumulated % interval
-  const dueInHours = interval - remainder
-  const dueNow = dueInHours === interval || dueInHours <= 0.01 // numeric quirks
+  const accumulated = aircraft.initialHours + flownHours
 
   return {
+    initial: aircraft.initialHours,
+    flown: flownHours,
+    accumulated,
+  }
+}
+
+// Calculate aircraft maintenance status
+export function calcAircraftMaintenance(aircraft: Aircraft, accumulatedHours: number) {
+  // Calculate how many maintenance intervals have passed since the initial hours
+  const hoursSinceInitial = accumulatedHours - aircraft.initialHours
+  const intervalsCompleted = Math.floor(hoursSinceInitial / aircraft.maintenanceIntervalHours)
+
+  // Next maintenance should be at: initial hours + (completed intervals + 1) * interval
+  const nextMaintenanceAt = aircraft.initialHours + (intervalsCompleted + 1) * aircraft.maintenanceIntervalHours
+  const dueInHours = nextMaintenanceAt - accumulatedHours
+  const dueNow = dueInHours <= 0
+
+  return {
+    nextMaintenanceAt,
+    dueInHours,
     dueNow,
-    dueInHours: dueNow ? 0 : Number(dueInHours) || 0,
   }
 }
