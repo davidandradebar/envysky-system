@@ -5,7 +5,11 @@ import type { Pilot, Flight, Purchase, Aircraft } from "@/lib/types"
 import { calcPilotHours } from "@/lib/aggregates"
 import { calculateFlightHours } from "@/lib/types"
 import { Button } from "@/components/ui/button"
-import { FileText, Download, User, Calendar, Plane } from "lucide-react"
+import { FileText, Download, User, Plane } from "lucide-react"
+import { Card, Typography } from "antd"
+import { CompletedFlights } from "./completed-flights"
+
+const { Title } = Typography
 
 interface PilotReportProps {
   pilot: Pilot
@@ -34,7 +38,6 @@ const generateReportHTML = (
   // Filtrar vuelos del piloto (como piloto 1 o piloto 2)
   const pilotFlights = flights.filter((f) => f.pilotId === pilot.id || f.pilotId2 === pilot.id)
   const completedFlights = pilotFlights.filter((f) => f.status === "completed")
-  const scheduledFlights = pilotFlights.filter((f) => f.status === "scheduled")
 
   // Función para obtener el nombre del piloto acompañante
   const getCompanionPilotName = (flight: Flight) => {
@@ -405,46 +408,6 @@ const generateReportHTML = (
         }
     </div>
     
-    <div class="section">
-        <h3>📅 Scheduled Flights</h3>
-        ${
-          scheduledFlights.length === 0
-            ? '<div class="no-data">No Scheduled Flights </div>'
-            : `<table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Aircraft</th>
-                        <th>Copilot</th>
-                        <th>Initial Tachometer</th>
-                        <th>Notes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${scheduledFlights
-                      .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
-                      .map((flight) => {
-                        const aircraft = aircrafts.find((a) => a.id === flight.aircraftId)
-                        const companionPilot = getCompanionPilotName(flight)
-
-                        return `
-                                <tr>
-                                    <td>${flight.date}</td>
-                                    <td>${flight.time}</td>
-                                    <td>${aircraft?.tailNumber || "—"} - ${aircraft?.model || ""}</td>
-                                    <td>${companionPilot}</td>
-                                    <td>${flight.tachometerStart !== undefined ? safeToFixed(flight.tachometerStart) : "Por definir"}</td>
-                                    <td>${flight.notes || "—"}</td>
-                                </tr>
-                            `
-                      })
-                      .join("")}
-                </tbody>
-            </table>`
-        }
-    </div>
-    
     <div class="footer">
         <p>Reporte generado el ${new Date().toLocaleDateString("es-ES")} a las ${new Date().toLocaleTimeString("es-ES")}</p>
         <p>ENVYSKY - Flight Management System</p>
@@ -454,11 +417,10 @@ const generateReportHTML = (
   `
 }
 
-export const PilotReport: React.FC<PilotReportProps> = ({ pilot, flights, purchases, aircrafts, allPilots = [] }) => {
+const PilotReport: React.FC<PilotReportProps> = ({ pilot, flights, purchases, aircrafts, allPilots = [] }) => {
   const hours = calcPilotHours(pilot.id, purchases, flights)
   const pilotFlights = flights.filter((f) => f.pilotId === pilot.id || f.pilotId2 === pilot.id)
   const completedFlights = pilotFlights.filter((f) => f.status === "completed")
-  const scheduledFlights = pilotFlights.filter((f) => f.status === "scheduled")
 
   const handlePrint = () => {
     const reportHTML = generateReportHTML(pilot, flights, purchases, aircrafts, allPilots)
@@ -525,15 +487,8 @@ export const PilotReport: React.FC<PilotReportProps> = ({ pilot, flights, purcha
         </div>
       </div>
 
-      {/* Resumen de actividad */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="flex items-center gap-2 mb-2">
-            <Calendar className="h-4 w-4 text-blue-600" />
-            <span className="font-medium text-gray-700">Scheduled Flights</span>
-          </div>
-          <div className="text-2xl font-bold text-blue-600">{scheduledFlights.length}</div>
-        </div>
+      {/* Resumen de actividad - REMOVED SCHEDULED FLIGHTS */}
+      <div className="grid grid-cols-1 gap-4">
         <div className="bg-white p-4 rounded-lg border border-gray-200">
           <div className="flex items-center gap-2 mb-2">
             <Plane className="h-4 w-4 text-green-600" />
@@ -573,10 +528,16 @@ export const PilotReport: React.FC<PilotReportProps> = ({ pilot, flights, purcha
           <li>
             • List of completed flights with <strong>copilot</strong>
           </li>
-          <li>• Pending scheduled flights</li>
           <li>• Tachometer data and flight notes</li>
         </ul>
       </div>
+
+      {/* Solo mostrar sección de vuelos completados */}
+      <Card title="Vuelos Completados">
+        <CompletedFlights flights={completedFlights} />
+      </Card>
     </div>
   )
 }
+
+export default PilotReport
