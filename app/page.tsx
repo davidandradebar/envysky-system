@@ -1403,13 +1403,13 @@ export default function Page() {
                   </CardHeader>
                   <CardContent className="text-sm space-y-2">
                     <p>
-                      • Ve a <strong>"Panel"</strong> → <strong>"Acciones rápidas"</strong>
+                      • Ve a <strong>"Panel"</strong> → <strong>"Quick actions"</strong>
                     </p>
                     <p>
-                      • Completa el formulario <strong>"Compra de horas"</strong>
+                      • Complete the form <strong>"Purchase of hours"</strong>
                     </p>
-                    <p>• Si el piloto no existe, se crea automáticamente</p>
-                    <p>• Las horas compradas se suman a su cuenta</p>
+                    <p>• If the pilot does not exist, it is created automatically</p>
+                    <p>• Purchased hours are added to their account</p>
                   </CardContent>
                 </Card>
 
@@ -1417,16 +1417,16 @@ export default function Page() {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
                       <Plane className="h-4 w-4" />
-                      2. Agregar aviones
+                      2. “Add aircraft
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="text-sm space-y-2">
                     <p>
-                      • En <strong>"Acciones rápidas"</strong> → <strong>"Crear avión"</strong>
+                      • En <strong>"Quick actions"</strong> → <strong>"Create aircraft"</strong>
                     </p>
-                    <p>• Ingresa matrícula, modelo y horas iniciales</p>
-                    <p>• Define intervalo de mantenimiento (ej: cada 100 hs)</p>
-                    <p>• El sistema calculará automáticamente cuándo necesita servicio</p>
+                    <p>• Enter registration, model, and initial hours</p>
+                    <p>• Define maintenance interval (e.g., every 100 hrs)</p>
+                    <p>• The system will automatically calculate when service is needed</p>
                   </CardContent>
                 </Card>
 
@@ -1434,21 +1434,21 @@ export default function Page() {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
-                      3. Agendar vuelos
+                      3. Schedule flights
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="text-sm space-y-2">
                     <p>
-                      • Ahora puedes seleccionar <strong>hasta 2 pilotos</strong> por vuelo
+                      • You can now select <strong>up to 2 pilots</strong> per flight
                     </p>
                     <p>
-                      • El <strong>Piloto 1</strong> es obligatorio (principal)
+                      • <strong>Pilot 1</strong> is mandatory (principal)
                     </p>
                     <p>
-                      • El <strong>Piloto 2</strong> es opcional
+                      • <strong>Piloto 2</strong> is optional
                     </p>
                     <p>
-                      • Opcionalmente ingresa el <strong>tacómetro inicial</strong>
+                      • Optionally enter the <strong>initial tachometer</strong>
                     </p>
                   </CardContent>
                 </Card>
@@ -1457,20 +1457,20 @@ export default function Page() {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
                       <Gauge className="h-4 w-4" />
-                      4. Completar vuelos (NUEVO)
+                      4. Complete flights
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="text-sm space-y-2">
                     <p>
-                      • Ve a <strong>"Agenda"</strong> y click en <strong>"Completar"</strong>
+                      • Go to <strong>"Schedule"</strong> and click <strong>"Complete"</strong>
                     </p>
                     <p>
-                      • Ingresa <strong>tacómetro inicial y final</strong>
+                      • Enter <strong>initial and final tachometer</strong>
                     </p>
                     <p>
-                      • Las horas se calculan automáticamente: <strong>final - inicial</strong>
+                      • Hours are calculated automatically: <strong>final - initial</strong>
                     </p>
-                    <p>• Se descuentan del Piloto 1 y se suman al avión</p>
+                    <p>• They are deducted from <strong>Pilot 1</strong> and added to the aircraft</p>
                   </CardContent>
                 </Card>
               </div>
@@ -1480,20 +1480,20 @@ export default function Page() {
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 p-4 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <Gauge className="h-5 w-5 text-green-600" />
-                  <div className="font-semibold text-green-800">🆕 NUEVO: Sistema de tacómetro</div>
+                  <div className="font-semibold text-green-800">Tachometer system</div>
                 </div>
                 <div className="text-sm text-green-700 space-y-1">
                   <p>
-                    • <strong>Más preciso:</strong> Las horas se calculan desde el tacómetro del avión
+                    • <strong>More accurate:</strong> Hours are calculated from the aircraft’s tachometer
                   </p>
                   <p>
-                    • <strong>Automático:</strong> No más cálculos manuales de duración
+                    • <strong>Automatic:</strong> No more manual duration calculations
                   </p>
                   <p>
-                    • <strong>Compatible:</strong> Los vuelos antiguos siguen funcionando
+                    • <strong>Compatible:</strong> Legacy flights still work
                   </p>
                   <p>
-                    • <strong>Flexible:</strong> Puedes ingresar el tacómetro inicial al agendar o al completar
+                    • <strong>Flexible:</strong> You can enter the initial tachometer either when scheduling or when completing
                   </p>
                 </div>
               </div>
@@ -1501,41 +1501,41 @@ export default function Page() {
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="text-center p-4 bg-muted/50 rounded-lg">
                   <BadgeCheck className="h-8 w-8 mx-auto mb-2 text-green-600" />
-                  <div className="font-medium">Alertas automáticas</div>
+                  <div className="font-medium">Automatic alerts</div>
                   <div className="text-sm text-muted-foreground">
-                    El sistema te avisa cuando un avión necesita mantenimiento
+                    The system notifies you when an aircraft requires maintenance
                   </div>
                 </div>
                 <div className="text-center p-4 bg-muted/50 rounded-lg">
                   <Clock className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-                  <div className="font-medium">Control de horas</div>
+                  <div className="font-medium">Hour control</div>
                   <div className="text-sm text-muted-foreground">
-                    Seguimiento automático de horas compradas vs. voladas
+                    Automatic tracking of purchased vs. flown hours
                   </div>
                 </div>
                 <div className="text-center p-4 bg-muted/50 rounded-lg">
                   <Gauge className="h-8 w-8 mx-auto mb-2 text-purple-600" />
-                  <div className="font-medium">Tacómetro preciso</div>
-                  <div className="text-sm text-muted-foreground">Cálculo automático basado en tacómetro real</div>
+                  <div className="font-medium">Accurate tachometer</div>
+                  <div className="text-sm text-muted-foreground">Automatic calculation based on the actual tachometer</div>
                 </div>
               </div>
 
               <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
                 <CardHeader>
-                  <CardTitle className="text-lg text-blue-900">💡 Consejos útiles</CardTitle>
+                  <CardTitle className="text-lg text-blue-900">💡 Useful tips</CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm space-y-2 text-blue-800">
                   <p>
-                    • <strong>Click en nombres y matrículas</strong> para ver detalles completos
+                    • <strong>Click on names and registrations</strong> to see full details
                   </p>
                   <p>
-                    • <strong>Revisa las alertas</strong> de mantenimiento regularmente
+                    • <strong>Check maintenance alerts</strong> regularly
                   </p>
                   <p>
-                    • <strong>El tacómetro inicial</strong> es opcional al agendar, obligatorio al completar
+                    • <strong>The initial tachometer</strong> is optional when scheduling, mandatory when completing
                   </p>
                   <p>
-                    • <strong>Los datos se sincronizan</strong> automáticamente con la base de datos
+                    • <strong>Data is synced</strong> automatically with the database
                   </p>
                 </CardContent>
               </Card>
