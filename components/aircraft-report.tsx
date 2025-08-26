@@ -277,7 +277,7 @@ const generateAircraftReportHTML = (aircraft: Aircraft, flights: Flight[], pilot
 <body>
     <div class="header">
         <h1>ENVYSKY</h1>
-        <p>Reporte Individual de Avión</p>
+        <p>Individual aircraft report</p>
     </div>
     
     <div class="aircraft-info">
@@ -326,20 +326,20 @@ const generateAircraftReportHTML = (aircraft: Aircraft, flights: Flight[], pilot
     </div>
     
     <div class="section">
-        <h3>✈️ Historial de Vuelos Completados</h3>
+        <h3>✈️ Completed flights history</h3>
         ${
           completedFlights.length === 0
-            ? '<div class="no-data">No hay vuelos completados para este avión</div>'
+            ? '<div class="no-data">No completed flights for this aircraft.</div>'
             : `<table>
                 <thead>
                     <tr>
-                        <th>Fecha</th>
-                        <th>Hora</th>
-                        <th>Tacómetro Inicial</th>
-                        <th>Tacómetro Final</th>
-                        <th>Horas Voladas</th>
-                        <th>Pilotos</th>
-                        <th>Notas</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Tachometer Inicial</th>
+                        <th>Final Tachometer</th>
+                        <th>Hours flown</th>
+                        <th>Pilots</th>
+                        <th>Notes</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -382,18 +382,18 @@ const generateAircraftReportHTML = (aircraft: Aircraft, flights: Flight[], pilot
     </div>
     
     <div class="section">
-        <h3>📅 Vuelos Programados</h3>
+        <h3>📅 Scheduled flights</h3>
         ${
           scheduledFlights.length === 0
-            ? '<div class="no-data">No hay vuelos programados para este avión</div>'
+            ? '<div class="no-data">No scheduled flights for this aircraft.</div>'
             : `<table>
                 <thead>
                     <tr>
-                        <th>Fecha</th>
-                        <th>Hora</th>
-                        <th>Tacómetro Inicial</th>
-                        <th>Pilotos</th>
-                        <th>Notas</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Initial Tachometer</th>
+                        <th>Pilots</th>
+                        <th>Notes</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -433,8 +433,8 @@ const generateAircraftReportHTML = (aircraft: Aircraft, flights: Flight[], pilot
     </div>
     
     <div class="footer">
-        <p>Reporte generado el ${new Date().toLocaleDateString("es-ES")} a las ${new Date().toLocaleTimeString("es-ES")}</p>
-        <p>ENVYSKY - Sistema de Gestión de Vuelos</p>
+        <p>Report generated the ${new Date().toLocaleDateString("es-ES")} at ${new Date().toLocaleTimeString("es-ES")}</p>
+        <p>ENVYSKY - Flight Management System</p>
     </div>
 </body>
 </html>
@@ -465,7 +465,7 @@ export const AircraftReport: React.FC<AircraftReportProps> = ({ aircraft, flight
         printWindow.close()
       }
     } else {
-      alert("Por favor, permite las ventanas emergentes para generar el informe")
+      alert("Please allow pop-ups to generate the report.")
     }
   }
 
@@ -481,7 +481,7 @@ export const AircraftReport: React.FC<AircraftReportProps> = ({ aircraft, flight
         printWindow.print()
       }
     } else {
-      alert("Por favor, permite las ventanas emergentes para generar el informe")
+      alert("Please allow pop-ups to generate the report.")
     }
   }
 
@@ -498,7 +498,7 @@ export const AircraftReport: React.FC<AircraftReportProps> = ({ aircraft, flight
               {aircraft.tailNumber} - {aircraft.model}
             </h3>
             <p className="text-blue-700">
-              Estado: {aircraft.status === "active" ? "Activo" : "En mantenimiento"} • Mantenimiento cada{" "}
+              Estado: {aircraft.status === "active" ? "Activo" : "In maintenance"} • Maintenance every{" "}
               {safeToFixed(aircraft.maintenanceIntervalHours)} hs
             </p>
           </div>
@@ -507,15 +507,15 @@ export const AircraftReport: React.FC<AircraftReportProps> = ({ aircraft, flight
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-white p-4 rounded-lg border border-green-200">
             <div className="text-2xl font-bold text-green-600">{safeToFixed(totalHoursFlown)}</div>
-            <div className="text-sm text-green-700 font-medium">Total Horas Voladas</div>
+            <div className="text-sm text-green-700 font-medium">Total Flight Hours</div>
           </div>
           <div className="bg-white p-4 rounded-lg border border-blue-200">
             <div className="text-2xl font-bold text-blue-600">{completedFlights.length}</div>
-            <div className="text-sm text-blue-700 font-medium">Vuelos Completados</div>
+            <div className="text-sm text-blue-700 font-medium">Completed Flights</div>
           </div>
           <div className="bg-white p-4 rounded-lg border border-orange-200">
             <div className="text-2xl font-bold text-orange-600">{scheduledFlights.length}</div>
-            <div className="text-sm text-orange-700 font-medium">Vuelos Programados</div>
+            <div className="text-sm text-orange-700 font-medium">Scheduled Flights</div>
           </div>
         </div>
       </div>
@@ -525,14 +525,14 @@ export const AircraftReport: React.FC<AircraftReportProps> = ({ aircraft, flight
         <div className="bg-white p-4 rounded-lg border border-gray-200">
           <div className="flex items-center gap-2 mb-2">
             <Calendar className="h-4 w-4 text-blue-600" />
-            <span className="font-medium text-gray-700">Horas Iniciales</span>
+            <span className="font-medium text-gray-700">Initial Hours</span>
           </div>
           <div className="text-2xl font-bold text-blue-600">{safeToFixed(aircraft.initialHours)}</div>
         </div>
         <div className="bg-white p-4 rounded-lg border border-gray-200">
           <div className="flex items-center gap-2 mb-2">
             <Gauge className="h-4 w-4 text-green-600" />
-            <span className="font-medium text-gray-700">Horas Acumuladas</span>
+            <span className="font-medium text-gray-700">Total Hours</span>
           </div>
           <div className="text-2xl font-bold text-green-600">
             {safeToFixed(aircraft.initialHours + totalHoursFlown)}
@@ -548,28 +548,28 @@ export const AircraftReport: React.FC<AircraftReportProps> = ({ aircraft, flight
           className="flex items-center gap-2 bg-white hover:bg-gray-50 border-gray-300"
         >
           <FileText className="h-4 w-4" />
-          Imprimir Reporte
+          Print Report
         </Button>
         <Button
           onClick={handleDownloadPDF}
           className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
         >
           <Download className="h-4 w-4" />
-          Descargar PDF
+          Download PDF
         </Button>
       </div>
 
       <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
         <p className="text-sm text-blue-800 mb-2">
-          <strong>📊 Reporte completo incluye:</strong>
+          <strong>📊 Full report includes:</strong>
         </p>
         <ul className="text-xs text-blue-700 space-y-1">
-          <li>• Información técnica del avión (matrícula, modelo, horas iniciales)</li>
-          <li>• Total de horas voladas (sumatoria de todos los vuelos)</li>
-          <li>• Historial completo de vuelos con tacómetro inicial y final</li>
-          <li>• Detalle de pilotos que participaron en cada vuelo</li>
-          <li>• Vuelos programados pendientes</li>
-          <li>• Estadísticas de mantenimiento y estado actual</li>
+          <li>• Technical information of the aircraft (registration, model, initial hours)</li>
+          <li>• Total flight hours (sum of all flights)</li>
+          <li>• Complete flight history with initial and final tachometer</li>
+          <li>• Detail of pilots who participated in each flight</li>
+          <li>• Pending scheduled flights</li>
+          <li>• Maintenance statistics and current status</li>
         </ul>
       </div>
     </div>
