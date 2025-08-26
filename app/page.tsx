@@ -4,18 +4,7 @@ import React from "react"
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import {
-  BadgeCheck,
-  Calendar,
-  CheckCircle2,
-  Clock,
-  Plane,
-  PlusCircle,
-  Rocket,
-  ShieldAlert,
-  UserPlus,
-  Gauge,
-} from "lucide-react"
+import { BadgeCheck, CheckCircle2, Clock, Plane, PlusCircle, Rocket, ShieldAlert, UserPlus, Gauge } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -392,15 +381,39 @@ export default function Page() {
   }
 
   const handleSchedule = async () => {
-    if (!scheduleForm.pilotId || !scheduleForm.aircraftId || !scheduleForm.date || !scheduleForm.time) return
+    if (!scheduleForm.pilotId || !scheduleForm.aircraftId || !scheduleForm.date || !scheduleForm.time) {
+      alert("Please complete all required fields")
+      return
+    }
 
-    console.log("Scheduling flight with:", {
+    // Require both tachometer values
+    if (!scheduleForm.tachometerStart || !scheduleForm.tachometerEnd) {
+      alert("Please enter both initial and final tachometer values")
+      return
+    }
+
+    const start = Number.parseFloat(scheduleForm.tachometerStart)
+    const end = Number.parseFloat(scheduleForm.tachometerEnd)
+
+    if (isNaN(start) || isNaN(end)) {
+      alert("Please enter valid numeric values for tachometer")
+      return
+    }
+
+    if (end <= start) {
+      alert("The final tachometer must be greater than the initial one")
+      return
+    }
+
+    console.log("Registering completed flight with:", {
       pilotId: scheduleForm.pilotId,
       pilotId2: scheduleForm.pilotId2,
       aircraftId: scheduleForm.aircraftId,
       date: scheduleForm.date,
       time: scheduleForm.time,
-      tachometerStart: scheduleForm.tachometerStart,
+      tachometerStart: start,
+      tachometerEnd: end,
+      calculatedHours: end - start,
     })
 
     try {
@@ -411,12 +424,13 @@ export default function Page() {
         date: scheduleForm.date,
         time: scheduleForm.time,
         duration: 0, // Will be calculated from tachometer
-        tachometerStart: scheduleForm.tachometerStart ? Number.parseFloat(scheduleForm.tachometerStart) : undefined,
-        status: "scheduled",
+        tachometerStart: start,
+        tachometerEnd: end,
+        status: "completed", // Save directly as completed
         notes: scheduleForm.notes || "",
       })
 
-      console.log("Flight created:", newFlight)
+      console.log("Flight completed and saved:", newFlight)
 
       await reload()
       setScheduleForm({
@@ -426,10 +440,14 @@ export default function Page() {
         date: "",
         time: "",
         tachometerStart: "",
+        tachometerEnd: "",
         notes: "",
       })
+
+      alert(`Flight registered successfully. Hours flown: ${safeToFixed(end - start)}`)
     } catch (error) {
       console.error("Error saving flight:", error)
+      alert("Error registering the flight. Please try again.")
     }
   }
 
@@ -487,9 +505,26 @@ export default function Page() {
     aircraftId: string
     date: string
     time: string
-    tachometerStart: string // Tacómetro inicial (opcional al programar)
+    tachometerStart: string // Now required
+    tachometerEnd: string // Now required
     notes: string
-  }>({ pilotId: "", pilotId2: "", aircraftId: "", date: "", time: "", tachometerStart: "", notes: "" })
+  }>({
+    pilotId: "",
+    pilotId2: "",
+    aircraftId: "",
+    date: "",
+    time: "",
+    tachometerStart: "",
+    tachometerEnd: "",
+    notes: "",
+  })
+
+  // Calculate hours for display in schedule form
+  const calculatedHours = useMemo(() => {
+    const start = Number.parseFloat(scheduleForm.tachometerStart) || 0
+    const end = Number.parseFloat(scheduleForm.tachometerEnd) || 0
+    return end > start ? end - start : 0
+  }, [scheduleForm.tachometerStart, scheduleForm.tachometerEnd])
 
   const handleSetAircraftStatus = (aircraftId: string, status: "active" | "maintenance") => {
     // This function is not updated as per the provided updates
@@ -601,7 +636,9 @@ export default function Page() {
         <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent">
           ENVYSKY
         </h1>
-        <p className="text-blue-700/80 mt-2 text-lg">Management of pilots, aircraft, hours, flights, and maintenance.</p>
+        <p className="text-blue-700/80 mt-2 text-lg">
+          Management of pilots, aircraft, hours, flights, and maintenance.
+        </p>
       </div>
 
       <Tabs defaultValue="dashboard" className="w-full">
@@ -629,7 +666,7 @@ export default function Page() {
               <CardHeader className="bg-gradient-to-r from-blue-100 to-sky-100 border-b border-blue-200">
                 <SectionHeader
                   title="Quick actions"
-                  description="Register purchase, create aircraft, schedule flight"
+                  description="Register purchase, create aircraft, register completed flight"
                   icon={<PlusCircle className="h-4 w-4 text-blue-700" />}
                 />
               </CardHeader>
@@ -771,7 +808,7 @@ export default function Page() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="maintenance">In maintenance”</SelectItem>
+                        <SelectItem value="maintenance">In maintenance"</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -786,7 +823,7 @@ export default function Page() {
                 <div className="space-y-3">
                   <div className="font-medium flex items-center gap-2">
                     <Gauge className="h-4 w-4" />
-                    Schedule flight (with tachometer)
+                    Register completed flight
                   </div>
                   <div className="space-y-2">
                     <Label>Pilot 1 (Principal)</Label>
@@ -844,9 +881,7 @@ export default function Page() {
                         <SelectValue placeholder="Select aircraft" />
                       </SelectTrigger>
                       <SelectContent>
-                        {aircrafts.length === 0 ? (
-                          <SelectItem value="no-aircrafts">{"No aircrafts"}</SelectItem>
-                        ) : null}
+                        {aircrafts.length === 0 ? <SelectItem value="no-aircrafts">{"No aircrafts"}</SelectItem> : null}
                         {aircrafts.map((a) => (
                           <SelectItem key={a.id} value={a.id}>
                             {a.tailNumber} - {a.model}
@@ -873,29 +908,68 @@ export default function Page() {
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Initial tachometer (optional)</Label>
-                    <Input
-                      type="number"
-                      step="0.1"
-                      placeholder="1500.0"
-                      value={scheduleForm.tachometerStart}
-                      onChange={(e) => setScheduleForm((s) => ({ ...s, tachometerStart: e.target.value }))}
-                    />
-                    <div className="text-xs text-muted-foreground">You can enter it now or when completing the flight.</div>
+
+                  {/* Modified tachometer section - now both are required */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Initial tachometer *</Label>
+                      <Input
+                        type="number"
+                        step="0.1"
+                        placeholder="1500.0"
+                        value={scheduleForm.tachometerStart}
+                        onChange={(e) => setScheduleForm((s) => ({ ...s, tachometerStart: e.target.value }))}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Final tachometer *</Label>
+                      <Input
+                        type="number"
+                        step="0.1"
+                        placeholder="1502.5"
+                        value={scheduleForm.tachometerEnd}
+                        onChange={(e) => setScheduleForm((s) => ({ ...s, tachometerEnd: e.target.value }))}
+                        required
+                      />
+                    </div>
                   </div>
+
+                  {/* Calculated Hours Display */}
+                  {calculatedHours > 0 && (
+                    <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
+                      <div className="text-sm text-green-800">
+                        <span className="font-medium">Calculated hours:</span> {safeToFixed(calculatedHours)} hs
+                      </div>
+                      <div className="text-xs text-green-600 mt-1">Will be automatically deducted from Pilot 1</div>
+                    </div>
+                  )}
+
+                  {/* Error Display */}
+                  {scheduleForm.tachometerStart && scheduleForm.tachometerEnd && calculatedHours <= 0 && (
+                    <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
+                      <div className="text-sm text-red-800">
+                        ⚠️ The final tachometer must be greater than the initial one
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-2">
                     <Label>Notes</Label>
                     <Textarea
-                      placeholder="Opcional"
+                      placeholder="Optional"
                       value={scheduleForm.notes}
                       onChange={(e) => setScheduleForm((s) => ({ ...s, notes: e.target.value }))}
                       className="min-h-[40px]"
                     />
                   </div>
-                  <Button onClick={handleSchedule} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    Schedule
+                  <Button
+                    onClick={handleSchedule}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    disabled={!calculatedHours || calculatedHours <= 0}
+                  >
+                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                    Register flight
                   </Button>
                 </div>
               </CardContent>
@@ -926,9 +1000,7 @@ export default function Page() {
                         {safeToFixed(ac.maintenanceIntervalHours)} hs
                       </div>
                       <div className={cn("text-sm", maint.dueNow ? "text-red-600" : "text-amber-600")}>
-                        {maint.dueNow
-                          ? "Maintenance required now"
-                          : `Next in ~${safeToFixed(maint.dueInHours)} hs`}
+                        {maint.dueNow ? "Maintenance required now" : `Next in ~${safeToFixed(maint.dueInHours)} hs`}
                       </div>
                       <div className="pt-2">
                         <Select
@@ -952,17 +1024,18 @@ export default function Page() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Replace "Upcoming flights" with "Recent completed flights" */}
             <Card>
               <CardHeader>
                 <SectionHeader
-                  title="Upcoming flights"
-                  description="Future flight schedule"
-                  icon={<Clock className="h-4 w-4" />}
+                  title="Recent completed flights"
+                  description="Latest registered flights"
+                  icon={<CheckCircle2 className="h-4 w-4" />}
                 />
               </CardHeader>
               <CardContent className="space-y-2">
-                {upcomingFlights.length === 0 ? (
-                  <div className="text-sm text-muted-foreground">No scheduled flights.</div>
+                {flights.filter((f) => f.status === "completed").length === 0 ? (
+                  <div className="text-sm text-muted-foreground">No completed flights.</div>
                 ) : (
                   <Table>
                     <TableHeader>
@@ -970,42 +1043,51 @@ export default function Page() {
                         <TableHead>Date</TableHead>
                         <TableHead>Pilot(s)</TableHead>
                         <TableHead>Aircraft</TableHead>
+                        <TableHead>Hours flown</TableHead>
                         <TableHead>Tachometer</TableHead>
-                        <TableHead />
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {upcomingFlights.map((f) => {
-                        const a = aircrafts.find((x) => x.id === f.aircraftId)
-                        return (
-                          <TableRow key={f.id}>
-                            <TableCell>
-                              {f.date} {f.time}
-                            </TableCell>
-                            <TableCell>{renderFlightPilots(f)}</TableCell>
-                            <TableCell>
-                              <Link className="underline hover:text-primary" href={`/aircrafts/${a?.id || ""}`}>
-                                {a?.tailNumber || "—"}
-                              </Link>
-                            </TableCell>
-                            <TableCell>
-                              {f.tachometerStart !== undefined ? (
-                                <div className="text-sm">Inicial: {safeToFixed(f.tachometerStart)}</div>
-                              ) : (
-                                <div className="text-xs text-muted-foreground">Will be entered upon completion.</div>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <CompleteFlightDialog
-                                flight={f}
-                                aircrafts={aircrafts}
-                                pilots={pilots}
-                                onComplete={reload}
-                              />
-                            </TableCell>
-                          </TableRow>
-                        )
-                      })}
+                      {flights
+                        .filter((f) => f.status === "completed")
+                        .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time))
+                        .slice(0, 10)
+                        .map((f) => {
+                          const a = aircrafts.find((x) => x.id === f.aircraftId)
+                          const hours = calculateFlightHours(f)
+                          return (
+                            <TableRow key={f.id}>
+                              <TableCell>
+                                {f.date} {f.time}
+                              </TableCell>
+                              <TableCell>{renderFlightPilots(f)}</TableCell>
+                              <TableCell>
+                                <Link className="underline hover:text-primary" href={`/aircrafts/${a?.id || ""}`}>
+                                  {a?.tailNumber || "—"}
+                                </Link>
+                              </TableCell>
+                              <TableCell>
+                                <div className="font-medium">{safeToFixed(hours)} hs</div>
+                              </TableCell>
+                              <TableCell>
+                                {f.tachometerStart !== undefined && f.tachometerEnd !== undefined ? (
+                                  <div className="text-sm">
+                                    <div>
+                                      {safeToFixed(f.tachometerStart)} → {safeToFixed(f.tachometerEnd)}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                      Difference: {safeToFixed(f.tachometerEnd - f.tachometerStart)}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="text-xs text-muted-foreground">
+                                    Legacy flight (without tachometer)
+                                  </div>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          )
+                        })}
                     </TableBody>
                   </Table>
                 )}
@@ -1403,7 +1485,7 @@ export default function Page() {
                   </CardHeader>
                   <CardContent className="text-sm space-y-2">
                     <p>
-                      • Ve a <strong>"Panel"</strong> → <strong>"Quick actions"</strong>
+                      • Go to <strong>"Dashboard"</strong> → <strong>"Quick actions"</strong>
                     </p>
                     <p>
                       • Complete the form <strong>"Purchase of hours"</strong>
@@ -1417,12 +1499,12 @@ export default function Page() {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
                       <Plane className="h-4 w-4" />
-                      2. “Add aircraft
+                      2. Add aircraft
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="text-sm space-y-2">
                     <p>
-                      • En <strong>"Quick actions"</strong> → <strong>"Create aircraft"</strong>
+                      • In <strong>"Quick actions"</strong> → <strong>"Create aircraft"</strong>
                     </p>
                     <p>• Enter registration, model, and initial hours</p>
                     <p>• Define maintenance interval (e.g., every 100 hrs)</p>
@@ -1433,8 +1515,8 @@ export default function Page() {
                 <Card className="border-l-4 border-l-purple-500">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      3. Schedule flights
+                      <CheckCircle2 className="h-4 w-4" />
+                      3. Register completed flights
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="text-sm space-y-2">
@@ -1445,11 +1527,12 @@ export default function Page() {
                       • <strong>Pilot 1</strong> is mandatory (principal)
                     </p>
                     <p>
-                      • <strong>Piloto 2</strong> is optional
+                      • <strong>Pilot 2</strong> is optional
                     </p>
                     <p>
-                      • Optionally enter the <strong>initial tachometer</strong>
+                      • Enter both <strong>initial and final tachometer</strong> values
                     </p>
+                    <p>• Flight is registered as completed immediately</p>
                   </CardContent>
                 </Card>
 
@@ -1457,20 +1540,18 @@ export default function Page() {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
                       <Gauge className="h-4 w-4" />
-                      4. Complete flights
+                      4. Automatic calculations
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="text-sm space-y-2">
                     <p>
-                      • Go to <strong>"Schedule"</strong> and click <strong>"Complete"</strong>
-                    </p>
-                    <p>
-                      • Enter <strong>initial and final tachometer</strong>
-                    </p>
-                    <p>
                       • Hours are calculated automatically: <strong>final - initial</strong>
                     </p>
-                    <p>• They are deducted from <strong>Pilot 1</strong> and added to the aircraft</p>
+                    <p>
+                      • They are deducted from <strong>Pilot 1</strong> and added to the aircraft
+                    </p>
+                    <p>• View recent flights in the dashboard</p>
+                    <p>• Check maintenance alerts regularly</p>
                   </CardContent>
                 </Card>
               </div>
@@ -1480,20 +1561,20 @@ export default function Page() {
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 p-4 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <Gauge className="h-5 w-5 text-green-600" />
-                  <div className="font-semibold text-green-800">Tachometer system</div>
+                  <div className="font-semibold text-green-800">Simplified tachometer system</div>
                 </div>
                 <div className="text-sm text-green-700 space-y-1">
                   <p>
-                    • <strong>More accurate:</strong> Hours are calculated from the aircraft’s tachometer
+                    • <strong>Direct registration:</strong> Register completed flights in one step
+                  </p>
+                  <p>
+                    • <strong>More accurate:</strong> Hours are calculated from the aircraft's tachometer
                   </p>
                   <p>
                     • <strong>Automatic:</strong> No more manual duration calculations
                   </p>
                   <p>
                     • <strong>Compatible:</strong> Legacy flights still work
-                  </p>
-                  <p>
-                    • <strong>Flexible:</strong> You can enter the initial tachometer either when scheduling or when completing
                   </p>
                 </div>
               </div>
@@ -1509,14 +1590,14 @@ export default function Page() {
                 <div className="text-center p-4 bg-muted/50 rounded-lg">
                   <Clock className="h-8 w-8 mx-auto mb-2 text-blue-600" />
                   <div className="font-medium">Hour control</div>
-                  <div className="text-sm text-muted-foreground">
-                    Automatic tracking of purchased vs. flown hours
-                  </div>
+                  <div className="text-sm text-muted-foreground">Automatic tracking of purchased vs. flown hours</div>
                 </div>
                 <div className="text-center p-4 bg-muted/50 rounded-lg">
                   <Gauge className="h-8 w-8 mx-auto mb-2 text-purple-600" />
                   <div className="font-medium">Accurate tachometer</div>
-                  <div className="text-sm text-muted-foreground">Automatic calculation based on the actual tachometer</div>
+                  <div className="text-sm text-muted-foreground">
+                    Automatic calculation based on the actual tachometer
+                  </div>
                 </div>
               </div>
 
@@ -1532,7 +1613,7 @@ export default function Page() {
                     • <strong>Check maintenance alerts</strong> regularly
                   </p>
                   <p>
-                    • <strong>The initial tachometer</strong> is optional when scheduling, mandatory when completing
+                    • <strong>Both tachometer values</strong> are required when registering flights
                   </p>
                   <p>
                     • <strong>Data is synced</strong> automatically with the database
