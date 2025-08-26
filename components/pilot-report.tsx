@@ -327,16 +327,16 @@ const generateReportHTML = (
     </div>
     
     <div class="section">
-        <h3>📋 Compras de Horas</h3>
+        <h3>📋 Hour purchases</h3>
         ${
           purchases.filter((p) => p.pilotId === pilot.id).length === 0
-            ? '<div class="no-data">No hay compras registradas</div>'
+            ? '<div class="no-data">No purchases recorded.</div>'
             : `<table>
                 <thead>
                     <tr>
                         <th>Fecha</th>
-                        <th>Horas Compradas</th>
-                        <th>Fecha de Registro</th>
+                        <th>Hours Purchaseds</th>
+                        <th>Registration Date</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -359,20 +359,20 @@ const generateReportHTML = (
     </div>
     
     <div class="section">
-        <h3>✈️ Vuelos Completados</h3>
+        <h3>✈️ Completed Flights</h3>
         ${
           completedFlights.length === 0
-            ? '<div class="no-data">No hay vuelos completados</div>'
+            ? '<div class="no-data">No completed flights. </div>'
             : `<table>
                 <thead>
                     <tr>
-                        <th>Fecha</th>
-                        <th>Hora</th>
-                        <th>Avión</th>
-                        <th>Horas Voladas</th>
-                        <th>Piloto Acompañante</th>
-                        <th>Tacómetro</th>
-                        <th>Notas</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Aircraft</th>
+                        <th>Flight Hourss</th>
+                        <th>Copilot</th>
+                        <th>Tachometer</th>
+                        <th>Notes</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -406,19 +406,19 @@ const generateReportHTML = (
     </div>
     
     <div class="section">
-        <h3>📅 Vuelos Programados</h3>
+        <h3>📅 Scheduled Flights</h3>
         ${
           scheduledFlights.length === 0
-            ? '<div class="no-data">No hay vuelos programados</div>'
+            ? '<div class="no-data">No Scheduled Flights </div>'
             : `<table>
                 <thead>
                     <tr>
-                        <th>Fecha</th>
-                        <th>Hora</th>
-                        <th>Avión</th>
-                        <th>Piloto Acompañante</th>
-                        <th>Tacómetro Inicial</th>
-                        <th>Notas</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Aircraft</th>
+                        <th>Copilot</th>
+                        <th>Initial Tachometer</th>
+                        <th>Notes</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -447,7 +447,7 @@ const generateReportHTML = (
     
     <div class="footer">
         <p>Reporte generado el ${new Date().toLocaleDateString("es-ES")} a las ${new Date().toLocaleTimeString("es-ES")}</p>
-        <p>ENVYSKY - Sistema de Gestión de Vuelos</p>
+        <p>ENVYSKY - Flight Management System</p>
     </div>
 </body>
 </html>
@@ -473,7 +473,7 @@ export const PilotReport: React.FC<PilotReportProps> = ({ pilot, flights, purcha
         printWindow.close()
       }
     } else {
-      alert("Por favor, permite las ventanas emergentes para generar el informe")
+      alert("Please allow pop-ups to generate the report.")
     }
   }
 
@@ -489,7 +489,7 @@ export const PilotReport: React.FC<PilotReportProps> = ({ pilot, flights, purcha
         printWindow.print()
       }
     } else {
-      alert("Por favor, permite las ventanas emergentes para generar el informe")
+      alert("Please allow pop-ups to generate the report")
     }
   }
 
@@ -512,15 +512,15 @@ export const PilotReport: React.FC<PilotReportProps> = ({ pilot, flights, purcha
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-white p-4 rounded-lg border border-green-200">
             <div className="text-2xl font-bold text-green-600">{safeToFixed(hours.purchased)}</div>
-            <div className="text-sm text-green-700 font-medium">Horas Compradas</div>
+            <div className="text-sm text-green-700 font-medium">Purchased Hours</div>
           </div>
           <div className="bg-white p-4 rounded-lg border border-orange-200">
             <div className="text-2xl font-bold text-orange-600">{safeToFixed(hours.flown)}</div>
-            <div className="text-sm text-orange-700 font-medium">Horas Voladas</div>
+            <div className="text-sm text-orange-700 font-medium">Flown Hours</div>
           </div>
           <div className="bg-white p-4 rounded-lg border border-blue-200">
             <div className="text-2xl font-bold text-blue-600">{safeToFixed(hours.remaining)}</div>
-            <div className="text-sm text-blue-700 font-medium">Horas Restantes</div>
+            <div className="text-sm text-blue-700 font-medium">Remaining Hours</div>
           </div>
         </div>
       </div>
@@ -530,14 +530,14 @@ export const PilotReport: React.FC<PilotReportProps> = ({ pilot, flights, purcha
         <div className="bg-white p-4 rounded-lg border border-gray-200">
           <div className="flex items-center gap-2 mb-2">
             <Calendar className="h-4 w-4 text-blue-600" />
-            <span className="font-medium text-gray-700">Vuelos Programados</span>
+            <span className="font-medium text-gray-700">Scheduled Flights</span>
           </div>
           <div className="text-2xl font-bold text-blue-600">{scheduledFlights.length}</div>
         </div>
         <div className="bg-white p-4 rounded-lg border border-gray-200">
           <div className="flex items-center gap-2 mb-2">
             <Plane className="h-4 w-4 text-green-600" />
-            <span className="font-medium text-gray-700">Vuelos Completados</span>
+            <span className="font-medium text-gray-700">Completed Flights</span>
           </div>
           <div className="text-2xl font-bold text-green-600">{completedFlights.length}</div>
         </div>
@@ -551,30 +551,30 @@ export const PilotReport: React.FC<PilotReportProps> = ({ pilot, flights, purcha
           className="flex items-center gap-2 bg-white hover:bg-gray-50 border-gray-300"
         >
           <FileText className="h-4 w-4" />
-          Imprimir Reporte
+          Print Report
         </Button>
         <Button
           onClick={handleDownloadPDF}
           className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
         >
           <Download className="h-4 w-4" />
-          Descargar PDF
+          Download PDF
         </Button>
       </div>
 
       <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
         <p className="text-sm text-blue-800 mb-2">
-          <strong>📊 Reporte completo incluye:</strong>
+          <strong>📊 Full Report includes:</strong>
         </p>
         <ul className="text-xs text-blue-700 space-y-1">
-          <li>• Información personal y de contacto</li>
-          <li>• Resumen detallado de horas (compradas, voladas, restantes)</li>
-          <li>• Historial completo de compras de horas</li>
+          <li>• Personal and contact information</li>
+          <li>• Detailed summary of hours (purchased, flown, remaining)</li>
+          <li>• Complete history of hour purchases</li>
           <li>
-            • Lista de vuelos completados con <strong>piloto acompañante</strong>
+            • List of completed flights with <strong>copilot</strong>
           </li>
-          <li>• Vuelos programados pendientes</li>
-          <li>• Datos de tacómetro y notas de vuelo</li>
+          <li>• Pending scheduled flights</li>
+          <li>• Tachometer data and flight notes</li>
         </ul>
       </div>
     </div>
