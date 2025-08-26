@@ -284,27 +284,27 @@ const generateAircraftReportHTML = (aircraft: Aircraft, flights: Flight[], pilot
         <h2>${aircraft.tailNumber} - ${aircraft.model}</h2>
         <div class="info-grid">
             <div class="info-item">
-                <div class="info-label">Matrícula</div>
+                <div class="info-label">Registration</div>
                 <div class="info-value">${aircraft.tailNumber}</div>
             </div>
             <div class="info-item">
-                <div class="info-label">Modelo</div>
+                <div class="info-label">Model</div>
                 <div class="info-value">${aircraft.model}</div>
             </div>
             <div class="info-item">
-                <div class="info-label">Horas iniciales</div>
+                <div class="info-label">Initial Hours</div>
                 <div class="info-value">${safeToFixed(aircraft.initialHours)} hs</div>
             </div>
             <div class="info-item">
-                <div class="info-label">Intervalo de mantenimiento</div>
+                <div class="info-label">Maintenance Interval</div>
                 <div class="info-value">Cada ${safeToFixed(aircraft.maintenanceIntervalHours)} hs</div>
             </div>
             <div class="info-item">
-                <div class="info-label">Estado actual</div>
+                <div class="info-label">Status</div>
                 <div class="info-value">${aircraft.status === "active" ? "Activo" : "En mantenimiento"}</div>
             </div>
             <div class="info-item">
-                <div class="info-label">Fecha de registro</div>
+                <div class="info-label">Registration Date</div>
                 <div class="info-value">${new Date(aircraft.createdAt).toLocaleDateString("es-ES")}</div>
             </div>
         </div>
@@ -313,15 +313,15 @@ const generateAircraftReportHTML = (aircraft: Aircraft, flights: Flight[], pilot
     <div class="hours-summary">
         <div class="hours-card total">
             <div class="hours-number">${safeToFixed(totalHoursFlown)}</div>
-            <div class="hours-label">Total Horas Voladas</div>
+            <div class="hours-label">Total Flight Hours</div>
         </div>
         <div class="hours-card completed">
             <div class="hours-number">${completedFlights.length}</div>
-            <div class="hours-label">Vuelos Completados</div>
+            <div class="hours-label">Completed Flights</div>
         </div>
         <div class="hours-card scheduled">
             <div class="hours-number">${scheduledFlights.length}</div>
-            <div class="hours-label">Vuelos Programados</div>
+            <div class="hours-label">Scheduled Flights</div>
         </div>
     </div>
     
@@ -335,7 +335,7 @@ const generateAircraftReportHTML = (aircraft: Aircraft, flights: Flight[], pilot
                     <tr>
                         <th>Date</th>
                         <th>Time</th>
-                        <th>Tachometer Inicial</th>
+                        <th>Initial Tachometer</th>
                         <th>Final Tachometer</th>
                         <th>Hours flown</th>
                         <th>Pilots</th>
