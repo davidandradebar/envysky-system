@@ -278,7 +278,7 @@ const generateReportHTML = (
 <body>
     <div class="header">
         <h1>ENVYSKY</h1>
-        <p>Reporte Individual de Piloto</p>
+        <p>Individual Pilot Report</p>
     </div>
     
     <div class="pilot-info">
@@ -289,23 +289,23 @@ const generateReportHTML = (
                 <div class="info-value">${pilot.email}</div>
             </div>
             <div class="info-item">
-                <div class="info-label">Teléfono</div>
+                <div class="info-label">Phone</div>
                 <div class="info-value">${pilot.phone || "—"}</div>
             </div>
             <div class="info-item">
-                <div class="info-label">País</div>
+                <div class="info-label">Country</div>
                 <div class="info-value">${pilot.country || "—"}</div>
             </div>
             <div class="info-item">
-                <div class="info-label">Fecha de nacimiento</div>
+                <div class="info-label">Birth of Date</div>
                 <div class="info-value">${pilot.birthDate || "—"}</div>
             </div>
             <div class="info-item">
-                <div class="info-label">Tipo de licencia</div>
+                <div class="info-label">Type of License</div>
                 <div class="info-value">${pilot.licenseType || "—"}</div>
             </div>
             <div class="info-item">
-                <div class="info-label">Fecha de registro</div>
+                <div class="info-label">Registration date</div>
                 <div class="info-value">${new Date(pilot.createdAt).toLocaleDateString("es-ES")}</div>
             </div>
         </div>
