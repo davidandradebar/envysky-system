@@ -71,14 +71,14 @@ export default function AircraftPage({ params }: { params: { id: string } }) {
           <Button asChild variant="outline" size="sm">
             <Link href="/">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Volver
+              Back
             </Link>
           </Button>
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>Avión no encontrado</CardTitle>
-            <CardDescription>El perfil solicitado no existe.</CardDescription>
+            <CardTitle>Airplane not found.</CardTitle>
+            <CardDescription>The requested profile does not exist.</CardDescription>
           </CardHeader>
         </Card>
       </main>
@@ -91,7 +91,7 @@ export default function AircraftPage({ params }: { params: { id: string } }) {
         <Button asChild variant="outline" size="sm">
           <Link href="/">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver
+            Back
           </Link>
         </Button>
         <AircraftReportButton aircraft={aircraft} flights={flights} pilots={pilots} variant="default" size="sm" />
@@ -103,31 +103,31 @@ export default function AircraftPage({ params }: { params: { id: string } }) {
             {aircraft.tailNumber} — {aircraft.model}
           </CardTitle>
           <CardDescription>
-            Acumuladas: {safeToFixed(accumulated)} hs • Intervalo mantenimiento:{" "}
+            Accumulated: {safeToFixed(accumulated)} hs • Maintenance interval:{" "}
             {safeToFixed(aircraft.maintenanceIntervalHours)} hs
           </CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="rounded-lg border p-3">
-            <div className="text-sm text-muted-foreground">Estado</div>
+            <div className="text-sm text-muted-foreground">Status</div>
             <Select value={aircraft.status} onValueChange={(v: "active" | "maintenance") => handleSetStatus(v)}>
               <SelectTrigger className="mt-1">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="active">Activo</SelectItem>
-                <SelectItem value="maintenance">En mantenimiento</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="maintenance">In maintenance</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="rounded-lg border p-3">
-            <div className="text-sm text-muted-foreground">Próximo mantenimiento</div>
+            <div className="text-sm text-muted-foreground">Next maintenance</div>
             <div className={cn("text-2xl font-semibold", maint.dueNow ? "text-red-600" : "text-amber-600")}>
               {maint.dueNow ? "Ahora" : `${safeToFixed(maint.dueInHours)} hs`}
             </div>
           </div>
           <div className="rounded-lg border p-3">
-            <div className="text-sm text-muted-foreground">Alerta</div>
+            <div className="text-sm text-muted-foreground">Alert</div>
             <div className="text-2xl font-semibold flex items-center gap-2">
               <BadgeCheck className={cn("h-5 w-5", maint.dueNow ? "text-red-600" : "text-amber-600")} />
               {maint.dueNow ? "Requerido" : "Próximo"}
@@ -140,20 +140,20 @@ export default function AircraftPage({ params }: { params: { id: string } }) {
         <CardHeader>
           <CardTitle>
             <Users className="h-4 w-4 inline mr-2" />
-            Historial de vuelos y pilotos
+            Flight and pilot history
           </CardTitle>
         </CardHeader>
         <CardContent>
           {history.length === 0 ? (
-            <div className="text-sm text-muted-foreground">Sin vuelos.</div>
+            <div className="text-sm text-muted-foreground">No scheduled flights.</div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Piloto</TableHead>
-                  <TableHead>Duración</TableHead>
-                  <TableHead>Estado</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Pilot</TableHead>
+                  <TableHead>Duration</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
