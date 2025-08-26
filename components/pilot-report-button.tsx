@@ -38,12 +38,12 @@ export function PilotReportButton({
           className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600 hover:border-blue-700"
         >
           <FileText className="h-4 w-4 mr-2" />
-          Generar Informe
+          Generate report
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl text-blue-900">📋 Informe Completo - {pilot.fullName}</DialogTitle>
+          <DialogTitle className="text-xl text-blue-900">📋 Full report - {pilot.fullName}</DialogTitle>
         </DialogHeader>
         <PilotReport
           pilot={pilot}
