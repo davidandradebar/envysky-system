@@ -92,7 +92,7 @@ function CompleteFlightDialog({
 
   const handleComplete = async () => {
     if (!tachometerStart || !tachometerEnd) {
-      alert("Por favor ingresa ambos valores del tacómetro")
+      alert("Please enter both tachometer values.")
       return
     }
 
@@ -100,12 +100,12 @@ function CompleteFlightDialog({
     const end = Number.parseFloat(tachometerEnd)
 
     if (isNaN(start) || isNaN(end)) {
-      alert("Por favor ingresa valores numéricos válidos")
+      alert("Please enter valid numeric values.")
       return
     }
 
     if (end <= start) {
-      alert("El tacómetro final debe ser mayor al inicial")
+      alert("The final tachometer value must be greater than the initial one.")
       return
     }
 
@@ -128,7 +128,7 @@ function CompleteFlightDialog({
       onComplete()
     } catch (error) {
       console.error("Error completing flight:", error)
-      alert("Error al completar el vuelo. Por favor intenta de nuevo.")
+      alert("Error completing the flight. Please try again.")
     } finally {
       setIsSubmitting(false)
     }
@@ -147,14 +147,14 @@ function CompleteFlightDialog({
       <DialogTrigger asChild>
         <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
           <CheckCircle2 className="mr-2 h-4 w-4" />
-          Completar
+          Complete
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md bg-white">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-gray-900">
             <Gauge className="h-5 w-5 text-blue-600" />
-            Completar Vuelo
+            Complete Flight
           </DialogTitle>
         </DialogHeader>
 
@@ -181,7 +181,7 @@ function CompleteFlightDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="tach-start" className="text-sm font-medium text-gray-700">
-                Tacómetro inicial
+                Initial tachometer
               </Label>
               <Input
                 id="tach-start"
@@ -195,7 +195,7 @@ function CompleteFlightDialog({
             </div>
             <div className="space-y-2">
               <Label htmlFor="tach-end" className="text-sm font-medium text-gray-700">
-                Tacómetro final
+                Final tachometer
               </Label>
               <Input
                 id="tach-end"
@@ -213,10 +213,10 @@ function CompleteFlightDialog({
           {calculatedHours > 0 && (
             <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
               <div className="text-sm text-green-800">
-                <span className="font-medium">Horas calculadas:</span> {safeToFixed(calculatedHours)} hs
+                <span className="font-medium">Calculated hours:</span> {safeToFixed(calculatedHours)} hs
               </div>
               <div className="text-xs text-green-600 mt-1">
-                Se descontarán automáticamente del Piloto 1: {pilot1?.fullName}
+                They will be automatically deducted from Pilot 1: {pilot1?.fullName}
               </div>
             </div>
           )}
@@ -224,14 +224,14 @@ function CompleteFlightDialog({
           {/* Error Display */}
           {tachometerStart && tachometerEnd && calculatedHours <= 0 && (
             <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
-              <div className="text-sm text-red-800">⚠️ El tacómetro final debe ser mayor al inicial</div>
+              <div className="text-sm text-red-800">⚠️ The final tachometer must be greater than the initial one.</div>
             </div>
           )}
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-2">
             <Button variant="outline" onClick={() => setOpen(false)} className="flex-1" disabled={isSubmitting}>
-              Cancelar
+              Cancel
             </Button>
             <Button
               onClick={handleComplete}
@@ -241,12 +241,12 @@ function CompleteFlightDialog({
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Completando...
+                  Completing...
                 </>
               ) : (
                 <>
                   <CheckCircle2 className="mr-2 h-4 w-4" />
-                  Completar vuelo
+                  Complete flight
                 </>
               )}
             </Button>
@@ -535,7 +535,7 @@ export default function Page() {
         {flight.pilotId2 && !pilot2 && (
           <div className="flex items-center gap-1">
             <span className="text-xs text-muted-foreground font-medium">P2:</span>
-            <span className="text-sm text-red-500">Piloto no encontrado (ID: {flight.pilotId2})</span>
+            <span className="text-sm text-red-500">Pilot not found (ID: {flight.pilotId2})</span>
           </div>
         )}
       </div>
@@ -564,7 +564,7 @@ export default function Page() {
       <div className="space-y-1">
         <div className="text-sm font-medium">{safeToFixed(hours)} hs</div>
         {flight.status === "scheduled" && flight.tachometerStart !== undefined && (
-          <div className="text-xs text-muted-foreground">Inicial: {safeToFixed(flight.tachometerStart)}</div>
+          <div className="text-xs text-muted-foreground">Initial: {safeToFixed(flight.tachometerStart)}</div>
         )}
       </div>
     )
@@ -601,25 +601,25 @@ export default function Page() {
         <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent">
           ENVYSKY
         </h1>
-        <p className="text-blue-700/80 mt-2 text-lg">Gestión de pilotos, aviones, horas, vuelos y mantenimiento.</p>
+        <p className="text-blue-700/80 mt-2 text-lg">Management of pilots, aircraft, hours, flights, and maintenance.</p>
       </div>
 
       <Tabs defaultValue="dashboard" className="w-full">
         <TabsList className="flex w-full justify-center overflow-x-auto bg-blue-50 border border-blue-200">
           <TabsTrigger value="dashboard" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-            Panel
+            Dashboard
           </TabsTrigger>
           <TabsTrigger value="pilots" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-            Pilotos
+            Pilots
           </TabsTrigger>
           <TabsTrigger value="aircraft" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-            Aviones
+            Airplanes
           </TabsTrigger>
           <TabsTrigger value="schedule" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-            Agenda
+            Schedule
           </TabsTrigger>
           <TabsTrigger value="settings" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-            Guía rápida
+            Quick guide
           </TabsTrigger>
         </TabsList>
 
@@ -628,38 +628,38 @@ export default function Page() {
             <Card className="xl:col-span-2 shadow-sm">
               <CardHeader className="bg-gradient-to-r from-blue-100 to-sky-100 border-b border-blue-200">
                 <SectionHeader
-                  title="Acciones rápidas"
-                  description="Registrar compra, crear avión, agendar vuelo"
+                  title="Quick actions"
+                  description="Register purchase, create aircraft, schedule flight"
                   icon={<PlusCircle className="h-4 w-4 text-blue-700" />}
                 />
               </CardHeader>
               <CardContent className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
                 <div className="space-y-3">
-                  <div className="font-medium">Compra de horas (crea piloto si no existe)</div>
+                  <div className="font-medium">Purchase hours (create pilot if not existing)</div>
                   <div className="space-y-2">
                     <Label htmlFor="buy-email">Email</Label>
                     <Input
                       id="buy-email"
-                      placeholder="piloto@correo.com"
+                      placeholder="pilot@correo.com"
                       value={purchaseForm.email}
                       onChange={(e) => setPurchaseForm((s) => ({ ...s, email: e.target.value }))}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-2">
-                      <Label htmlFor="buy-name">Nombre</Label>
+                      <Label htmlFor="buy-name">Name</Label>
                       <Input
                         id="buy-name"
-                        placeholder="Nombre completo"
+                        placeholder="Full Name"
                         value={purchaseForm.fullName}
                         onChange={(e) => setPurchaseForm((s) => ({ ...s, fullName: e.target.value }))}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="buy-phone">Teléfono</Label>
+                      <Label htmlFor="buy-phone">Phone</Label>
                       <Input
                         id="buy-phone"
-                        placeholder="+54 ..."
+                        placeholder="+1 ..."
                         value={purchaseForm.phone}
                         onChange={(e) => setPurchaseForm((s) => ({ ...s, phone: e.target.value }))}
                       />
@@ -667,16 +667,16 @@ export default function Page() {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-2">
-                      <Label htmlFor="buy-country">País</Label>
+                      <Label htmlFor="buy-country">Country</Label>
                       <Input
                         id="buy-country"
-                        placeholder="AR"
+                        placeholder="USA"
                         value={purchaseForm.country}
                         onChange={(e) => setPurchaseForm((s) => ({ ...s, country: e.target.value }))}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="buy-birth">Nacimiento</Label>
+                      <Label htmlFor="buy-birth">Date of birth</Label>
                       <Input
                         id="buy-birth"
                         type="date"
@@ -686,7 +686,7 @@ export default function Page() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="buy-license">Tipo de licencia</Label>
+                    <Label htmlFor="buy-license">License type</Label>
                     <Input
                       id="buy-license"
                       placeholder="PPL / CPL ..."
@@ -695,7 +695,7 @@ export default function Page() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="buy-hours">Horas a comprar</Label>
+                    <Label htmlFor="buy-hours">Hours to purchase</Label>
                     <Input
                       id="buy-hours"
                       type="number"
@@ -708,16 +708,16 @@ export default function Page() {
                   </div>
                   <Button onClick={handlePurchase} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                     <UserPlus className="mr-2 h-4 w-4" />
-                    Registrar compra
+                    Register purchase
                   </Button>
                 </div>
 
                 <Separator className="lg:hidden" />
 
                 <div className="space-y-3">
-                  <div className="font-medium">Crear avión</div>
+                  <div className="font-medium">Create aircraft</div>
                   <div className="space-y-2">
-                    <Label htmlFor="ac-tail">Matrícula / ID</Label>
+                    <Label htmlFor="ac-tail">License plate / ID</Label>
                     <Input
                       id="ac-tail"
                       placeholder="LV-ABC"
@@ -726,7 +726,7 @@ export default function Page() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="ac-model">Modelo</Label>
+                    <Label htmlFor="ac-model">Aircraft model</Label>
                     <Input
                       id="ac-model"
                       placeholder="Cessna 172"
@@ -736,7 +736,7 @@ export default function Page() {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-2">
-                      <Label htmlFor="ac-initial">Horas iniciales</Label>
+                      <Label htmlFor="ac-initial">Starting hours</Label>
                       <Input
                         id="ac-initial"
                         type="number"
@@ -748,7 +748,7 @@ export default function Page() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="ac-maint">Mantenimiento cada X hs</Label>
+                      <Label htmlFor="ac-maint">Maintenance every X hours</Label>
                       <Input
                         id="ac-maint"
                         type="number"
@@ -761,7 +761,7 @@ export default function Page() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>Estado</Label>
+                    <Label>Status</Label>
                     <Select
                       value={aircraftForm.status}
                       onValueChange={(v: "active" | "maintenance") => setAircraftForm((s) => ({ ...s, status: v }))}
@@ -770,14 +770,14 @@ export default function Page() {
                         <SelectValue placeholder="Estado" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="active">Activo</SelectItem>
-                        <SelectItem value="maintenance">En mantenimiento</SelectItem>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="maintenance">In maintenance”</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <Button onClick={handleAddAircraft} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                     <Plane className="mr-2 h-4 w-4" />
-                    Crear avión
+                    Create aircraft
                   </Button>
                 </div>
 
@@ -786,19 +786,19 @@ export default function Page() {
                 <div className="space-y-3">
                   <div className="font-medium flex items-center gap-2">
                     <Gauge className="h-4 w-4" />
-                    Agendar vuelo (con tacómetro)
+                    Schedule flight (with tachometer)
                   </div>
                   <div className="space-y-2">
-                    <Label>Piloto 1 (Principal)</Label>
+                    <Label>Pilot 1 (Principal)</Label>
                     <Select
                       value={scheduleForm.pilotId}
                       onValueChange={(v) => setScheduleForm((s) => ({ ...s, pilotId: v }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar piloto principal" />
+                        <SelectValue placeholder="Select main pilot" />
                       </SelectTrigger>
                       <SelectContent>
-                        {pilots.length === 0 ? <SelectItem value="no-pilots">{"No hay pilotos"}</SelectItem> : null}
+                        {pilots.length === 0 ? <SelectItem value="no-pilots">{"No Pilots"}</SelectItem> : null}
                         {pilots.map((p) => (
                           <SelectItem key={p.id} value={p.id}>
                             {p.fullName} ({p.email})
@@ -808,16 +808,16 @@ export default function Page() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Piloto 2 (Opcional)</Label>
+                    <Label>Pilot 2 (Optional)</Label>
                     <Select
                       value={scheduleForm.pilotId2}
                       onValueChange={(v) => setScheduleForm((s) => ({ ...s, pilotId2: v === "none" ? "" : v }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar piloto 2 (opcional)" />
+                        <SelectValue placeholder="Select pilot 2 (opcional)" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="none">Sin piloto 2</SelectItem>
+                        <SelectItem value="none">Without Piloy 2</SelectItem>
                         {pilots
                           .filter((p) => p.id !== scheduleForm.pilotId) // ✅ FILTRAR para evitar el mismo piloto
                           .map((p) => (
@@ -828,24 +828,24 @@ export default function Page() {
                         {/* Mostrar mensaje si no hay otros pilotos disponibles */}
                         {pilots.filter((p) => p.id !== scheduleForm.pilotId).length === 0 && scheduleForm.pilotId && (
                           <SelectItem value="no-other-pilots" disabled>
-                            No hay otros pilotos disponibles
+                            No other pilots available.
                           </SelectItem>
                         )}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Avión</Label>
+                    <Label>Aircraft</Label>
                     <Select
                       value={scheduleForm.aircraftId}
                       onValueChange={(v) => setScheduleForm((s) => ({ ...s, aircraftId: v }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar avión" />
+                        <SelectValue placeholder="Select aircraft" />
                       </SelectTrigger>
                       <SelectContent>
                         {aircrafts.length === 0 ? (
-                          <SelectItem value="no-aircrafts">{"No hay aviones"}</SelectItem>
+                          <SelectItem value="no-aircrafts">{"No aircrafts"}</SelectItem>
                         ) : null}
                         {aircrafts.map((a) => (
                           <SelectItem key={a.id} value={a.id}>
@@ -857,7 +857,7 @@ export default function Page() {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-2">
-                      <Label>Fecha</Label>
+                      <Label>Date</Label>
                       <Input
                         type="date"
                         value={scheduleForm.date}
@@ -865,7 +865,7 @@ export default function Page() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Hora</Label>
+                      <Label>Hour</Label>
                       <Input
                         type="time"
                         value={scheduleForm.time}
@@ -874,7 +874,7 @@ export default function Page() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>Tacómetro inicial (opcional)</Label>
+                    <Label>Initial tachometer (optional)</Label>
                     <Input
                       type="number"
                       step="0.1"
@@ -882,10 +882,10 @@ export default function Page() {
                       value={scheduleForm.tachometerStart}
                       onChange={(e) => setScheduleForm((s) => ({ ...s, tachometerStart: e.target.value }))}
                     />
-                    <div className="text-xs text-muted-foreground">Puedes ingresarlo ahora o al completar el vuelo</div>
+                    <div className="text-xs text-muted-foreground">You can enter it now or when completing the flight.</div>
                   </div>
                   <div className="space-y-2">
-                    <Label>Notas</Label>
+                    <Label>Notes</Label>
                     <Textarea
                       placeholder="Opcional"
                       value={scheduleForm.notes}
@@ -895,7 +895,7 @@ export default function Page() {
                   </div>
                   <Button onClick={handleSchedule} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                     <Calendar className="mr-2 h-4 w-4" />
-                    Agendar
+                    Schedule
                   </Button>
                 </div>
               </CardContent>
@@ -904,14 +904,14 @@ export default function Page() {
             <Card className="shadow-sm">
               <CardHeader className="bg-gradient-to-r from-red-50 to-orange-50 border-b border-red-200">
                 <SectionHeader
-                  title="Alertas de mantenimiento"
-                  description="Aviones cercanos o en mantenimiento"
+                  title="Maintenance alerts"
+                  description="Nearby or under-maintenance aircraft"
                   icon={<ShieldAlert className="h-4 w-4 text-red-600" />}
                 />
               </CardHeader>
               <CardContent className="space-y-3">
                 {maintenanceAlerts.length === 0 ? (
-                  <div className="text-sm text-muted-foreground">Sin alertas.</div>
+                  <div className="text-sm text-muted-foreground">No alerts.</div>
                 ) : (
                   maintenanceAlerts.map(({ ac, accumulated, maint }) => (
                     <div key={ac.id} className="rounded-lg border p-3">
@@ -927,8 +927,8 @@ export default function Page() {
                       </div>
                       <div className={cn("text-sm", maint.dueNow ? "text-red-600" : "text-amber-600")}>
                         {maint.dueNow
-                          ? "Mantenimiento requerido ahora"
-                          : `Próximo en ~${safeToFixed(maint.dueInHours)} hs`}
+                          ? "Maintenance required now"
+                          : `Next in ~${safeToFixed(maint.dueInHours)} hs`}
                       </div>
                       <div className="pt-2">
                         <Select
@@ -939,8 +939,8 @@ export default function Page() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="active">Activo</SelectItem>
-                            <SelectItem value="maintenance">En mantenimiento</SelectItem>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="maintenance">In maintenance</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -955,22 +955,22 @@ export default function Page() {
             <Card>
               <CardHeader>
                 <SectionHeader
-                  title="Próximos vuelos"
-                  description="Agenda de vuelos futuros"
+                  title="Upcoming flights"
+                  description="Future flight schedule"
                   icon={<Clock className="h-4 w-4" />}
                 />
               </CardHeader>
               <CardContent className="space-y-2">
                 {upcomingFlights.length === 0 ? (
-                  <div className="text-sm text-muted-foreground">No hay vuelos agendados.</div>
+                  <div className="text-sm text-muted-foreground">No scheduled flights.</div>
                 ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Fecha</TableHead>
-                        <TableHead>Piloto(s)</TableHead>
-                        <TableHead>Avión</TableHead>
-                        <TableHead>Tacómetro</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Pilot(s)</TableHead>
+                        <TableHead>Aircraft</TableHead>
+                        <TableHead>Tachometer</TableHead>
                         <TableHead />
                       </TableRow>
                     </TableHeader>
@@ -992,7 +992,7 @@ export default function Page() {
                               {f.tachometerStart !== undefined ? (
                                 <div className="text-sm">Inicial: {safeToFixed(f.tachometerStart)}</div>
                               ) : (
-                                <div className="text-xs text-muted-foreground">Se ingresará al completar</div>
+                                <div className="text-xs text-muted-foreground">Will be entered upon completion.</div>
                               )}
                             </TableCell>
                             <TableCell className="text-right">
@@ -1018,16 +1018,16 @@ export default function Page() {
               </CardHeader>
               <CardContent className="space-y-2">
                 {pilots.length === 0 ? (
-                  <div className="text-sm text-muted-foreground">No hay pilotos.</div>
+                  <div className="text-sm text-muted-foreground">No pilots.</div>
                 ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Piloto</TableHead>
-                        <TableHead>Compradas</TableHead>
-                        <TableHead>Voladas</TableHead>
-                        <TableHead>Restantes</TableHead>
-                        <TableHead>Acciones</TableHead>
+                        <TableHead>Pilot</TableHead>
+                        <TableHead>Purchased</TableHead>
+                        <TableHead>Flown</TableHead>
+                        <TableHead>Remaining</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -1074,24 +1074,24 @@ export default function Page() {
           <Card>
             <CardHeader>
               <SectionHeader
-                title="Aviones"
-                description="Estado y horas acumuladas"
+                title="Aircrafts"
+                description="Status and accumulated hours"
                 icon={<Plane className="h-4 w-4" />}
               />
             </CardHeader>
             <CardContent className="space-y-2">
               {aircrafts.length === 0 ? (
-                <div className="text-sm text-muted-foreground">No hay aviones.</div>
+                <div className="text-sm text-muted-foreground">No aircrafts.</div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Matrícula</TableHead>
-                      <TableHead>Modelo</TableHead>
-                      <TableHead>Acumuladas</TableHead>
-                      <TableHead>Intervalo mant.</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Acciones</TableHead>
+                      <TableHead>Liscence Plate</TableHead>
+                      <TableHead>Model</TableHead>
+                      <TableHead>Total Hours</TableHead>
+                      <TableHead>Maintenance interval</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1130,23 +1130,23 @@ export default function Page() {
         <TabsContent value="pilots" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Pilotos</CardTitle>
-              <CardDescription>Perfiles completos y estado de horas.</CardDescription>
+              <CardTitle>Pilots</CardTitle>
+              <CardDescription>Complete profiles and hour status.</CardDescription>
             </CardHeader>
             <CardContent>
               {pilots.length === 0 ? (
-                <div className="text-sm text-muted-foreground">No hay pilotos.</div>
+                <div className="text-sm text-muted-foreground">No pilots</div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Nombre</TableHead>
+                      <TableHead>Name</TableHead>
                       <TableHead>Email</TableHead>
-                      <TableHead>Licencia</TableHead>
-                      <TableHead>Horas compradas</TableHead>
-                      <TableHead>Voladas</TableHead>
-                      <TableHead>Restantes</TableHead>
-                      <TableHead>Acciones</TableHead>
+                      <TableHead>License</TableHead>
+                      <TableHead>Hours compradas</TableHead>
+                      <TableHead>Flown</TableHead>
+                      <TableHead>Remaining</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1194,22 +1194,22 @@ export default function Page() {
         <TabsContent value="aircraft" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Aviones</CardTitle>
-              <CardDescription>Perfiles de aeronaves y mantenimiento.</CardDescription>
+              <CardTitle>Aircrafts</CardTitle>
+              <CardDescription>Aircraft and maintenance profiles.</CardDescription>
             </CardHeader>
             <CardContent>
               {aircrafts.length === 0 ? (
-                <div className="text-sm text-muted-foreground">No hay aviones.</div>
+                <div className="text-sm text-muted-foreground">No aircrafts</div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Matrícula</TableHead>
-                      <TableHead>Modelo</TableHead>
-                      <TableHead>Acumuladas</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Próx. mant.</TableHead>
-                      <TableHead>Acciones</TableHead>
+                      <TableHead>Registration</TableHead>
+                      <TableHead>Model</TableHead>
+                      <TableHead>Total Hours</TableHead>
+                      <TableHead>Satus</TableHead>
+                      <TableHead>Next maintenance</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1253,22 +1253,22 @@ export default function Page() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Gauge className="h-5 w-5" />
-                Agenda de vuelos (Sistema de tacómetro)
+                Flight schedule (Tachometer system)
               </CardTitle>
-              <CardDescription>Completar vuelos con tacómetro inicial y final.</CardDescription>
+              <CardDescription>Complete flights with initial and final tachometer.</CardDescription>
             </CardHeader>
             <CardContent>
               {flights.filter((f) => f.status === "scheduled").length === 0 ? (
-                <div className="text-sm text-muted-foreground">No hay vuelos programados.</div>
+                <div className="text-sm text-muted-foreground">No scheduled flights.</div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Fecha</TableHead>
-                      <TableHead>Piloto(s)</TableHead>
-                      <TableHead>Avión</TableHead>
-                      <TableHead>Tacómetro</TableHead>
-                      <TableHead>Notas</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Pilot(s)</TableHead>
+                      <TableHead>Aircraft</TableHead>
+                      <TableHead>Tachometer</TableHead>
+                      <TableHead>Notes</TableHead>
                       <TableHead />
                     </TableRow>
                   </TableHeader>
@@ -1293,10 +1293,10 @@ export default function Page() {
                               {f.tachometerStart !== undefined ? (
                                 <div className="text-sm">
                                   <div className="font-medium">Inicial: {safeToFixed(f.tachometerStart)}</div>
-                                  <div className="text-xs text-muted-foreground">Listo para completar</div>
+                                  <div className="text-xs text-muted-foreground">Ready to complete</div>
                                 </div>
                               ) : (
-                                <div className="text-xs text-muted-foreground">Se ingresará al completar</div>
+                                <div className="text-xs text-muted-foreground">Will be entered upon completion.</div>
                               )}
                             </TableCell>
                             <TableCell className="max-w-[240px] truncate">{f.notes}</TableCell>
@@ -1320,21 +1320,21 @@ export default function Page() {
           {/* Vuelos completados */}
           <Card>
             <CardHeader>
-              <CardTitle>Vuelos completados recientes</CardTitle>
-              <CardDescription>Historial de vuelos con datos de tacómetro.</CardDescription>
+              <CardTitle>Recent completed flights.</CardTitle>
+              <CardDescription>Flight history with tachometer data.</CardDescription>
             </CardHeader>
             <CardContent>
               {flights.filter((f) => f.status === "completed").length === 0 ? (
-                <div className="text-sm text-muted-foreground">No hay vuelos completados.</div>
+                <div className="text-sm text-muted-foreground">No completed flights.</div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Fecha</TableHead>
-                      <TableHead>Piloto(s)</TableHead>
-                      <TableHead>Avión</TableHead>
-                      <TableHead>Horas voladas</TableHead>
-                      <TableHead>Tacómetro</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Pilot(s)</TableHead>
+                      <TableHead>Aircraft</TableHead>
+                      <TableHead>Hours flown</TableHead>
+                      <TableHead>Tachometer</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1370,7 +1370,7 @@ export default function Page() {
                                   </div>
                                 </div>
                               ) : (
-                                <div className="text-xs text-muted-foreground">Vuelo legacy (sin tacómetro)</div>
+                                <div className="text-xs text-muted-foreground">Legacy flight (without tachometer)</div>
                               )}
                             </TableCell>
                           </TableRow>
@@ -1388,9 +1388,9 @@ export default function Page() {
             <CardHeader className="bg-gradient-to-r from-blue-100 to-sky-100 border-b border-blue-200">
               <CardTitle className="flex items-center gap-2 text-blue-900">
                 <Rocket className="h-5 w-5" />
-                Guía rápida de ENVYSKY
+                ENVYSKY Quick guide
               </CardTitle>
-              <CardDescription className="text-blue-700">Aprende a usar el sistema en 5 minutos.</CardDescription>
+              <CardDescription className="text-blue-700">Learn to use the system in 5 minutes.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
@@ -1398,7 +1398,7 @@ export default function Page() {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
                       <UserPlus className="h-4 w-4" />
-                      1. Registrar pilotos
+                      1. Register pilots
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="text-sm space-y-2">
