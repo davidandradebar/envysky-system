@@ -613,7 +613,7 @@ export default function Page() {
             Pilots
           </TabsTrigger>
           <TabsTrigger value="aircraft" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-            Airplanes
+            Aircrafts
           </TabsTrigger>
           <TabsTrigger value="schedule" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
             Schedule
