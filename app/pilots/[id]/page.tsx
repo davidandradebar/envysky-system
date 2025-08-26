@@ -74,14 +74,14 @@ export default function PilotPage({ params }: { params: { id: string } }) {
           <Button asChild variant="outline" size="sm">
             <Link href="/">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Volver
+              Back
             </Link>
           </Button>
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>Piloto no encontrado</CardTitle>
-            <CardDescription>El perfil solicitado no existe.</CardDescription>
+            <CardTitle>Pilot not found.</CardTitle>
+            <CardDescription>The requested profile does not exist.</CardDescription>
           </CardHeader>
         </Card>
       </main>
@@ -94,7 +94,7 @@ export default function PilotPage({ params }: { params: { id: string } }) {
         <Button asChild variant="outline" size="sm">
           <Link href="/">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver
+            Back
           </Link>
         </Button>
         <PilotReportButton
@@ -117,15 +117,15 @@ export default function PilotPage({ params }: { params: { id: string } }) {
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="rounded-lg border p-3">
-            <div className="text-sm text-muted-foreground">Horas compradas</div>
+            <div className="text-sm text-muted-foreground">Purchased hours</div>
             <div className="text-2xl font-semibold">{safeToFixed(hours?.purchased)}</div>
           </div>
           <div className="rounded-lg border p-3">
-            <div className="text-sm text-muted-foreground">Horas voladas</div>
+            <div className="text-sm text-muted-foreground">Flown hours</div>
             <div className="text-2xl font-semibold">{safeToFixed(hours?.flown)}</div>
           </div>
           <div className="rounded-lg border p-3">
-            <div className="text-sm text-muted-foreground">Horas restantes</div>
+            <div className="text-sm text-muted-foreground">Remaining hours</div>
             <div className="text-2xl font-semibold">{safeToFixed(hours?.remaining)}</div>
           </div>
         </CardContent>
@@ -136,19 +136,19 @@ export default function PilotPage({ params }: { params: { id: string } }) {
           <CardHeader>
             <CardTitle>
               <Calendar className="h-4 w-4 inline mr-2" />
-              Vuelos programados
+              Scheduled flights
             </CardTitle>
           </CardHeader>
           <CardContent>
             {pilotFlights.filter((f) => f.status === "scheduled").length === 0 ? (
-              <div className="text-sm text-muted-foreground">Sin vuelos programados.</div>
+              <div className="text-sm text-muted-foreground">No Scheduled flights.</div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Avión</TableHead>
-                    <TableHead>Duración</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Plane</TableHead>
+                    <TableHead>Duration</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -177,21 +177,21 @@ export default function PilotPage({ params }: { params: { id: string } }) {
           <CardHeader>
             <CardTitle>
               <Plane className="h-4 w-4 inline mr-2" />
-              Vuelos realizados
+              Completed flights
             </CardTitle>
           </CardHeader>
           <CardContent>
             {pilotFlights.filter((f) => f.status === "completed").length === 0 ? (
-              <div className="text-sm text-muted-foreground">Sin vuelos realizados.</div>
+              <div className="text-sm text-muted-foreground">No completed flights.</div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Piloto(s)</TableHead>
-                    <TableHead>Avión</TableHead>
-                    <TableHead>Duración</TableHead>
-                    <TableHead>Notas</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Pilot(s)</TableHead>
+                    <TableHead>Plane</TableHead>
+                    <TableHead>Duration</TableHead>
+                    <TableHead>Notes</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
