@@ -297,7 +297,7 @@ const generateReportHTML = (
                 <div class="info-value">${pilot.country || "—"}</div>
             </div>
             <div class="info-item">
-                <div class="info-label">Birth of Date</div>
+                <div class="info-label">Birthdate</div>
                 <div class="info-value">${pilot.birthDate || "—"}</div>
             </div>
             <div class="info-item">
@@ -314,15 +314,15 @@ const generateReportHTML = (
     <div class="hours-summary">
         <div class="hours-card purchased">
             <div class="hours-number">${safeToFixed(hours.purchased)}</div>
-            <div class="hours-label">Horas Compradas</div>
+            <div class="hours-label">Purchased Hours</div>
         </div>
         <div class="hours-card flown">
             <div class="hours-number">${safeToFixed(hours.flown)}</div>
-            <div class="hours-label">Horas Voladas</div>
+            <div class="hours-label">Flown Hours</div>
         </div>
         <div class="hours-card remaining">
             <div class="hours-number">${safeToFixed(hours.remaining)}</div>
-            <div class="hours-label">Horas Restantes</div>
+            <div class="hours-label">Remaining Hours</div>
         </div>
     </div>
     
@@ -334,8 +334,8 @@ const generateReportHTML = (
             : `<table>
                 <thead>
                     <tr>
-                        <th>Fecha</th>
-                        <th>Hours Purchaseds</th>
+                        <th>Date</th>
+                        <th>Purchased Hours</th>
                         <th>Registration Date</th>
                     </tr>
                 </thead>
@@ -369,7 +369,7 @@ const generateReportHTML = (
                         <th>Date</th>
                         <th>Time</th>
                         <th>Aircraft</th>
-                        <th>Flight Hourss</th>
+                        <th>Flight Hours</th>
                         <th>Copilot</th>
                         <th>Tachometer</th>
                         <th>Notes</th>
