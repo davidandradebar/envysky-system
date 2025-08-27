@@ -996,7 +996,7 @@ export default function Page() {
                         <BadgeCheck className={cn("h-4 w-4", maint.dueNow ? "text-red-600" : "text-amber-600")} />
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        Acumuladas: {safeToFixed(accumulated)} hs • Intervalo:{" "}
+                        Accumulated: {safeToFixed(accumulated)} hs • Interval:{" "}
                         {safeToFixed(ac.maintenanceIntervalHours)} hs
                       </div>
                       <div className={cn("text-sm", maint.dueNow ? "text-red-600" : "text-amber-600")}>
@@ -1225,7 +1225,7 @@ export default function Page() {
                       <TableHead>Name</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>License</TableHead>
-                      <TableHead>Hours compradas</TableHead>
+                      <TableHead>Purchased Hours</TableHead>
                       <TableHead>Flown</TableHead>
                       <TableHead>Remaining</TableHead>
                       <TableHead>Actions</TableHead>
