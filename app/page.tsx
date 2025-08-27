@@ -941,7 +941,7 @@ export default function Page() {
                       <div className="text-sm text-green-800">
                         <span className="font-medium">Calculated hours:</span> {safeToFixed(calculatedHours)} hs
                       </div>
-                      <div className="text-xs text-green-600 mt-1">Will be automatically deducted from Pilot 1</div>
+                      <div className="text-xs text-green-600 mt-1">They will be automatically deducted from Pilot 1 and Pilot 2, if applicable.</div>
                     </div>
                   )}
 
@@ -1309,7 +1309,7 @@ export default function Page() {
                           <TableCell>{safeToFixed(accumulated)} hs</TableCell>
                           <TableCell className="capitalize">{a.status}</TableCell>
                           <TableCell className={cn(maint.dueNow ? "text-red-600" : "text-amber-600")}>
-                            {maint.dueNow ? "Ahora" : `${safeToFixed(maint.dueInHours)} hs`}
+                            {maint.dueNow ? "Now" : `${safeToFixed(maint.dueInHours)} hs`}
                           </TableCell>
                           <TableCell>
                             <AircraftReportButton
@@ -1548,7 +1548,7 @@ export default function Page() {
                       • Hours are calculated automatically: <strong>final - initial</strong>
                     </p>
                     <p>
-                      • They are deducted from <strong>Pilot 1</strong> and added to the aircraft
+                      • They are deducted from <strong>Pilot </strong> and added to the aircraft
                     </p>
                     <p>• View recent flights in the dashboard</p>
                     <p>• Check maintenance alerts regularly</p>
