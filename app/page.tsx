@@ -672,7 +672,7 @@ export default function Page() {
               </CardHeader>
               <CardContent className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
                 <div className="space-y-3">
-                  <div className="font-medium">Purchase hours (create pilot if not existing)</div>
+                  <div className="font-medium">Pilot Registration</div>
                   <div className="space-y-2">
                     <Label htmlFor="buy-email">Email</Label>
                     <Input
@@ -713,7 +713,7 @@ export default function Page() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="buy-birth">Date of birth</Label>
+                      <Label htmlFor="buy-birth">Birthdate</Label>
                       <Input
                         id="buy-birth"
                         type="date"
@@ -732,7 +732,7 @@ export default function Page() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="buy-hours">Hours to purchase</Label>
+                    <Label htmlFor="buy-hours">Purchased Hours</Label>
                     <Input
                       id="buy-hours"
                       type="number"
@@ -752,7 +752,7 @@ export default function Page() {
                 <Separator className="lg:hidden" />
 
                 <div className="space-y-3">
-                  <div className="font-medium">Create aircraft</div>
+                  <div className="font-medium">Aircraft Registration</div>
                   <div className="space-y-2">
                     <Label htmlFor="ac-tail">License plate / ID</Label>
                     <Input
@@ -1488,7 +1488,7 @@ export default function Page() {
                       • Go to <strong>"Dashboard"</strong> → <strong>"Quick actions"</strong>
                     </p>
                     <p>
-                      • Complete the form <strong>"Purchase of hours"</strong>
+                      • Complete the form <strong>"Purchased hours"</strong>
                     </p>
                     <p>• If the pilot does not exist, it is created automatically</p>
                     <p>• Purchased hours are added to their account</p>
