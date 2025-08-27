@@ -205,7 +205,7 @@ function CompleteFlightDialog({
                 <span className="font-medium">Calculated hours:</span> {safeToFixed(calculatedHours)} hs
               </div>
               <div className="text-xs text-green-600 mt-1">
-                They will be automatically deducted from Pilot 1: {pilot1?.fullName}
+                They will be automatically deducted from Pilot 1 and Pilot 2, if applicable: {pilot1?.fullName}
               </div>
             </div>
           )}
