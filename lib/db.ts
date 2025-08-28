@@ -139,6 +139,31 @@ export async function saveAircraft(aircraft: Omit<Aircraft, "id" | "createdAt">)
   return newAircraft
 }
 
+// ✅ NUEVA FUNCIÓN PARA ACTUALIZAR AIRCRAFTS
+export async function updateAircraft(aircraft: Aircraft): Promise<Aircraft> {
+  if (hasDatabase()) {
+    try {
+      return await apiCall<Aircraft>(`/aircrafts/${aircraft.id}`, {
+        method: "PUT",
+        body: JSON.stringify(aircraft),
+      })
+    } catch (error) {
+      console.warn("Database unavailable, using localStorage:", error)
+    }
+  }
+
+  // Fallback to localStorage
+  const aircrafts = readLocal<Aircraft[]>("envysky:aircrafts", [])
+  const index = aircrafts.findIndex((a) => a.id === aircraft.id)
+
+  if (index !== -1) {
+    aircrafts[index] = aircraft
+    writeLocal("envysky:aircrafts", aircrafts)
+  }
+
+  return aircraft
+}
+
 // PURCHASES
 export async function getPurchases(): Promise<Purchase[]> {
   if (hasDatabase()) {
