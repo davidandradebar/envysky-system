@@ -346,9 +346,8 @@ const generateReportHTML = (
                       .map(
                         (purchase) => `
                             <tr>
-                                <td>${purchase.date}</td>
-                                <td>${safeToFixed(purchase.hours)} hs</td>
                                 <td>${new Date(purchase.date).toLocaleDateString("en-US")}</td>
+                                <td>${safeToFixed(purchase.hours)} hs</td>
                                 <td>${new Date(purchase.createdAt).toLocaleDateString("en-US")}</td>
                             </tr>
                         `,
