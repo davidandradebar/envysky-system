@@ -639,6 +639,9 @@ export default function Page() {
             alt="ENVYSKY Logo"
             className="h-16 md:h-20 mx-auto"
         </div>
+        <h1 className="text-3x1 md:text-4x1 font-bold bg-gradient-yo-r from-blue-600 yp-sky-600 bg-clip-text text-transparent">
+          ENVYSKY
+        </h1>
         <p className="text-blue-700/80 mt-2 text-lg">
           Management of pilots, aircraft, hours, flights, and maintenance.
         </p>
