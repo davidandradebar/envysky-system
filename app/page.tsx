@@ -1062,7 +1062,7 @@ export default function Page() {
                           return (
                             <TableRow key={f.id}>
                               <TableCell>
-                                {f.date} {f.time}
+                                {new Date(f.date).toLocaleDateString("en-US")} {f.time}
                               </TableCell>
                               <TableCell>{renderFlightPilots(f)}</TableCell>
                               <TableCell>
@@ -1100,7 +1100,7 @@ export default function Page() {
 
             <Card>
               <CardHeader>
-                <SectionHeader title="Pilotos" description="Horas y estado" icon={<BadgeCheck className="h-4 w-4" />} />
+                <SectionHeader title="Pilots" description="Hours and Status" icon={<BadgeCheck className="h-4 w-4" />} />
               </CardHeader>
               <CardContent className="space-y-2">
                 {pilots.length === 0 ? (
