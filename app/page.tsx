@@ -1151,6 +1151,7 @@ export default function Page() {
                           <TableCell>{safeToFixed(a.maintenanceIntervalHours)} hs</TableCell>
                           <TableCell className="capitalize">{a.status}</TableCell>
                           <TableCell>
+                            <div className="flex gap-2">
                             <AircraftReportButton
                               aircraft={a}
                               flights={flights}
@@ -1158,6 +1159,16 @@ export default function Page() {
                               variant="outline"
                               size="sm"
                             />
+                            {a.status === "maintenance" && (
+                              <Button
+                                size="sm"
+                                onClick={() => handleCompleteMaintenance(a.id, accumulated)}
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                             >   
+                                  ✅ Complete
+                                </Button>
+                              )}
+                             </div> 
                           </TableCell>
                         </TableRow>
                       )
