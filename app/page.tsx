@@ -1054,7 +1054,8 @@ export default function Page() {
                     <TableBody>
                       {flights
                         .filter((f) => f.status === "completed")
-                        .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time))
+                        //.sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time))
+                        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
                         .slice(0, 10)
                         .map((f) => {
                           const a = aircrafts.find((x) => x.id === f.aircraftId)
