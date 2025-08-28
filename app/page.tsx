@@ -648,15 +648,7 @@ const handleCompleteMaintenance = async (aircraftId: string) => {
       )
     }
 
-    return (
-      <div className="space-y-1">
-        <div className="text-sm font-medium">{safeToFixed(hours)} hs</div>
-        {flight.status === "scheduled" && flight.tachometerStart !== undefined && (
-          <div className="text-xs text-muted-foreground">Initial: {safeToFixed(flight.tachometerStart)}</div>
-        )}
-      </div>
-    )
-  }
+    
 
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-8 space-y-6">
