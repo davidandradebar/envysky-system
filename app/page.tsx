@@ -1097,63 +1097,64 @@ export default function Page() {
                     </Table>
                   )}
                 </CardContent>
-                <Card>
-                  <CardHeader>
-                    <SectionHeader title="Pilots" description="Hours and Status" icon={<BadgeCheck className="h-4 w-4" />} />
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {pilots.length === 0 ? (
-                      <div className="text-sm text-muted-foreground">No pilots.</div>
-                    ) : (
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Pilot</TableHead>
-                            <TableHead>Purchased</TableHead>
-                            <TableHead>Flown</TableHead>
-                            <TableHead>Remaining</TableHead>
-                            <TableHead>Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {pilots.map((p) => {
-                            const hours = calcPilotHours(p.id, purchases, flights)
-                            const purchased = typeof hours.purchased === "number" ? hours.purchased : 0
-                            const flown = typeof hours.flown === "number" ? hours.flown : 0
-                            const remaining = typeof hours.remaining === "number" ? hours.remaining : 0
-                
-                            return (
-                              <TableRow key={p.id}>
-                                <TableCell>
-                                  <Link className="underline" href={`/pilots/${p.id}`}>
-                                    {p.fullName}
-                                  </Link>
-                                  <div className="text-xs text-muted-foreground">{p.email}</div>
-                                </TableCell>
-                                <TableCell>{safeToFixed(purchased)}</TableCell>
-                                <TableCell>{safeToFixed(flown)}</TableCell>
-                                <TableCell className={cn(remaining <= 0 ? "text-red-600" : "")}>
-                                  {safeToFixed(remaining)}
-                                </TableCell>
-                                <TableCell>
-                                  <PilotReportButton
-                                    pilot={p}
-                                    flights={flights}
-                                    purchases={purchases}
-                                    aircrafts={aircrafts}
-                                    allPilots={pilots} // ✅ Agregar esta línea
-                                    variant="outline"
-                                    size="sm"
-                                  />
-                                </TableCell>
-                              </TableRow>
-                            )
-                          })}
-                        </TableBody>
-                      </Table>
-                    )}
-                  </CardContent>
-                </Card>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <SectionHeader title="Pilots" description="Hours and Status" icon={<BadgeCheck className="h-4 w-4" />} />
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {pilots.length === 0 ? (
+                    <div className="text-sm text-muted-foreground">No pilots.</div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Pilot</TableHead>
+                          <TableHead>Purchased</TableHead>
+                          <TableHead>Flown</TableHead>
+                          <TableHead>Remaining</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {pilots.map((p) => {
+                          const hours = calcPilotHours(p.id, purchases, flights)
+                          const purchased = typeof hours.purchased === "number" ? hours.purchased : 0
+                          const flown = typeof hours.flown === "number" ? hours.flown : 0
+                          const remaining = typeof hours.remaining === "number" ? hours.remaining : 0
+              
+                          return (
+                            <TableRow key={p.id}>
+                              <TableCell>
+                                <Link className="underline" href={`/pilots/${p.id}`}>
+                                  {p.fullName}
+                                </Link>
+                                <div className="text-xs text-muted-foreground">{p.email}</div>
+                              </TableCell>
+                              <TableCell>{safeToFixed(purchased)}</TableCell>
+                              <TableCell>{safeToFixed(flown)}</TableCell>
+                              <TableCell className={cn(remaining <= 0 ? "text-red-600" : "")}>
+                                {safeToFixed(remaining)}
+                              </TableCell>
+                              <TableCell>
+                                <PilotReportButton
+                                  pilot={p}
+                                  flights={flights}
+                                  purchases={purchases}
+                                  aircrafts={aircrafts}
+                                  allPilots={pilots} // ✅ Agregar esta línea
+                                  variant="outline"
+                                  size="sm"
+                                />
+                              </TableCell>
+                            </TableRow>
+                          )
+                        })}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
                 
             <Card>
               <CardHeader>
