@@ -305,7 +305,7 @@ const generateAircraftReportHTML = (aircraft: Aircraft, flights: Flight[], pilot
             </div>
             <div class="info-item">
                 <div class="info-label">Registration Date</div>
-                <div class="info-value">${new Date(aircraft.createdAt).toLocaleDateString("es-ES")}</div>
+                <div class="info-value">${new Date(aircraft.createdAt).toLocaleDateString("en-US")}</div>
             </div>
         </div>
     </div>
@@ -352,7 +352,7 @@ const generateAircraftReportHTML = (aircraft: Aircraft, flights: Flight[], pilot
 
                         return `
                             <tr>
-                                <td>${flight.date}</td>
+                                <td>${new Date(flight.date).toLocaleDateString("en-US")}</td>
                                 <td>${flight.time}</td>
                                 <td>${
                                   flight.tachometerStart !== undefined ? safeToFixed(flight.tachometerStart) : "Legacy"
@@ -405,7 +405,7 @@ const generateAircraftReportHTML = (aircraft: Aircraft, flights: Flight[], pilot
 
                         return `
                             <tr>
-                                <td>${flight.date}</td>
+                                <td>${new Date(flight.date).toLocaleDateString("en-US")}</td>
                                 <td>${flight.time}</td>
                                 <td>${
                                   flight.tachometerStart !== undefined
@@ -433,7 +433,7 @@ const generateAircraftReportHTML = (aircraft: Aircraft, flights: Flight[], pilot
     </div>
     
     <div class="footer">
-        <p>Report generated the ${new Date().toLocaleDateString("es-ES")} at ${new Date().toLocaleTimeString("es-ES")}</p>
+        <p>Report generated the ${new Date().toLocaleDateString("en-US")} at ${new Date().toLocaleTimeString("en-US")}</p>
         <p>ENVYSKY - Flight Management System</p>
     </div>
 </body>
