@@ -70,8 +70,12 @@ export function calcAircraftAccumulatedHours(aircraft: Aircraft, flights: Flight
 }
 
 export function calcAircraftMaintenance(aircraft: Aircraft, accumulatedHours: number) {
-  // Simple: next maintenance = initial hours + interval
-  const nextMaintenanceAt = aircraft.initialHours + aircraft.maintenanceIntervalHours
+  // Calculate how many maintenance intervals have passed since the initial hours
+  const hoursSinceInitial = accumulatedHours - aircraft.initialHours
+  const intervalsCompleted = Math.floor(hoursSinceInitial / aircraft.maintenanceIntervalHours)
+
+  // Next maintenance should be at: initial hours + (completed intervals + 1) * interval
+  const nextMaintenanceAt = aircraft.initialHours + (intervalsCompleted + 1) * aircraft.maintenanceIntervalHours
   const dueInHours = nextMaintenanceAt - accumulatedHours
   const dueNow = dueInHours <= 0
 
