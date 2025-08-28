@@ -28,6 +28,7 @@ import {
   getPurchases,
   savePurchase,
   saveAircraft,
+  updateAircraft,
   saveFlight,
   updateFlightStatus,
 } from "@/lib/db"
