@@ -494,6 +494,27 @@ export default function Page() {
   }, [scheduleForm.tachometerStart, scheduleForm.tachometerEnd])
 
   const handleSetAircraftStatus = (aircraftId: string, status: "active" | "maintenance") => {
+    try {
+      if (status === "active") {
+        // Resetear mantenimiento: actualizar initialHours
+        const aircraft = aircrafts.find(a => a.id === aircraftId)
+        if (aircraft) {
+          const { accumulated } = calcAircraftAccumulatedHours(aircraft, flights)
+
+          // Crear nuevo aircraft con horas iniciales actualizadas
+          await saveAircraft({
+            ...aircraft,
+            initialHours: accumulated,
+            status: "active"
+          })
+
+          await reload()
+          alert("Maintenance completed! Counter reset.")
+        }
+      }
+    } catch (error) {
+      console.error("Error",error)
+    }
     // This function is not updated as per the provided updates
   }
 
