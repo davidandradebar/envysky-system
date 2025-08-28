@@ -640,10 +640,7 @@ export default function Page() {
           className="h-16 md:h-20 mx-auto"
         />
       </div>
-      <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent">
-        ENVYSKY
-      </h1>
-      <p className="text-blue-700/80 mt-2 text-lg">
+      <p className="text-[#2D5F73] mt-2 text-lg">
         Management of pilots, aircraft, hours, flights, and maintenance.
       </p>
     </div>
