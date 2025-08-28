@@ -17,6 +17,7 @@ export type Aircraft = {
   maintenanceIntervalHours: number
   status: "active" | "maintenance"
   createdAt: string
+  lastMaintenanceAt?: number
 }
 
 export type Purchase = {
