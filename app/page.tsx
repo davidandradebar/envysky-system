@@ -631,21 +631,22 @@ export default function Page() {
   }
 
   return (
-    <main className="mx-auto max-w-7xl p-4 md:p-8 space-y-6">
-      <div className="text-center py-8 bg-gradient-to-r from-blue-50 via-sky-50 to-blue-50 rounded-lg border border-blue-100 mb-6">
-        <div className="flex items-center justify-center gap-3 mb-2">
-          <img
-            src="/envysky-logo.png"
-            alt="ENVYSKY Logo"
-            className="h-16 md:h-20 mx-auto"
-        </div>
-        <h1 className="text-3x1 md:text-4x1 font-bold bg-gradient-yo-r from-blue-600 yp-sky-600 bg-clip-text text-transparent">
-          ENVYSKY
-        </h1>
-        <p className="text-blue-700/80 mt-2 text-lg">
-          Management of pilots, aircraft, hours, flights, and maintenance.
-        </p>
+  <main className="mx-auto max-w-7xl p-4 md:p-8 space-y-6">
+    <div className="text-center py-8 bg-gradient-to-r from-blue-50 via-sky-50 to-blue-50 rounded-lg border border-blue-100 mb-6">
+      <div className="flex items-center justify-center gap-3 mb-2">
+        <img
+          src="/envysky-logo.png"
+          alt="ENVYSKY Logo"
+          className="h-16 md:h-20 mx-auto"
+        />
       </div>
+      <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent">
+        ENVYSKY
+      </h1>
+      <p className="text-blue-700/80 mt-2 text-lg">
+        Management of pilots, aircraft, hours, flights, and maintenance.
+      </p>
+    </div>
 
       <Tabs defaultValue="dashboard" className="w-full">
         <TabsList className="flex w-full justify-center overflow-x-auto bg-blue-50 border border-blue-200">
