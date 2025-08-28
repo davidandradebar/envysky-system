@@ -348,7 +348,8 @@ const generateReportHTML = (
                             <tr>
                                 <td>${purchase.date}</td>
                                 <td>${safeToFixed(purchase.hours)} hs</td>
-                                <td>${new Date(purchase.createdAt).toLocaleDateString("es-ES")}</td>
+                                <td>${new Date(purchase.date).toLocaleDateString("en-US")}</td>
+                                <td>${new Date(purchase.createdAt).toLocaleDateString("en-US")}</td>
                             </tr>
                         `,
                       )
@@ -385,7 +386,7 @@ const generateReportHTML = (
 
                         return `
                                 <tr>
-                                    <td>${flight.date}</td>
+                                    <td>${new Date(flight.date).toLocaleDateString("en-US")}</td>
                                     <td>${flight.time}</td>
                                     <td>${aircraft?.tailNumber || "—"} - ${aircraft?.model || ""}</td>
                                     <td>${safeToFixed(hours)} hs</td>
@@ -430,7 +431,7 @@ const generateReportHTML = (
 
                         return `
                                 <tr>
-                                    <td>${flight.date}</td>
+                                    <td>${new Date(flight.date).toLocaleDateString("en-US")}</td>
                                     <td>${flight.time}</td>
                                     <td>${aircraft?.tailNumber || "—"} - ${aircraft?.model || ""}</td>
                                     <td>${companionPilot}</td>
@@ -446,7 +447,7 @@ const generateReportHTML = (
     </div>
     
     <div class="footer">
-        <p>Reporte generado el ${new Date().toLocaleDateString("es-ES")} a las ${new Date().toLocaleTimeString("es-ES")}</p>
+        <p>Report generated on ${new Date().toLocaleDateString("en-US")} at ${new Date().toLocaleTimeString("en-US")}</p>
         <p>ENVYSKY - Flight Management System</p>
     </div>
 </body>
