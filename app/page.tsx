@@ -522,12 +522,6 @@ export default function Page() {
     alert("Error updating aircraft status.")
   }
 }
-    } catch (error) {
-      console.error("Error",error)
-    }
-    // This function is not updated as per the provided updates
-  }
-
   // Helper function to get pilot name by ID
   const getPilotName = (pilotId: string) => {
     const pilot = pilots.find((p) => p.id === pilotId)
