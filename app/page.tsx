@@ -632,413 +632,799 @@ export default function Page() {
   }
 
   return (
-  <main className="mx-auto max-w-7xl p-4 md:p-8 space-y-6">
-    <div className="text-center py-8 bg-gradient-to-r from-blue-50 via-sky-50 to-blue-50 rounded-lg border border-blue-100 mb-6">
-      <div className="flex items-center justify-center gap-3 mb-2">
-        <img
-          src="/envysky-logo.png"
-          alt="ENVYSKY Logo"
-          className="h-16 md:h-20 mx-auto"
-        />
+    <main className="mx-auto max-w-7xl p-4 md:p-8 space-y-6">
+      <div className="text-center py-8 bg-gradient-to-r from-blue-50 via-sky-50 to-blue-50 rounded-lg border border-blue-100 mb-6">
+        <div className="flex items-center justify-center gap-3 mb-2">
+          <img
+            src="/envysky-logo.png"
+            alt="ENVYSKY Logo"
+            className="h-16 md:h-20 mx-auto"
+          />
+        </div>
+        <p className="text-[#2D5F73] mt-2 text-lg">
+          Management of pilots, aircraft, hours, flights, and maintenance.
+        </p>
       </div>
-      <p className="text-[#2D5F73] mt-2 text-lg">
-        Management of pilots, aircraft, hours, flights, and maintenance.
-      </p>
-    </div>
-
-      <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="flex w-full justify-center overflow-x-auto bg-blue-50 border border-blue-200">
-          <TabsTrigger value="dashboard" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-            Dashboard
-          </TabsTrigger>
-          <TabsTrigger value="pilots" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-            Pilots
-          </TabsTrigger>
-          <TabsTrigger value="aircraft" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-            Aircrafts
-          </TabsTrigger>
-          <TabsTrigger value="schedule" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-            Schedule
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-            Quick guide
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="dashboard" className="space-y-6">
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <Card className="xl:col-span-2 shadow-sm">
-              <CardHeader className="bg-gradient-to-r from-blue-100 to-sky-100 border-b border-blue-200">
-                <SectionHeader
-                  title="Quick actions"
-                  description="Register purchase, create aircraft, register completed flight"
-                  icon={<PlusCircle className="h-4 w-4 text-blue-700" />}
-                />
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
-                <div className="space-y-3">
-                  <div className="font-medium">Pilot Registration</div>
-                  <div className="space-y-2">
-                    <Label htmlFor="buy-email">Email</Label>
-                    <Input
-                      id="buy-email"
-                      placeholder="pilot@correo.com"
-                      value={purchaseForm.email}
-                      onChange={(e) => setPurchaseForm((s) => ({ ...s, email: e.target.value }))}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
+  
+        <Tabs defaultValue="dashboard" className="w-full">
+          <TabsList className="flex w-full justify-center overflow-x-auto bg-blue-50 border border-blue-200">
+            <TabsTrigger value="dashboard" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="pilots" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              Pilots
+            </TabsTrigger>
+            <TabsTrigger value="aircraft" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              Aircrafts
+            </TabsTrigger>
+            <TabsTrigger value="schedule" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              Schedule
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              Quick guide
+            </TabsTrigger>
+          </TabsList>
+  
+          <TabsContent value="dashboard" className="space-y-6">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              <Card className="xl:col-span-2 shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-blue-100 to-sky-100 border-b border-blue-200">
+                  <SectionHeader
+                    title="Quick actions"
+                    description="Register purchase, create aircraft, register completed flight"
+                    icon={<PlusCircle className="h-4 w-4 text-blue-700" />}
+                  />
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+                  <div className="space-y-3">
+                    <div className="font-medium">Pilot Registration</div>
                     <div className="space-y-2">
-                      <Label htmlFor="buy-name">Name</Label>
+                      <Label htmlFor="buy-email">Email</Label>
                       <Input
-                        id="buy-name"
-                        placeholder="Full Name"
-                        value={purchaseForm.fullName}
-                        onChange={(e) => setPurchaseForm((s) => ({ ...s, fullName: e.target.value }))}
+                        id="buy-email"
+                        placeholder="pilot@correo.com"
+                        value={purchaseForm.email}
+                        onChange={(e) => setPurchaseForm((s) => ({ ...s, email: e.target.value }))}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="buy-name">Name</Label>
+                        <Input
+                          id="buy-name"
+                          placeholder="Full Name"
+                          value={purchaseForm.fullName}
+                          onChange={(e) => setPurchaseForm((s) => ({ ...s, fullName: e.target.value }))}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="buy-phone">Phone</Label>
+                        <Input
+                          id="buy-phone"
+                          placeholder="+1 ..."
+                          value={purchaseForm.phone}
+                          onChange={(e) => setPurchaseForm((s) => ({ ...s, phone: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="buy-country">Country</Label>
+                        <Input
+                          id="buy-country"
+                          placeholder="USA"
+                          value={purchaseForm.country}
+                          onChange={(e) => setPurchaseForm((s) => ({ ...s, country: e.target.value }))}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="buy-birth">Birthdate</Label>
+                        <Input
+                          id="buy-birth"
+                          type="date"
+                          value={purchaseForm.birthDate}
+                          onChange={(e) => setPurchaseForm((s) => ({ ...s, birthDate: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="buy-license">License type</Label>
+                      <Input
+                        id="buy-license"
+                        placeholder="PPL / CPL ..."
+                        value={purchaseForm.licenseType}
+                        onChange={(e) => setPurchaseForm((s) => ({ ...s, licenseType: e.target.value }))}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="buy-phone">Phone</Label>
+                      <Label htmlFor="buy-hours">Purchased Hours</Label>
                       <Input
-                        id="buy-phone"
-                        placeholder="+1 ..."
-                        value={purchaseForm.phone}
-                        onChange={(e) => setPurchaseForm((s) => ({ ...s, phone: e.target.value }))}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="buy-country">Country</Label>
-                      <Input
-                        id="buy-country"
-                        placeholder="USA"
-                        value={purchaseForm.country}
-                        onChange={(e) => setPurchaseForm((s) => ({ ...s, country: e.target.value }))}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="buy-birth">Birthdate</Label>
-                      <Input
-                        id="buy-birth"
-                        type="date"
-                        value={purchaseForm.birthDate}
-                        onChange={(e) => setPurchaseForm((s) => ({ ...s, birthDate: e.target.value }))}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="buy-license">License type</Label>
-                    <Input
-                      id="buy-license"
-                      placeholder="PPL / CPL ..."
-                      value={purchaseForm.licenseType}
-                      onChange={(e) => setPurchaseForm((s) => ({ ...s, licenseType: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="buy-hours">Purchased Hours</Label>
-                    <Input
-                      id="buy-hours"
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      placeholder="10"
-                      value={purchaseForm.hours}
-                      onChange={(e) => setPurchaseForm((s) => ({ ...s, hours: e.target.value }))}
-                    />
-                  </div>
-                  <Button onClick={handlePurchase} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Register purchase
-                  </Button>
-                </div>
-
-                <Separator className="lg:hidden" />
-
-                <div className="space-y-3">
-                  <div className="font-medium">Aircraft Registration</div>
-                  <div className="space-y-2">
-                    <Label htmlFor="ac-tail">License plate / ID</Label>
-                    <Input
-                      id="ac-tail"
-                      placeholder="LV-ABC"
-                      value={aircraftForm.tailNumber}
-                      onChange={(e) => setAircraftForm((s) => ({ ...s, tailNumber: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="ac-model">Aircraft model</Label>
-                    <Input
-                      id="ac-model"
-                      placeholder="Cessna 172"
-                      value={aircraftForm.model}
-                      onChange={(e) => setAircraftForm((s) => ({ ...s, model: e.target.value }))}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="ac-initial">Starting hours</Label>
-                      <Input
-                        id="ac-initial"
+                        id="buy-hours"
                         type="number"
                         min="0"
                         step="0.1"
-                        placeholder="1500"
-                        value={aircraftForm.initialHours}
-                        onChange={(e) => setAircraftForm((s) => ({ ...s, initialHours: e.target.value }))}
+                        placeholder="10"
+                        value={purchaseForm.hours}
+                        onChange={(e) => setPurchaseForm((s) => ({ ...s, hours: e.target.value }))}
+                      />
+                    </div>
+                    <Button onClick={handlePurchase} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Register purchase
+                    </Button>
+                  </div>
+  
+                  <Separator className="lg:hidden" />
+  
+                  <div className="space-y-3">
+                    <div className="font-medium">Aircraft Registration</div>
+                    <div className="space-y-2">
+                      <Label htmlFor="ac-tail">License plate / ID</Label>
+                      <Input
+                        id="ac-tail"
+                        placeholder="LV-ABC"
+                        value={aircraftForm.tailNumber}
+                        onChange={(e) => setAircraftForm((s) => ({ ...s, tailNumber: e.target.value }))}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="ac-maint">Maintenance every X hours</Label>
+                      <Label htmlFor="ac-model">Aircraft model</Label>
                       <Input
-                        id="ac-maint"
-                        type="number"
-                        min="1"
-                        step="1"
-                        placeholder="100"
-                        value={aircraftForm.maintenanceInterval}
-                        onChange={(e) => setAircraftForm((s) => ({ ...s, maintenanceInterval: e.target.value }))}
+                        id="ac-model"
+                        placeholder="Cessna 172"
+                        value={aircraftForm.model}
+                        onChange={(e) => setAircraftForm((s) => ({ ...s, model: e.target.value }))}
                       />
                     </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="ac-initial">Starting hours</Label>
+                        <Input
+                          id="ac-initial"
+                          type="number"
+                          min="0"
+                          step="0.1"
+                          placeholder="1500"
+                          value={aircraftForm.initialHours}
+                          onChange={(e) => setAircraftForm((s) => ({ ...s, initialHours: e.target.value }))}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="ac-maint">Maintenance every X hours</Label>
+                        <Input
+                          id="ac-maint"
+                          type="number"
+                          min="1"
+                          step="1"
+                          placeholder="100"
+                          value={aircraftForm.maintenanceInterval}
+                          onChange={(e) => setAircraftForm((s) => ({ ...s, maintenanceInterval: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Status</Label>
+                      <Select
+                        value={aircraftForm.status}
+                        onValueChange={(v: "active" | "maintenance") => setAircraftForm((s) => ({ ...s, status: v }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Estado" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="maintenance">In maintenance"</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button onClick={handleAddAircraft} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                      <Plane className="mr-2 h-4 w-4" />
+                      Create aircraft
+                    </Button>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Status</Label>
-                    <Select
-                      value={aircraftForm.status}
-                      onValueChange={(v: "active" | "maintenance") => setAircraftForm((s) => ({ ...s, status: v }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Estado" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="maintenance">In maintenance"</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button onClick={handleAddAircraft} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                    <Plane className="mr-2 h-4 w-4" />
-                    Create aircraft
-                  </Button>
-                </div>
-
-                <Separator className="lg:hidden" />
-
-                <div className="space-y-3">
-                  <div className="font-medium flex items-center gap-2">
-                    <Gauge className="h-4 w-4" />
-                    Register completed flight
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Pilot 1 (Principal)</Label>
-                    <Select
-                      value={scheduleForm.pilotId}
-                      onValueChange={(v) => setScheduleForm((s) => ({ ...s, pilotId: v }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select main pilot" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {pilots.length === 0 ? <SelectItem value="no-pilots">{"No Pilots"}</SelectItem> : null}
-                        {pilots.map((p) => (
-                          <SelectItem key={p.id} value={p.id}>
-                            {p.fullName} ({p.email})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Pilot 2 (Optional)</Label>
-                    <Select
-                      value={scheduleForm.pilotId2}
-                      onValueChange={(v) => setScheduleForm((s) => ({ ...s, pilotId2: v === "none" ? "" : v }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select pilot 2 (opcional)" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Without Piloy 2</SelectItem>
-                        {pilots
-                          .filter((p) => p.id !== scheduleForm.pilotId) // ✅ FILTRAR para evitar el mismo piloto
-                          .map((p) => (
+  
+                  <Separator className="lg:hidden" />
+  
+                  <div className="space-y-3">
+                    <div className="font-medium flex items-center gap-2">
+                      <Gauge className="h-4 w-4" />
+                      Register completed flight
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Pilot 1 (Principal)</Label>
+                      <Select
+                        value={scheduleForm.pilotId}
+                        onValueChange={(v) => setScheduleForm((s) => ({ ...s, pilotId: v }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select main pilot" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {pilots.length === 0 ? <SelectItem value="no-pilots">{"No Pilots"}</SelectItem> : null}
+                          {pilots.map((p) => (
                             <SelectItem key={p.id} value={p.id}>
                               {p.fullName} ({p.email})
                             </SelectItem>
                           ))}
-                        {/* Mostrar mensaje si no hay otros pilotos disponibles */}
-                        {pilots.filter((p) => p.id !== scheduleForm.pilotId).length === 0 && scheduleForm.pilotId && (
-                          <SelectItem value="no-other-pilots" disabled>
-                            No other pilots available.
-                          </SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Aircraft</Label>
-                    <Select
-                      value={scheduleForm.aircraftId}
-                      onValueChange={(v) => setScheduleForm((s) => ({ ...s, aircraftId: v }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select aircraft" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {aircrafts.length === 0 ? <SelectItem value="no-aircrafts">{"No aircrafts"}</SelectItem> : null}
-                        {aircrafts.map((a) => (
-                          <SelectItem key={a.id} value={a.id}>
-                            {a.tailNumber} - {a.model}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-2">
-                      <Label>Date</Label>
-                      <Input
-                        type="date"
-                        value={scheduleForm.date}
-                        onChange={(e) => setScheduleForm((s) => ({ ...s, date: e.target.value }))}
-                      />
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Hour</Label>
-                      <Input
-                        type="time"
-                        value={scheduleForm.time}
-                        onChange={(e) => setScheduleForm((s) => ({ ...s, time: e.target.value }))}
-                      />
+                      <Label>Pilot 2 (Optional)</Label>
+                      <Select
+                        value={scheduleForm.pilotId2}
+                        onValueChange={(v) => setScheduleForm((s) => ({ ...s, pilotId2: v === "none" ? "" : v }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select pilot 2 (opcional)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Without Piloy 2</SelectItem>
+                          {pilots
+                            .filter((p) => p.id !== scheduleForm.pilotId) // ✅ FILTRAR para evitar el mismo piloto
+                            .map((p) => (
+                              <SelectItem key={p.id} value={p.id}>
+                                {p.fullName} ({p.email})
+                              </SelectItem>
+                            ))}
+                          {/* Mostrar mensaje si no hay otros pilotos disponibles */}
+                          {pilots.filter((p) => p.id !== scheduleForm.pilotId).length === 0 && scheduleForm.pilotId && (
+                            <SelectItem value="no-other-pilots" disabled>
+                              No other pilots available.
+                            </SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </div>
-
-                  {/* Modified tachometer section - now both are required */}
-                  <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">Initial tachometer *</Label>
-                      <Input
-                        type="number"
-                        step="0.1"
-                        placeholder="1500.0"
-                        value={scheduleForm.tachometerStart}
-                        onChange={(e) => setScheduleForm((s) => ({ ...s, tachometerStart: e.target.value }))}
-                        required
-                      />
+                      <Label>Aircraft</Label>
+                      <Select
+                        value={scheduleForm.aircraftId}
+                        onValueChange={(v) => setScheduleForm((s) => ({ ...s, aircraftId: v }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select aircraft" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {aircrafts.length === 0 ? <SelectItem value="no-aircrafts">{"No aircrafts"}</SelectItem> : null}
+                          {aircrafts.map((a) => (
+                            <SelectItem key={a.id} value={a.id}>
+                              {a.tailNumber} - {a.model}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Final tachometer *</Label>
-                      <Input
-                        type="number"
-                        step="0.1"
-                        placeholder="1502.5"
-                        value={scheduleForm.tachometerEnd}
-                        onChange={(e) => setScheduleForm((s) => ({ ...s, tachometerEnd: e.target.value }))}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* Calculated Hours Display */}
-                  {calculatedHours > 0 && (
-                    <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
-                      <div className="text-sm text-green-800">
-                        <span className="font-medium">Calculated hours:</span> {safeToFixed(calculatedHours)} hs
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
+                        <Label>Date</Label>
+                        <Input
+                          type="date"
+                          value={scheduleForm.date}
+                          onChange={(e) => setScheduleForm((s) => ({ ...s, date: e.target.value }))}
+                        />
                       </div>
-                      <div className="text-xs text-green-600 mt-1">They will be automatically deducted from Pilot 1 and Pilot 2, if applicable.</div>
-                    </div>
-                  )}
-
-                  {/* Error Display */}
-                  {scheduleForm.tachometerStart && scheduleForm.tachometerEnd && calculatedHours <= 0 && (
-                    <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
-                      <div className="text-sm text-red-800">
-                        ⚠️ The final tachometer must be greater than the initial one
+                      <div className="space-y-2">
+                        <Label>Hour</Label>
+                        <Input
+                          type="time"
+                          value={scheduleForm.time}
+                          onChange={(e) => setScheduleForm((s) => ({ ...s, time: e.target.value }))}
+                        />
                       </div>
                     </div>
-                  )}
-
-                  <div className="space-y-2">
-                    <Label>Notes</Label>
-                    <Textarea
-                      placeholder="Optional"
-                      value={scheduleForm.notes}
-                      onChange={(e) => setScheduleForm((s) => ({ ...s, notes: e.target.value }))}
-                      className="min-h-[40px]"
-                    />
-                  </div>
-                  <Button
-                    onClick={handleSchedule}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                    disabled={!calculatedHours || calculatedHours <= 0}
-                  >
-                    <CheckCircle2 className="mr-2 h-4 w-4" />
-                    Register flight
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-sm">
-              <CardHeader className="bg-gradient-to-r from-red-50 to-orange-50 border-b border-red-200">
-                <SectionHeader
-                  title="Maintenance alerts"
-                  description="Nearby or under-maintenance aircraft"
-                  icon={<ShieldAlert className="h-4 w-4 text-red-600" />}
-                />
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {maintenanceAlerts.length === 0 ? (
-                  <div className="text-sm text-muted-foreground">No alerts.</div>
-                ) : (
-                  maintenanceAlerts.map(({ ac, accumulated, maint }) => (
-                    <div key={ac.id} className="rounded-lg border p-3">
-                      <div className="flex items-center justify-between">
-                        <div className="font-medium">
-                          {ac.tailNumber} - {ac.model}
+  
+                    {/* Modified tachometer section - now both are required */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Initial tachometer *</Label>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          placeholder="1500.0"
+                          value={scheduleForm.tachometerStart}
+                          onChange={(e) => setScheduleForm((s) => ({ ...s, tachometerStart: e.target.value }))}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Final tachometer *</Label>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          placeholder="1502.5"
+                          value={scheduleForm.tachometerEnd}
+                          onChange={(e) => setScheduleForm((s) => ({ ...s, tachometerEnd: e.target.value }))}
+                          required
+                        />
+                      </div>
+                    </div>
+  
+                    {/* Calculated Hours Display */}
+                    {calculatedHours > 0 && (
+                      <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
+                        <div className="text-sm text-green-800">
+                          <span className="font-medium">Calculated hours:</span> {safeToFixed(calculatedHours)} hs
                         </div>
-                        <BadgeCheck className={cn("h-4 w-4", maint.dueNow ? "text-red-600" : "text-amber-600")} />
+                        <div className="text-xs text-green-600 mt-1">They will be automatically deducted from Pilot 1 and Pilot 2, if applicable.</div>
                       </div>
-                      <div className="text-sm text-muted-foreground">
-                        Accumulated: {safeToFixed(accumulated)} hs • Interval:{" "}
-                        {safeToFixed(ac.maintenanceIntervalHours)} hs
+                    )}
+  
+                    {/* Error Display */}
+                    {scheduleForm.tachometerStart && scheduleForm.tachometerEnd && calculatedHours <= 0 && (
+                      <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
+                        <div className="text-sm text-red-800">
+                          ⚠️ The final tachometer must be greater than the initial one
+                        </div>
                       </div>
-                      <div className={cn("text-sm", maint.dueNow ? "text-red-600" : "text-amber-600")}>
-                        {maint.dueNow ? "Maintenance required now" : `Next in ~${safeToFixed(maint.dueInHours)} hs`}
-                      </div>
-                      <div className="pt-2">
-                        <Select
-                          value={ac.status}
-                          onValueChange={(v: "active" | "maintenance") => handleSetAircraftStatus(ac.id, v)}
-                        >
-                          <SelectTrigger className="h-8 w-full">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="maintenance">In maintenance</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                    )}
+  
+                    <div className="space-y-2">
+                      <Label>Notes</Label>
+                      <Textarea
+                        placeholder="Optional"
+                        value={scheduleForm.notes}
+                        onChange={(e) => setScheduleForm((s) => ({ ...s, notes: e.target.value }))}
+                        className="min-h-[40px]"
+                      />
                     </div>
-                  ))
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Replace "Upcoming flights" with "Recent completed flights" */}
+                    <Button
+                      onClick={handleSchedule}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                      disabled={!calculatedHours || calculatedHours <= 0}
+                    >
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      Register flight
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+  
+              <Card className="shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-red-50 to-orange-50 border-b border-red-200">
+                  <SectionHeader
+                    title="Maintenance alerts"
+                    description="Nearby or under-maintenance aircraft"
+                    icon={<ShieldAlert className="h-4 w-4 text-red-600" />}
+                  />
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {maintenanceAlerts.length === 0 ? (
+                    <div className="text-sm text-muted-foreground">No alerts.</div>
+                  ) : (
+                    maintenanceAlerts.map(({ ac, accumulated, maint }) => (
+                      <div key={ac.id} className="rounded-lg border p-3">
+                        <div className="flex items-center justify-between">
+                          <div className="font-medium">
+                            {ac.tailNumber} - {ac.model}
+                          </div>
+                          <BadgeCheck className={cn("h-4 w-4", maint.dueNow ? "text-red-600" : "text-amber-600")} />
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Accumulated: {safeToFixed(accumulated)} hs • Interval:{" "}
+                          {safeToFixed(ac.maintenanceIntervalHours)} hs
+                        </div>
+                        <div className={cn("text-sm", maint.dueNow ? "text-red-600" : "text-amber-600")}>
+                          {maint.dueNow ? "Maintenance required now" : `Next in ~${safeToFixed(maint.dueInHours)} hs`}
+                        </div>
+                        <div className="pt-2">
+                          <Select
+                            value={ac.status}
+                            onValueChange={(v: "active" | "maintenance") => handleSetAircraftStatus(ac.id, v)}
+                          >
+                            <SelectTrigger className="h-8 w-full">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="active">Active</SelectItem>
+                              <SelectItem value="maintenance">In maintenance</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+  
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Replace "Upcoming flights" with "Recent completed flights" */}
+              <Card>
+                <CardHeader>
+                  <SectionHeader
+                    title="Recent completed flights"
+                    description="Latest registered flights"
+                    icon={<CheckCircle2 className="h-4 w-4" />}
+                  />
+                </CardHeader>
+                <CardContent className="space-y-2 max-h-96 overflow-y-auto">
+                  {flights.filter((f) => f.status === "completed").length === 0 ? (
+                    <div className="text-sm text-muted-foreground">No completed flights.</div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Pilot(s)</TableHead>
+                          <TableHead>Aircraft</TableHead>
+                          <TableHead>Hours flown</TableHead>
+                          <TableHead>Tachometer</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {flights
+                          .filter((f) => f.status === "completed")
+                          //.sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time))
+                          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                          .map((f) => {
+                            const a = aircrafts.find((x) => x.id === f.aircraftId)
+                            const hours = calculateFlightHours(f)
+                            return (
+                              <TableRow key={f.id}>
+                                <TableCell>
+                                  {new Date(f.date).toLocaleDateString("en-US")} {f.time}
+                                </TableCell>
+                                <TableCell>{renderFlightPilots(f)}</TableCell>
+                                <TableCell>
+                                  <Link className="underline hover:text-primary" href={`/aircrafts/${a?.id || ""}`}>
+                                    {a?.tailNumber || "—"}
+                                  </Link>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="font-medium">{safeToFixed(hours)} hs</div>
+                                </TableCell>
+                                <TableCell>
+                                  {f.tachometerStart !== undefined && f.tachometerEnd !== undefined ? (
+                                    <div className="text-sm">
+                                      <div>
+                                        {safeToFixed(f.tachometerStart)} → {safeToFixed(f.tachometerEnd)}
+                                      </div>
+                                      <div className="text-xs text-muted-foreground">
+                                        Difference: {safeToFixed(f.tachometerEnd - f.tachometerStart)}
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="text-xs text-muted-foreground">
+                                      Legacy flight (without tachometer)
+                                    </div>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            )
+                          })}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <SectionHeader title="Pilots" description="Hours and Status" icon={<BadgeCheck className="h-4 w-4" />} />
+                </CardHeader>
+              
+                {/* 🔍 Buscador de pilotos */}
+                <div className="px-6 pb-4">
+                  <Input
+                    placeholder="Search pilots by name or email..."
+                    value={pilotSearch}
+                    onChange={(e) => setPilotSearch(e.target.value)}
+                    className="max-w-sm"
+                  />
+                </div>
+              
+                <CardContent className="space-y-2">
+                  {pilots.length === 0 ? (
+                    <div className="text-sm text-muted-foreground">No pilots.</div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Pilot</TableHead>
+                          <TableHead>Purchased</TableHead>
+                          <TableHead>Flown</TableHead>
+                          <TableHead>Remaining</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {pilots
+                          .filter((p) => 
+                            p.fullName.toLowerCase().includes(pilotSearch.toLowerCase()) ||
+                            p.email.toLowerCase().includes(pilotSearch.toLowerCase())
+                          )
+                          .map((p) => {
+                            const hours = calcPilotHours(p.id, purchases, flights)
+                            const purchased = typeof hours.purchased === "number" ? hours.purchased : 0
+                            const flown = typeof hours.flown === "number" ? hours.flown : 0
+                            const remaining = typeof hours.remaining === "number" ? hours.remaining : 0
+              
+                            return (
+                              <TableRow key={p.id}>
+                                <TableCell>
+                                  <Link className="underline" href={`/pilots/${p.id}`}>
+                                    {p.fullName}
+                                  </Link>
+                                  <div className="text-xs text-muted-foreground">{p.email}</div>
+                                </TableCell>
+                                <TableCell>{safeToFixed(purchased)}</TableCell>
+                                <TableCell>{safeToFixed(flown)}</TableCell>
+                                <TableCell className={cn(remaining <= 0 ? "text-red-600" : "")}>
+                                  {safeToFixed(remaining)}
+                                </TableCell>
+                                <TableCell>
+                                  <PilotReportButton
+                                    pilot={p}
+                                    flights={flights}
+                                    purchases={purchases}
+                                    aircrafts={aircrafts}
+                                    allPilots={pilots}
+                                    variant="outline"
+                                    size="sm"
+                                  />
+                                </TableCell>
+                              </TableRow>
+                            )
+                          })}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+  
             <Card>
               <CardHeader>
                 <SectionHeader
-                  title="Recent completed flights"
-                  description="Latest registered flights"
-                  icon={<CheckCircle2 className="h-4 w-4" />}
+                  title="Aircrafts"
+                  description="Status and accumulated hours"
+                  icon={<Plane className="h-4 w-4" />}
                 />
               </CardHeader>
-              <CardContent className="space-y-2 max-h-96 overflow-y-auto">
+              <CardContent className="space-y-2">
+                {aircrafts.length === 0 ? (
+                  <div className="text-sm text-muted-foreground">No aircrafts.</div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Liscence Plate</TableHead>
+                        <TableHead>Model</TableHead>
+                        <TableHead>Total Hours</TableHead>
+                        <TableHead>Maintenance interval</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {aircrafts.map((a) => {
+                        const { accumulated } = calcAircraftAccumulatedHours(a, flights)
+                        return (
+                          <TableRow key={a.id}>
+                            <TableCell>
+                              <Link className="underline" href={`/aircrafts/${a.id}`}>
+                                {a.tailNumber}
+                              </Link>
+                            </TableCell>
+                            <TableCell>{a.model}</TableCell>
+                            <TableCell>{safeToFixed(accumulated)} hs</TableCell>
+                            <TableCell>{safeToFixed(a.maintenanceIntervalHours)} hs</TableCell>
+                            <TableCell className="capitalize">{a.status}</TableCell>
+                            <TableCell>
+                              <AircraftReportButton
+                                aircraft={a}
+                                flights={flights}
+                                pilots={pilots}
+                                variant="outline"
+                                size="sm"
+                              />
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+  
+          <TabsContent value="pilots" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Pilots</CardTitle>
+                <CardDescription>Complete profiles and hour status.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {pilots.length === 0 ? (
+                  <div className="text-sm text-muted-foreground">No pilots</div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>License</TableHead>
+                        <TableHead>Purchased Hours</TableHead>
+                        <TableHead>Flown</TableHead>
+                        <TableHead>Remaining</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pilots.map((p) => {
+                        const hours = calcPilotHours(p.id, purchases, flights)
+                        const purchased = typeof hours.purchased === "number" ? hours.purchased : 0
+                        const flown = typeof hours.flown === "number" ? hours.flown : 0
+                        const remaining = typeof hours.remaining === "number" ? hours.remaining : 0
+  
+                        return (
+                          <TableRow key={p.id}>
+                            <TableCell>
+                              <Link className="underline" href={`/pilots/${p.id}`}>
+                                {p.fullName}
+                              </Link>
+                            </TableCell>
+                            <TableCell>{p.email}</TableCell>
+                            <TableCell>{p.licenseType || "—"}</TableCell>
+                            <TableCell>{safeToFixed(purchased)}</TableCell>
+                            <TableCell>{safeToFixed(flown)}</TableCell>
+                            <TableCell className={cn(remaining <= 0 ? "text-red-600" : "")}>
+                              {safeToFixed(remaining)}
+                            </TableCell>
+                            <TableCell>
+                              <PilotReportButton
+                                pilot={p}
+                                flights={flights}
+                                purchases={purchases}
+                                aircrafts={aircrafts}
+                                allPilots={pilots} // ✅ Agregar esta línea
+                                variant="outline"
+                                size="sm"
+                              />
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+  
+          <TabsContent value="aircraft" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Aircrafts</CardTitle>
+                <CardDescription>Aircraft and maintenance profiles.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {aircrafts.length === 0 ? (
+                  <div className="text-sm text-muted-foreground">No aircrafts</div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Registration</TableHead>
+                        <TableHead>Model</TableHead>
+                        <TableHead>Total Hours</TableHead>
+                        <TableHead>Satus</TableHead>
+                        <TableHead>Next maintenance</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {aircrafts.map((a) => {
+                        const { accumulated } = calcAircraftAccumulatedHours(a, flights)
+                        const maint = calcAircraftMaintenance(a, accumulated)
+                        return (
+                          <TableRow key={a.id}>
+                            <TableCell>
+                              <Link className="underline" href={`/aircrafts/${a.id}`}>
+                                {a.tailNumber}
+                              </Link>
+                            </TableCell>
+                            <TableCell>{a.model}</TableCell>
+                            <TableCell>{safeToFixed(accumulated)} hs</TableCell>
+                            <TableCell className="capitalize">{a.status}</TableCell>
+                            <TableCell className={cn(maint.dueNow ? "text-red-600" : "text-amber-600")}>
+                              {maint.dueNow ? "Now" : `${safeToFixed(maint.dueInHours)} hs`}
+                            </TableCell>
+                            <TableCell>
+                              <AircraftReportButton
+                                aircraft={a}
+                                flights={flights}
+                                pilots={pilots}
+                                variant="outline"
+                                size="sm"
+                              />
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+  
+          <TabsContent value="schedule" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Gauge className="h-5 w-5" />
+                  Flight schedule (Tachometer system)
+                </CardTitle>
+                <CardDescription>Complete flights with initial and final tachometer.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {flights.filter((f) => f.status === "scheduled").length === 0 ? (
+                  <div className="text-sm text-muted-foreground">No scheduled flights.</div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Pilot(s)</TableHead>
+                        <TableHead>Aircraft</TableHead>
+                        <TableHead>Tachometer</TableHead>
+                        <TableHead>Notes</TableHead>
+                        <TableHead />
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {flights
+                        .filter((f) => f.status === "scheduled")
+                        .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
+                        .map((f) => {
+                          const a = aircrafts.find((x) => x.id === f.aircraftId)
+                          return (
+                            <TableRow key={f.id}>
+                              <TableCell>
+                                {f.date} {f.time}
+                              </TableCell>
+                              <TableCell>{renderFlightPilots(f)}</TableCell>
+                              <TableCell>
+                                <Link className="underline hover:text-primary" href={`/aircrafts/${a?.id || ""}`}>
+                                  {a?.tailNumber || "—"}
+                                </Link>
+                              </TableCell>
+                              <TableCell>
+                                {f.tachometerStart !== undefined ? (
+                                  <div className="text-sm">
+                                    <div className="font-medium">Inicial: {safeToFixed(f.tachometerStart)}</div>
+                                    <div className="text-xs text-muted-foreground">Ready to complete</div>
+                                  </div>
+                                ) : (
+                                  <div className="text-xs text-muted-foreground">Will be entered upon completion.</div>
+                                )}
+                              </TableCell>
+                              <TableCell className="max-w-[240px] truncate">{f.notes}</TableCell>
+                              <TableCell className="text-right">
+                                <CompleteFlightDialog
+                                  flight={f}
+                                  aircrafts={aircrafts}
+                                  pilots={pilots}
+                                  onComplete={reload}
+                                />
+                              </TableCell>
+                            </TableRow>
+                          )
+                        })}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+  
+            {/* Vuelos completados */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent completed flights.</CardTitle>
+                <CardDescription>Flight history with tachometer data.</CardDescription>
+              </CardHeader>
+              <CardContent>
                 {flights.filter((f) => f.status === "completed").length === 0 ? (
                   <div className="text-sm text-muted-foreground">No completed flights.</div>
                 ) : (
@@ -1055,15 +1441,15 @@ export default function Page() {
                     <TableBody>
                       {flights
                         .filter((f) => f.status === "completed")
-                        //.sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time))
-                        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                        .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time))
+                        .slice(0, 10)
                         .map((f) => {
                           const a = aircrafts.find((x) => x.id === f.aircraftId)
                           const hours = calculateFlightHours(f)
                           return (
                             <TableRow key={f.id}>
                               <TableCell>
-                                {new Date(f.date).toLocaleDateString("en-US")} {f.time}
+                                {f.date} {f.time}
                               </TableCell>
                               <TableCell>{renderFlightPilots(f)}</TableCell>
                               <TableCell>
@@ -1081,13 +1467,11 @@ export default function Page() {
                                       {safeToFixed(f.tachometerStart)} → {safeToFixed(f.tachometerEnd)}
                                     </div>
                                     <div className="text-xs text-muted-foreground">
-                                      Difference: {safeToFixed(f.tachometerEnd - f.tachometerStart)}
+                                      Diferencia: {safeToFixed(f.tachometerEnd - f.tachometerStart)}
                                     </div>
                                   </div>
                                 ) : (
-                                  <div className="text-xs text-muted-foreground">
-                                    Legacy flight (without tachometer)
-                                  </div>
+                                  <div className="text-xs text-muted-foreground">Legacy flight (without tachometer)</div>
                                 )}
                               </TableCell>
                             </TableRow>
@@ -1098,551 +1482,167 @@ export default function Page() {
                 )}
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader>
-                <SectionHeader title="Pilots" description="Hours and Status" icon={<BadgeCheck className="h-4 w-4" />} />
+          </TabsContent>
+  
+          <TabsContent value="settings" className="space-y-6">
+            <Card className="bg-gradient-to-br from-blue-50 to-sky-50 border-blue-200">
+              <CardHeader className="bg-gradient-to-r from-blue-100 to-sky-100 border-b border-blue-200">
+                <CardTitle className="flex items-center gap-2 text-blue-900">
+                  <Rocket className="h-5 w-5" />
+                  ENVYSKY Quick guide
+                </CardTitle>
+                <CardDescription className="text-blue-700">Learn to use the system in 5 minutes.</CardDescription>
               </CardHeader>
-            
-              {/* 🔍 Buscador de pilotos */}
-              <div className="px-6 pb-4">
-                <Input
-                  placeholder="Search pilots by name or email..."
-                  value={pilotSearch}
-                  onChange={(e) => setPilotSearch(e.target.value)}
-                  className="max-w-sm"
-                />
-              </div>
-            
-              <CardContent className="space-y-2">
-                {pilots.length === 0 ? (
-                  <div className="text-sm text-muted-foreground">No pilots.</div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Pilot</TableHead>
-                        <TableHead>Purchased</TableHead>
-                        <TableHead>Flown</TableHead>
-                        <TableHead>Remaining</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {pilots
-                        .filter((p) => 
-                          p.fullName.toLowerCase().includes(pilotSearch.toLowerCase()) ||
-                          p.email.toLowerCase().includes(pilotSearch.toLowerCase())
-                        )
-                        .map((p) => {
-                          const hours = calcPilotHours(p.id, purchases, flights)
-                          const purchased = typeof hours.purchased === "number" ? hours.purchased : 0
-                          const flown = typeof hours.flown === "number" ? hours.flown : 0
-                          const remaining = typeof hours.remaining === "number" ? hours.remaining : 0
-            
-                          return (
-                            <TableRow key={p.id}>
-                              <TableCell>
-                                <Link className="underline" href={`/pilots/${p.id}`}>
-                                  {p.fullName}
-                                </Link>
-                                <div className="text-xs text-muted-foreground">{p.email}</div>
-                              </TableCell>
-                              <TableCell>{safeToFixed(purchased)}</TableCell>
-                              <TableCell>{safeToFixed(flown)}</TableCell>
-                              <TableCell className={cn(remaining <= 0 ? "text-red-600" : "")}>
-                                {safeToFixed(remaining)}
-                              </TableCell>
-                              <TableCell>
-                                <PilotReportButton
-                                  pilot={p}
-                                  flights={flights}
-                                  purchases={purchases}
-                                  aircrafts={aircrafts}
-                                  allPilots={pilots}
-                                  variant="outline"
-                                  size="sm"
-                                />
-                              </TableCell>
-                            </TableRow>
-                          )
-                        })}
-                    </TableBody>
-                  </Table>
-                )}
+              <CardContent className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card className="border-l-4 border-l-blue-500">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <UserPlus className="h-4 w-4" />
+                        1. Register pilots
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-sm space-y-2">
+                      <p>
+                        • Go to <strong>"Dashboard"</strong> → <strong>"Quick actions"</strong>
+                      </p>
+                      <p>
+                        • Complete the form <strong>"Purchased hours"</strong>
+                      </p>
+                      <p>• If the pilot does not exist, it is created automatically</p>
+                      <p>• Purchased hours are added to their account</p>
+                    </CardContent>
+                  </Card>
+  
+                  <Card className="border-l-4 border-l-green-500">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Plane className="h-4 w-4" />
+                        2. Add aircraft
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-sm space-y-2">
+                      <p>
+                        • In <strong>"Quick actions"</strong> → <strong>"Create aircraft"</strong>
+                      </p>
+                      <p>• Enter registration, model, and initial hours</p>
+                      <p>• Define maintenance interval (e.g., every 100 hrs)</p>
+                      <p>• The system will automatically calculate when service is needed</p>
+                    </CardContent>
+                  </Card>
+  
+                  <Card className="border-l-4 border-l-purple-500">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4" />
+                        3. Register completed flights
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-sm space-y-2">
+                      <p>
+                        • You can now select <strong>up to 2 pilots</strong> per flight
+                      </p>
+                      <p>
+                        • <strong>Pilot 1</strong> is mandatory (principal)
+                      </p>
+                      <p>
+                        • <strong>Pilot 2</strong> is optional
+                      </p>
+                      <p>
+                        • Enter both <strong>initial and final tachometer</strong> values
+                      </p>
+                      <p>• Flight is registered as completed immediately</p>
+                    </CardContent>
+                  </Card>
+  
+                  <Card className="border-l-4 border-l-orange-500">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Gauge className="h-4 w-4" />
+                        4. Automatic calculations
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-sm space-y-2">
+                      <p>
+                        • Hours are calculated automatically: <strong>final - initial</strong>
+                      </p>
+                      <p>
+                        • They are deducted from <strong>Pilot </strong> and added to the aircraft
+                      </p>
+                      <p>• View recent flights in the dashboard</p>
+                      <p>• Check maintenance alerts regularly</p>
+                    </CardContent>
+                  </Card>
+                </div>
+  
+                <Separator />
+  
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 p-4 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Gauge className="h-5 w-5 text-green-600" />
+                    <div className="font-semibold text-green-800">Simplified tachometer system</div>
+                  </div>
+                  <div className="text-sm text-green-700 space-y-1">
+                    <p>
+                      • <strong>Direct registration:</strong> Register completed flights in one step
+                    </p>
+                    <p>
+                      • <strong>More accurate:</strong> Hours are calculated from the aircraft's tachometer
+                    </p>
+                    <p>
+                      • <strong>Automatic:</strong> No more manual duration calculations
+                    </p>
+                    <p>
+                      • <strong>Compatible:</strong> Legacy flights still work
+                    </p>
+                  </div>
+                </div>
+  
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                    <BadgeCheck className="h-8 w-8 mx-auto mb-2 text-green-600" />
+                    <div className="font-medium">Automatic alerts</div>
+                    <div className="text-sm text-muted-foreground">
+                      The system notifies you when an aircraft requires maintenance
+                    </div>
+                  </div>
+                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                    <Clock className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+                    <div className="font-medium">Hour control</div>
+                    <div className="text-sm text-muted-foreground">Automatic tracking of purchased vs. flown hours</div>
+                  </div>
+                  <div className="text-center p-4 bg-muted/50 rounded-lg">
+                    <Gauge className="h-8 w-8 mx-auto mb-2 text-purple-600" />
+                    <div className="font-medium">Accurate tachometer</div>
+                    <div className="text-sm text-muted-foreground">
+                      Automatic calculation based on the actual tachometer
+                    </div>
+                  </div>
+                </div>
+  
+                <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+                  <CardHeader>
+                    <CardTitle className="text-lg text-blue-900">💡 Useful tips</CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-sm space-y-2 text-blue-800">
+                    <p>
+                      • <strong>Click on names and registrations</strong> to see full details
+                    </p>
+                    <p>
+                      • <strong>Check maintenance alerts</strong> regularly
+                    </p>
+                    <p>
+                      • <strong>Both tachometer values</strong> are required when registering flights
+                    </p>
+                    <p>
+                      • <strong>Data is synced</strong> automatically with the database
+                    </p>
+                  </CardContent>
+                </Card>
               </CardContent>
             </Card>
-
-          <Card>
-            <CardHeader>
-              <SectionHeader
-                title="Aircrafts"
-                description="Status and accumulated hours"
-                icon={<Plane className="h-4 w-4" />}
-              />
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {aircrafts.length === 0 ? (
-                <div className="text-sm text-muted-foreground">No aircrafts.</div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Liscence Plate</TableHead>
-                      <TableHead>Model</TableHead>
-                      <TableHead>Total Hours</TableHead>
-                      <TableHead>Maintenance interval</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {aircrafts.map((a) => {
-                      const { accumulated } = calcAircraftAccumulatedHours(a, flights)
-                      return (
-                        <TableRow key={a.id}>
-                          <TableCell>
-                            <Link className="underline" href={`/aircrafts/${a.id}`}>
-                              {a.tailNumber}
-                            </Link>
-                          </TableCell>
-                          <TableCell>{a.model}</TableCell>
-                          <TableCell>{safeToFixed(accumulated)} hs</TableCell>
-                          <TableCell>{safeToFixed(a.maintenanceIntervalHours)} hs</TableCell>
-                          <TableCell className="capitalize">{a.status}</TableCell>
-                          <TableCell>
-                            <AircraftReportButton
-                              aircraft={a}
-                              flights={flights}
-                              pilots={pilots}
-                              variant="outline"
-                              size="sm"
-                            />
-                          </TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="pilots" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Pilots</CardTitle>
-              <CardDescription>Complete profiles and hour status.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {pilots.length === 0 ? (
-                <div className="text-sm text-muted-foreground">No pilots</div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>License</TableHead>
-                      <TableHead>Purchased Hours</TableHead>
-                      <TableHead>Flown</TableHead>
-                      <TableHead>Remaining</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {pilots.map((p) => {
-                      const hours = calcPilotHours(p.id, purchases, flights)
-                      const purchased = typeof hours.purchased === "number" ? hours.purchased : 0
-                      const flown = typeof hours.flown === "number" ? hours.flown : 0
-                      const remaining = typeof hours.remaining === "number" ? hours.remaining : 0
-
-                      return (
-                        <TableRow key={p.id}>
-                          <TableCell>
-                            <Link className="underline" href={`/pilots/${p.id}`}>
-                              {p.fullName}
-                            </Link>
-                          </TableCell>
-                          <TableCell>{p.email}</TableCell>
-                          <TableCell>{p.licenseType || "—"}</TableCell>
-                          <TableCell>{safeToFixed(purchased)}</TableCell>
-                          <TableCell>{safeToFixed(flown)}</TableCell>
-                          <TableCell className={cn(remaining <= 0 ? "text-red-600" : "")}>
-                            {safeToFixed(remaining)}
-                          </TableCell>
-                          <TableCell>
-                            <PilotReportButton
-                              pilot={p}
-                              flights={flights}
-                              purchases={purchases}
-                              aircrafts={aircrafts}
-                              allPilots={pilots} // ✅ Agregar esta línea
-                              variant="outline"
-                              size="sm"
-                            />
-                          </TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="aircraft" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Aircrafts</CardTitle>
-              <CardDescription>Aircraft and maintenance profiles.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {aircrafts.length === 0 ? (
-                <div className="text-sm text-muted-foreground">No aircrafts</div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Registration</TableHead>
-                      <TableHead>Model</TableHead>
-                      <TableHead>Total Hours</TableHead>
-                      <TableHead>Satus</TableHead>
-                      <TableHead>Next maintenance</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {aircrafts.map((a) => {
-                      const { accumulated } = calcAircraftAccumulatedHours(a, flights)
-                      const maint = calcAircraftMaintenance(a, accumulated)
-                      return (
-                        <TableRow key={a.id}>
-                          <TableCell>
-                            <Link className="underline" href={`/aircrafts/${a.id}`}>
-                              {a.tailNumber}
-                            </Link>
-                          </TableCell>
-                          <TableCell>{a.model}</TableCell>
-                          <TableCell>{safeToFixed(accumulated)} hs</TableCell>
-                          <TableCell className="capitalize">{a.status}</TableCell>
-                          <TableCell className={cn(maint.dueNow ? "text-red-600" : "text-amber-600")}>
-                            {maint.dueNow ? "Now" : `${safeToFixed(maint.dueInHours)} hs`}
-                          </TableCell>
-                          <TableCell>
-                            <AircraftReportButton
-                              aircraft={a}
-                              flights={flights}
-                              pilots={pilots}
-                              variant="outline"
-                              size="sm"
-                            />
-                          </TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="schedule" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Gauge className="h-5 w-5" />
-                Flight schedule (Tachometer system)
-              </CardTitle>
-              <CardDescription>Complete flights with initial and final tachometer.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {flights.filter((f) => f.status === "scheduled").length === 0 ? (
-                <div className="text-sm text-muted-foreground">No scheduled flights.</div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Pilot(s)</TableHead>
-                      <TableHead>Aircraft</TableHead>
-                      <TableHead>Tachometer</TableHead>
-                      <TableHead>Notes</TableHead>
-                      <TableHead />
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {flights
-                      .filter((f) => f.status === "scheduled")
-                      .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
-                      .map((f) => {
-                        const a = aircrafts.find((x) => x.id === f.aircraftId)
-                        return (
-                          <TableRow key={f.id}>
-                            <TableCell>
-                              {f.date} {f.time}
-                            </TableCell>
-                            <TableCell>{renderFlightPilots(f)}</TableCell>
-                            <TableCell>
-                              <Link className="underline hover:text-primary" href={`/aircrafts/${a?.id || ""}`}>
-                                {a?.tailNumber || "—"}
-                              </Link>
-                            </TableCell>
-                            <TableCell>
-                              {f.tachometerStart !== undefined ? (
-                                <div className="text-sm">
-                                  <div className="font-medium">Inicial: {safeToFixed(f.tachometerStart)}</div>
-                                  <div className="text-xs text-muted-foreground">Ready to complete</div>
-                                </div>
-                              ) : (
-                                <div className="text-xs text-muted-foreground">Will be entered upon completion.</div>
-                              )}
-                            </TableCell>
-                            <TableCell className="max-w-[240px] truncate">{f.notes}</TableCell>
-                            <TableCell className="text-right">
-                              <CompleteFlightDialog
-                                flight={f}
-                                aircrafts={aircrafts}
-                                pilots={pilots}
-                                onComplete={reload}
-                              />
-                            </TableCell>
-                          </TableRow>
-                        )
-                      })}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Vuelos completados */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent completed flights.</CardTitle>
-              <CardDescription>Flight history with tachometer data.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {flights.filter((f) => f.status === "completed").length === 0 ? (
-                <div className="text-sm text-muted-foreground">No completed flights.</div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Pilot(s)</TableHead>
-                      <TableHead>Aircraft</TableHead>
-                      <TableHead>Hours flown</TableHead>
-                      <TableHead>Tachometer</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {flights
-                      .filter((f) => f.status === "completed")
-                      .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time))
-                      .slice(0, 10)
-                      .map((f) => {
-                        const a = aircrafts.find((x) => x.id === f.aircraftId)
-                        const hours = calculateFlightHours(f)
-                        return (
-                          <TableRow key={f.id}>
-                            <TableCell>
-                              {f.date} {f.time}
-                            </TableCell>
-                            <TableCell>{renderFlightPilots(f)}</TableCell>
-                            <TableCell>
-                              <Link className="underline hover:text-primary" href={`/aircrafts/${a?.id || ""}`}>
-                                {a?.tailNumber || "—"}
-                              </Link>
-                            </TableCell>
-                            <TableCell>
-                              <div className="font-medium">{safeToFixed(hours)} hs</div>
-                            </TableCell>
-                            <TableCell>
-                              {f.tachometerStart !== undefined && f.tachometerEnd !== undefined ? (
-                                <div className="text-sm">
-                                  <div>
-                                    {safeToFixed(f.tachometerStart)} → {safeToFixed(f.tachometerEnd)}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground">
-                                    Diferencia: {safeToFixed(f.tachometerEnd - f.tachometerStart)}
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="text-xs text-muted-foreground">Legacy flight (without tachometer)</div>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        )
-                      })}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="settings" className="space-y-6">
-          <Card className="bg-gradient-to-br from-blue-50 to-sky-50 border-blue-200">
-            <CardHeader className="bg-gradient-to-r from-blue-100 to-sky-100 border-b border-blue-200">
-              <CardTitle className="flex items-center gap-2 text-blue-900">
-                <Rocket className="h-5 w-5" />
-                ENVYSKY Quick guide
-              </CardTitle>
-              <CardDescription className="text-blue-700">Learn to use the system in 5 minutes.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <Card className="border-l-4 border-l-blue-500">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <UserPlus className="h-4 w-4" />
-                      1. Register pilots
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-sm space-y-2">
-                    <p>
-                      • Go to <strong>"Dashboard"</strong> → <strong>"Quick actions"</strong>
-                    </p>
-                    <p>
-                      • Complete the form <strong>"Purchased hours"</strong>
-                    </p>
-                    <p>• If the pilot does not exist, it is created automatically</p>
-                    <p>• Purchased hours are added to their account</p>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-l-4 border-l-green-500">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Plane className="h-4 w-4" />
-                      2. Add aircraft
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-sm space-y-2">
-                    <p>
-                      • In <strong>"Quick actions"</strong> → <strong>"Create aircraft"</strong>
-                    </p>
-                    <p>• Enter registration, model, and initial hours</p>
-                    <p>• Define maintenance interval (e.g., every 100 hrs)</p>
-                    <p>• The system will automatically calculate when service is needed</p>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-l-4 border-l-purple-500">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4" />
-                      3. Register completed flights
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-sm space-y-2">
-                    <p>
-                      • You can now select <strong>up to 2 pilots</strong> per flight
-                    </p>
-                    <p>
-                      • <strong>Pilot 1</strong> is mandatory (principal)
-                    </p>
-                    <p>
-                      • <strong>Pilot 2</strong> is optional
-                    </p>
-                    <p>
-                      • Enter both <strong>initial and final tachometer</strong> values
-                    </p>
-                    <p>• Flight is registered as completed immediately</p>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-l-4 border-l-orange-500">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Gauge className="h-4 w-4" />
-                      4. Automatic calculations
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-sm space-y-2">
-                    <p>
-                      • Hours are calculated automatically: <strong>final - initial</strong>
-                    </p>
-                    <p>
-                      • They are deducted from <strong>Pilot </strong> and added to the aircraft
-                    </p>
-                    <p>• View recent flights in the dashboard</p>
-                    <p>• Check maintenance alerts regularly</p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <Separator />
-
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 p-4 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <Gauge className="h-5 w-5 text-green-600" />
-                  <div className="font-semibold text-green-800">Simplified tachometer system</div>
-                </div>
-                <div className="text-sm text-green-700 space-y-1">
-                  <p>
-                    • <strong>Direct registration:</strong> Register completed flights in one step
-                  </p>
-                  <p>
-                    • <strong>More accurate:</strong> Hours are calculated from the aircraft's tachometer
-                  </p>
-                  <p>
-                    • <strong>Automatic:</strong> No more manual duration calculations
-                  </p>
-                  <p>
-                    • <strong>Compatible:</strong> Legacy flights still work
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-muted/50 rounded-lg">
-                  <BadgeCheck className="h-8 w-8 mx-auto mb-2 text-green-600" />
-                  <div className="font-medium">Automatic alerts</div>
-                  <div className="text-sm text-muted-foreground">
-                    The system notifies you when an aircraft requires maintenance
-                  </div>
-                </div>
-                <div className="text-center p-4 bg-muted/50 rounded-lg">
-                  <Clock className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-                  <div className="font-medium">Hour control</div>
-                  <div className="text-sm text-muted-foreground">Automatic tracking of purchased vs. flown hours</div>
-                </div>
-                <div className="text-center p-4 bg-muted/50 rounded-lg">
-                  <Gauge className="h-8 w-8 mx-auto mb-2 text-purple-600" />
-                  <div className="font-medium">Accurate tachometer</div>
-                  <div className="text-sm text-muted-foreground">
-                    Automatic calculation based on the actual tachometer
-                  </div>
-                </div>
-              </div>
-
-              <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-                <CardHeader>
-                  <CardTitle className="text-lg text-blue-900">💡 Useful tips</CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm space-y-2 text-blue-800">
-                  <p>
-                    • <strong>Click on names and registrations</strong> to see full details
-                  </p>
-                  <p>
-                    • <strong>Check maintenance alerts</strong> regularly
-                  </p>
-                  <p>
-                    • <strong>Both tachometer values</strong> are required when registering flights
-                  </p>
-                  <p>
-                    • <strong>Data is synced</strong> automatically with the database
-                  </p>
-                </CardContent>
-              </Card>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </main>
-  )
+          </TabsContent>
+        </Tabs>
+      </main>
+    )
 }
