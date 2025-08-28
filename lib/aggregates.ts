@@ -69,16 +69,13 @@ export function calcAircraftAccumulatedHours(aircraft: Aircraft, flights: Flight
   }
 }
 
-// Calculate aircraft maintenance status
 export function calcAircraftMaintenance(aircraft: Aircraft, accumulatedHours: number) {
-  // Use lastMaintenanceAt if available, otherwise use initialHours
-  const lastMaintenance = aircraft.lastMaintenanceAt || aircraft.initialHours
-  
-  // Calculate hours since last maintenance
-  const hoursSinceLastMaintenance = accumulatedHours - lastMaintenance
-  
-  // Next maintenance should be at: last maintenance + interval
-  const nextMaintenanceAt = lastMaintenance + aircraft.maintenanceIntervalHours
+  // Calculate how many maintenance intervals have passed since the initial hours
+  const hoursSinceInitial = accumulatedHours - aircraft.initialHours
+  const intervalsCompleted = Math.floor(hoursSinceInitial / aircraft.maintenanceIntervalHours)
+
+  // Next maintenance should be at: initial hours + (completed intervals + 1) * interval
+  const nextMaintenanceAt = aircraft.initialHours + (intervalsCompleted + 1) * aircraft.maintenanceIntervalHours
   const dueInHours = nextMaintenanceAt - accumulatedHours
   const dueNow = dueInHours <= 0
 
@@ -86,6 +83,5 @@ export function calcAircraftMaintenance(aircraft: Aircraft, accumulatedHours: nu
     nextMaintenanceAt,
     dueInHours,
     dueNow,
-    hoursSinceLastMaintenance
   }
 }
