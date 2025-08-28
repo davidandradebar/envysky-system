@@ -327,7 +327,7 @@ const generateReportHTML = (
     </div>
     
     <div class="section">
-        <h3>📋 Hour purchases</h3>
+        <h3>📋 Purchased Hours</h3>
         ${
           purchases.filter((p) => p.pilotId === pilot.id).length === 0
             ? '<div class="no-data">No purchases recorded.</div>'
