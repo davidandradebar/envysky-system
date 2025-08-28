@@ -494,32 +494,77 @@ export default function Page() {
     return end > start ? end - start : 0
   }, [scheduleForm.tachometerStart, scheduleForm.tachometerEnd])
 
-  const handleSetAircraftStatus = async (aircraftId: string, status: "active" | "maintenance") => {
+const handleSetAircraftStatus = async (aircraftId: string, status: "active" | "maintenance") => {
   try {
+    console.log("🔧 Iniciando cambio de status:", { aircraftId, status })
+
+    // PASO 1: Encontrar el avión en el estado actual
     const aircraft = aircrafts.find((a) => a.id === aircraftId)
-    if (!aircraft) return
+    if (!aircraft) {
+      console.log("❌ Aircraft no encontrado")
+      return
+    }
+
+    console.log("✅ Aircraft encontrado:", aircraft)
+
+    let updatedAircraft: Aircraft
 
     if (status === "active") {
-      // Si cambia a "active", resetear el contador de mantenimiento
+      // PASO 2A: Calcular horas para resetear mantenimiento
       const { accumulated } = calcAircraftAccumulatedHours(aircraft, flights)
-      await saveAircraft({
-        ...aircraft,
-        initialHours: accumulated,
-        status: "active",
+      console.log("📊 Reseteando mantenimiento:", {
+        oldInitialHours: aircraft.initialHours,
+        newInitialHours: accumulated,
+        accumulated,
       })
-      await reload()
+
+      // PASO 3A: Crear objeto actualizado
+      updatedAircraft = {
+        ...aircraft,
+        initialHours: accumulated, // ← RESETEA EL CONTADOR
+        status: "active",
+      }
+
+      // PASO 4A: Actualizar en localStorage/DB
+      console.log("💾 Guardando en DB/localStorage...")
+      await updateAircraft(updatedAircraft)
+
+      // PASO 5A: ACTUALIZAR ESTADO LOCAL INMEDIATAMENTE
+      console.log("🔄 Actualizando estado local...")
+      setAircrafts((prevAircrafts) => 
+        prevAircrafts.map((a) => (a.id === aircraftId ? updatedAircraft : a))
+      )
+
       alert("Maintenance completed! Counter reset.")
     } else if (status === "maintenance") {
-      // Si cambia a "maintenance", solo cambiar el status
-      await saveAircraft({
+      // PASO 2B: Solo cambiar status (no resetear horas)
+      console.log("🔧 Cambiando a mantenimiento")
+
+      // PASO 3B: Crear objeto actualizado
+      updatedAircraft = {
         ...aircraft,
-        status: "maintenance",
-      })
-      await reload()
+        status: "maintenance", // ← SOLO CAMBIAR STATUS
+      }
+
+      // PASO 4B: Actualizar en localStorage/DB
+      console.log("💾 Guardando en DB/localStorage...")
+      await updateAircraft(updatedAircraft)
+
+      // PASO 5B: ACTUALIZAR ESTADO LOCAL INMEDIATAMENTE
+      console.log("🔄 Actualizando estado local...")
+      setAircrafts((prevAircrafts) => 
+        prevAircrafts.map((a) => (a.id === aircraftId ? updatedAircraft : a))
+      )
+
       alert("Aircraft set to maintenance mode.")
     }
+
+    // PASO 6: RECARGAR TODO PARA SINCRONIZAR
+    console.log("🔄 Recargando todos los datos...")
+    await reload()
+    console.log("✅ Proceso completado")
   } catch (error) {
-    console.error("Error:", error)
+    console.error("❌ Error:", error)
     alert("Error updating aircraft status.")
   }
 }
