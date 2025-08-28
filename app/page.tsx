@@ -1037,7 +1037,7 @@ export default function Page() {
                   icon={<CheckCircle2 className="h-4 w-4" />}
                 />
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-2 max-h-96 overflow-y-auto">
                 {flights.filter((f) => f.status === "completed").length === 0 ? (
                   <div className="text-sm text-muted-foreground">No completed flights.</div>
                 ) : (
@@ -1056,7 +1056,6 @@ export default function Page() {
                         .filter((f) => f.status === "completed")
                         //.sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time))
                         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                        .slice(0, 10)
                         .map((f) => {
                           const a = aircrafts.find((x) => x.id === f.aircraftId)
                           const hours = calculateFlightHours(f)
