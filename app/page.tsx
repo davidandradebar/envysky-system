@@ -493,7 +493,7 @@ export default function Page() {
     return end > start ? end - start : 0
   }, [scheduleForm.tachometerStart, scheduleForm.tachometerEnd])
 
-  const handleSetAircraftStatus = (aircraftId: string, status: "active" | "maintenance") => {
+  const handleSetAircraftStatus = async (aircraftId: string, status: "active" | "maintenance") => {
     try {
       if (status === "active") {
         // Resetear mantenimiento: actualizar initialHours
