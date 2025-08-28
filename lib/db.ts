@@ -341,21 +341,42 @@ export async function updateFlightStatus(
   )
   writeLocal("envysky:flights", updated)
   return updated.find((f) => f.id === flightId)!
+}
 
-  // Aircraft maintenance functions
+// Aircraft maintenance functions
 export async function completeAircraftMaintenance(
   aircraftId: string,
   maintenanceHours: number
 ): Promise<Aircraft | null> {
-  const aircraftIndex = aircrafts.findIndex((a) => a.id === aircraftId)
-  if (aircraftIndex === -1) return null
-
-  aircrafts[aircraftIndex] = {
-    ...aircrafts[aircraftIndex],
-    lastMaintenanceAt: maintenanceHours,
-    status: "active"
+  if (hasDatabase()) {
+    try {
+      return await apiCall<Aircraft>("/aircrafts/maintenance", {
+        method: "PUT",
+        body: JSON.stringify({
+          id: aircraftId,
+          lastMaintenanceAt: maintenanceHours,
+          status: "active"
+        }),
+      })
+    } catch (error) {
+      console.warn("Database unavailable, using localStorage:", error)
+      const aircrafts = readLocal<Aircraft[]>("envysky:aircrafts", [])
+      const updated = aircrafts.map((a) =>
+        a.id === aircraftId
+          ? { ...a, lastMaintenanceAt: maintenanceHours, status: "active" }
+          : a
+      )
+      writeLocal("envysky:aircrafts", updated)
+      return updated.find((a) => a.id === aircraftId) || null
+    }
   }
 
-  return aircrafts[aircraftIndex]
-}
+  const aircrafts = readLocal<Aircraft[]>("envysky:aircrafts", [])
+  const updated = aircrafts.map((a) =>
+    a.id === aircraftId
+      ? { ...a, lastMaintenanceAt: maintenanceHours, status: "active" }
+      : a
+  )
+  writeLocal("envysky:aircrafts", updated)
+  return updated.find((a) => a.id === aircraftId) || null
 }
