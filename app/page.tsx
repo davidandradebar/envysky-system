@@ -1097,48 +1097,31 @@ export default function Page() {
                     </Table>
                   )}
                 </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <SectionHeader title="Pilots" description="Hours and Status" icon={<BadgeCheck className="h-4 w-4" />} />
-                </CardHeader>
-              
-                {/* 🔍 Buscador de pilotos */}
-                <div className="px-6 pb-4">
-                  <Input
-                    placeholder="Search pilots by name or email..."
-                    value={pilotSearch}
-                    onChange={(e) => setPilotSearch(e.target.value)}
-                    className="max-w-sm"
-                  />
-                </div>
-              
-                <CardContent className="space-y-2">
-                  {pilots.length === 0 ? (
-                    <div className="text-sm text-muted-foreground">No pilots.</div>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Pilot</TableHead>
-                          <TableHead>Purchased</TableHead>
-                          <TableHead>Flown</TableHead>
-                          <TableHead>Remaining</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {pilots
-                          .filter((p) => 
-                            p.fullName.toLowerCase().includes(pilotSearch.toLowerCase()) ||
-                            p.email.toLowerCase().includes(pilotSearch.toLowerCase())
-                          )
-                          .map((p) => {
+                <Card>
+                  <CardHeader>
+                    <SectionHeader title="Pilots" description="Hours and Status" icon={<BadgeCheck className="h-4 w-4" />} />
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {pilots.length === 0 ? (
+                      <div className="text-sm text-muted-foreground">No pilots.</div>
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Pilot</TableHead>
+                            <TableHead>Purchased</TableHead>
+                            <TableHead>Flown</TableHead>
+                            <TableHead>Remaining</TableHead>
+                            <TableHead>Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {pilots.map((p) => {
                             const hours = calcPilotHours(p.id, purchases, flights)
                             const purchased = typeof hours.purchased === "number" ? hours.purchased : 0
                             const flown = typeof hours.flown === "number" ? hours.flown : 0
                             const remaining = typeof hours.remaining === "number" ? hours.remaining : 0
-              
+                
                             return (
                               <TableRow key={p.id}>
                                 <TableCell>
@@ -1158,7 +1141,7 @@ export default function Page() {
                                     flights={flights}
                                     purchases={purchases}
                                     aircrafts={aircrafts}
-                                    allPilots={pilots}
+                                    allPilots={pilots} // ✅ Agregar esta línea
                                     variant="outline"
                                     size="sm"
                                   />
@@ -1166,12 +1149,12 @@ export default function Page() {
                               </TableRow>
                             )
                           })}
-                      </TableBody>
-                    </Table>
-                  )}
-                </CardContent>
-              </Card>
-  
+                        </TableBody>
+                      </Table>
+                    )}
+                  </CardContent>
+                </Card>
+                
             <Card>
               <CardHeader>
                 <SectionHeader
@@ -1646,4 +1629,3 @@ export default function Page() {
       </main>
     )
 }
-      }
