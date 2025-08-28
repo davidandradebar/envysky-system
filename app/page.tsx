@@ -285,6 +285,7 @@ export default function Page() {
   const [aircrafts, setAircrafts] = useState<Aircraft[]>([])
   const [purchases, setPurchases] = useState<Purchase[]>([])
   const [flights, setFlights] = useState<Flight[]>([])
+  const [pilotSearch, setPilotSearch] = useState("")
 
   useEffect(() => {
     const loadData = async () => {
