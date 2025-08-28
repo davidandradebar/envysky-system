@@ -341,4 +341,21 @@ export async function updateFlightStatus(
   )
   writeLocal("envysky:flights", updated)
   return updated.find((f) => f.id === flightId)!
+
+  // Aircraft maintenance functions
+export async function completeAircraftMaintenance(
+  aircraftId: string,
+  maintenanceHours: number
+): Promise<Aircraft | null> {
+  const aircraftIndex = aircrafts.findIndex((a) => a.id === aircraftId)
+  if (aircraftIndex === -1) return null
+
+  aircrafts[aircraftIndex] = {
+    ...aircrafts[aircraftIndex],
+    lastMaintenanceAt: maintenanceHours,
+    status: "active"
+  }
+
+  return aircrafts[aircraftIndex]
+}
 }
