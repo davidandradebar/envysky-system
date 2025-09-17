@@ -429,40 +429,40 @@ export default function Page() {
     [flights],
   )
 
-// ✅ FILTRO SIMPLE: Solo aviones activos que necesitan mantenimiento
-const maintenanceAlerts = useMemo(() => {
-  console.log("🔍 Calculando maintenance alerts...")
-  
-  const alerts = aircrafts.filter((aircraft) => {
-    console.log("🔍 Evaluando aircraft para mantenimiento:", {
-      tailNumber: aircraft.tailNumber,
-      status: aircraft.status,
+  // ✅ FILTRO SIMPLE: Solo aviones activos que necesitan mantenimiento
+  const maintenanceAlerts = useMemo(() => {
+    console.log("🔍 Calculando maintenance alerts...")
+
+    const alerts = aircrafts.filter((aircraft) => {
+      console.log("🔍 Evaluando aircraft para mantenimiento:", {
+        tailNumber: aircraft.tailNumber,
+        status: aircraft.status,
+      })
+
+      // Solo evaluar aviones que están activos (no en mantenimiento)
+      if (aircraft.status !== "active") {
+        console.log("❌ Aircraft no activo, saltando:", aircraft.tailNumber)
+        return false
+      }
+
+      // Calcular horas acumuladas
+      const { accumulated } = calcAircraftAccumulatedHours(aircraft, flights)
+      const maintenance = calcAircraftMaintenance(aircraft, accumulated)
+
+      console.log("📊 Datos de mantenimiento:", {
+        tailNumber: aircraft.tailNumber,
+        accumulated: accumulated,
+        nextMaintenanceAt: maintenance.nextMaintenanceAt,
+        dueNow: maintenance.dueNow,
+      })
+
+      // Retornar true solo si necesita mantenimiento AHORA
+      return maintenance.dueNow
     })
 
-    // Solo evaluar aviones que están activos (no en mantenimiento)
-    if (aircraft.status !== "active") {
-      console.log("❌ Aircraft no activo, saltando:", aircraft.tailNumber)
-      return false
-    }
-
-    // Calcular horas acumuladas
-    const { accumulated } = calcAircraftAccumulatedHours(aircraft, flights)
-    const maintenance = calcAircraftMaintenance(aircraft, accumulated)
-
-    console.log("📊 Datos de mantenimiento:", {
-      tailNumber: aircraft.tailNumber,
-      accumulated: accumulated,
-      nextMaintenanceAt: maintenance.nextMaintenanceAt,
-      dueNow: maintenance.dueNow,
-    })
-
-    // Retornar true solo si necesita mantenimiento AHORA
-    return maintenance.dueNow
-  })
-
-  console.log("🚨 Aviones que necesitan mantenimiento:", alerts.length)
-  return alerts
-}, [aircrafts, flights])
+    console.log("🚨 Aviones que necesitan mantenimiento:", alerts.length)
+    return alerts
+  }, [aircrafts, flights])
 
   // Forms state
   const [purchaseForm, setPurchaseForm] = useState<{
@@ -518,71 +518,70 @@ const maintenanceAlerts = useMemo(() => {
     return end > start ? end - start : 0
   }, [scheduleForm.tachometerStart, scheduleForm.tachometerEnd])
 
-// ✅ NUEVA FUNCIÓN: Completar mantenimiento de forma simple
-const handleCompleteMaintenance = async (aircraftId: string) => {
-  try {
-    console.log("🔧 === INICIANDO MANTENIMIENTO COMPLETADO ===")
-    console.log("Aircraft ID:", aircraftId)
+  // ✅ NUEVA FUNCIÓN: Completar mantenimiento de forma simple
+  const handleCompleteMaintenance = async (aircraftId: string) => {
+    try {
+      console.log("🔧 === INICIANDO MANTENIMIENTO COMPLETADO ===")
+      console.log("Aircraft ID:", aircraftId)
 
-    // PASO 1: Encontrar el avión en la lista
-    const aircraft = aircrafts.find((a) => a.id === aircraftId)
-    if (!aircraft) {
-      console.log("❌ Aircraft no encontrado")
-      alert("Aircraft not found")
-      return
+      // PASO 1: Encontrar el avión en la lista
+      const aircraft = aircrafts.find((a) => a.id === aircraftId)
+      if (!aircraft) {
+        console.log("❌ Aircraft no encontrado")
+        alert("Aircraft not found")
+        return
+      }
+
+      console.log("✅ Aircraft encontrado:", {
+        tailNumber: aircraft.tailNumber,
+        model: aircraft.model,
+        currentInitialHours: aircraft.initialHours,
+        maintenanceInterval: aircraft.maintenanceIntervalHours,
+      })
+
+      // PASO 2: Calcular las horas actuales acumuladas
+      const { accumulated } = calcAircraftAccumulatedHours(aircraft, flights)
+      console.log("📊 Horas calculadas:", {
+        initialHours: aircraft.initialHours,
+        flownHours: accumulated - aircraft.initialHours,
+        totalAccumulated: accumulated,
+      })
+
+      // PASO 3: Crear el avión actualizado con contador reseteado
+      const updatedAircraft = {
+        ...aircraft,
+        initialHours: accumulated, // ← ESTO RESETEA EL CONTADOR DE MANTENIMIENTO
+      }
+
+      console.log("🔄 Reseteando contador:", {
+        oldInitialHours: aircraft.initialHours,
+        newInitialHours: accumulated,
+        nextMaintenanceAt: accumulated + aircraft.maintenanceIntervalHours,
+      })
+
+      // PASO 4: Guardar en la base de datos/localStorage
+      console.log("💾 Guardando cambios...")
+      await updateAircraft(updatedAircraft)
+
+      // PASO 5: Actualizar el estado local inmediatamente
+      console.log("🔄 Actualizando estado local...")
+      setAircrafts((prevAircrafts) => prevAircrafts.map((a) => (a.id === aircraftId ? updatedAircraft : a)))
+
+      // PASO 6: Recargar todos los datos para sincronizar
+      console.log("🔄 Recargando datos...")
+      await reload()
+
+      // PASO 7: Mostrar confirmación al usuario
+      const nextMaintenanceHours = accumulated + aircraft.maintenanceIntervalHours
+      alert(`✅ Maintenance completed!\n\nNext maintenance at: ${nextMaintenanceHours.toFixed(1)} hours`)
+
+      console.log("✅ === MANTENIMIENTO COMPLETADO EXITOSAMENTE ===")
+    } catch (error) {
+      console.error("❌ Error completando mantenimiento:", error)
+      alert("Error completing maintenance: " + error.message)
     }
+  } // ← ✅ ESTA LLAVE FALTABA
 
-    console.log("✅ Aircraft encontrado:", {
-      tailNumber: aircraft.tailNumber,
-      model: aircraft.model,
-      currentInitialHours: aircraft.initialHours,
-      maintenanceInterval: aircraft.maintenanceIntervalHours,
-    })
-
-    // PASO 2: Calcular las horas actuales acumuladas
-    const { accumulated } = calcAircraftAccumulatedHours(aircraft, flights)
-    console.log("📊 Horas calculadas:", {
-      initialHours: aircraft.initialHours,
-      flownHours: accumulated - aircraft.initialHours,
-      totalAccumulated: accumulated,
-    })
-
-    // PASO 3: Crear el avión actualizado con contador reseteado
-    const updatedAircraft = {
-      ...aircraft,
-      initialHours: accumulated, // ← ESTO RESETEA EL CONTADOR DE MANTENIMIENTO
-    }
-
-    console.log("🔄 Reseteando contador:", {
-      oldInitialHours: aircraft.initialHours,
-      newInitialHours: accumulated,
-      nextMaintenanceAt: accumulated + aircraft.maintenanceIntervalHours,
-    })
-
-    // PASO 4: Guardar en la base de datos/localStorage
-    console.log("💾 Guardando cambios...")
-    await updateAircraft(updatedAircraft)
-
-    // PASO 5: Actualizar el estado local inmediatamente
-    console.log("🔄 Actualizando estado local...")
-    setAircrafts((prevAircrafts) => 
-      prevAircrafts.map((a) => (a.id === aircraftId ? updatedAircraft : a))
-    )
-
-    // PASO 6: Recargar todos los datos para sincronizar
-    console.log("🔄 Recargando datos...")
-    await reload()
-
-    // PASO 7: Mostrar confirmación al usuario
-    const nextMaintenanceHours = accumulated + aircraft.maintenanceIntervalHours
-    alert(`✅ Maintenance completed!\n\nNext maintenance at: ${nextMaintenanceHours.toFixed(1)} hours`)
-    
-    console.log("✅ === MANTENIMIENTO COMPLETADO EXITOSAMENTE ===")
-  } catch (error) {
-    console.error("❌ Error completando mantenimiento:", error)
-    alert("Error completing maintenance: " + error.message)
-  }
-}
   // Helper function to get pilot name by ID
   const getPilotName = (pilotId: string) => {
     const pilot = pilots.find((p) => p.id === pilotId)
@@ -647,8 +646,7 @@ const handleCompleteMaintenance = async (aircraftId: string) => {
         </div>
       )
     }
-
-    
+  }
 
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-8 space-y-6">
@@ -959,7 +957,9 @@ const handleCompleteMaintenance = async (aircraftId: string) => {
                       <div className="text-sm text-green-800">
                         <span className="font-medium">Calculated hours:</span> {safeToFixed(calculatedHours)} hs
                       </div>
-                      <div className="text-xs text-green-600 mt-1">Will be automatically deducted from Pilot 1 and Pilot 2, if applicable.</div>
+                      <div className="text-xs text-green-600 mt-1">
+                        Will be automatically deducted from Pilot 1 and Pilot 2, if applicable.
+                      </div>
                     </div>
                   )}
 
@@ -992,7 +992,7 @@ const handleCompleteMaintenance = async (aircraftId: string) => {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="shadow-sm">
               <CardHeader className="bg-gradient-to-r from-red-50 to-orange-50 border-b border-red-200">
                 <SectionHeader
@@ -1001,7 +1001,7 @@ const handleCompleteMaintenance = async (aircraftId: string) => {
                   icon={<ShieldAlert className="h-4 w-4 text-red-600" />}
                 />
               </CardHeader>
-              
+
               <CardContent className="space-y-3">
                 {maintenanceAlerts.length === 0 ? (
                   // No hay aviones que necesiten mantenimiento
@@ -1012,7 +1012,7 @@ const handleCompleteMaintenance = async (aircraftId: string) => {
                     // Calcular datos para cada avión
                     const { accumulated } = calcAircraftAccumulatedHours(aircraft, flights)
                     const maintenance = calcAircraftMaintenance(aircraft, accumulated)
-            
+
                     return (
                       <div key={aircraft.id} className="rounded-lg border p-3">
                         <div className="flex items-center justify-between">
@@ -1022,13 +1022,12 @@ const handleCompleteMaintenance = async (aircraftId: string) => {
                               {aircraft.tailNumber} - {aircraft.model}
                             </div>
                             <div className="text-sm text-muted-foreground">
-                              Accumulated: {safeToFixed(accumulated)} hs • Interval: {safeToFixed(aircraft.maintenanceIntervalHours)} hs
+                              Accumulated: {safeToFixed(accumulated)} hs • Interval:{" "}
+                              {safeToFixed(aircraft.maintenanceIntervalHours)} hs
                             </div>
-                            <div className="text-sm text-red-600 font-medium">
-                              Maintenance required now
-                            </div>
+                            <div className="text-sm text-red-600 font-medium">Maintenance required now</div>
                           </div>
-            
+
                           {/* ✅ BOTÓN SIMPLE: Solo "Complete" */}
                           <Button
                             onClick={() => handleCompleteMaintenance(aircraft.id)}
@@ -1044,6 +1043,7 @@ const handleCompleteMaintenance = async (aircraftId: string) => {
                 )}
               </CardContent>
             </Card>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Replace "Upcoming flights" with "Recent completed flights" */}
