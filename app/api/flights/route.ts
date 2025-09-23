@@ -48,22 +48,39 @@ export async function GET() {
       ORDER BY flight_time DESC
     `
 
-    const flights = rows.map((row: any) => ({
-      id: row.flight_id || generateFlightId(),
-      pilotId: row.pilot_id,
-      pilotId2: row.copilot_id || undefined,
-      aircraftId: row.aircraft_id || "unknown",
-      // Split flight_time into date and time
-      date: row.flight_time ? row.flight_time.split(" ")[0] : new Date().toISOString().split("T")[0],
-      time: row.flight_time ? row.flight_time.split(" ")[1] : "00:00",
-      // Convert duration from HH:MM:SS to decimal hours
-      duration: parseDurationToHours(row.duration),
-      status: (row.status || "completed") as "scheduled" | "completed" | "cancelled",
-      notes: row.notes || "",
-      tachometerStart: row.tachometer_start ? Number.parseFloat(row.tachometer_start) : undefined,
-      tachometerEnd: row.tachometer_end ? Number.parseFloat(row.tachometer_end) : undefined,
-      createdAt: row.created_at || new Date().toISOString(),
-    }))
+    console.log(`Fetched ${rows.length} flights from database`)
+
+    const flights = rows.map((row: any) => {
+      // Convertir duración de formato HH:MM:SS a horas decimales
+      const durationHours = parseDurationToHours(row.duration)
+
+      // Convertir tacómetro a números si existen
+      const tachometerStart = row.tachometer_start !== null ? Number(row.tachometer_start) : undefined
+      const tachometerEnd = row.tachometer_end !== null ? Number(row.tachometer_end) : undefined
+
+      // Calcular horas basadas en tacómetro si ambos valores existen
+      let calculatedHours = durationHours
+      if (tachometerStart !== undefined && tachometerEnd !== undefined) {
+        calculatedHours = tachometerEnd - tachometerStart
+      }
+
+      return {
+        id: row.flight_id || generateFlightId(),
+        pilotId: row.pilot_id,
+        pilotId2: row.copilot_id || undefined,
+        aircraftId: row.aircraft_id || "unknown",
+        // Split flight_time into date and time
+        date: row.flight_time ? row.flight_time.split(" ")[0] : new Date().toISOString().split("T")[0],
+        time: row.flight_time ? row.flight_time.split(" ")[1] : "00:00",
+        // Use calculated hours (either from duration or tachometer)
+        duration: calculatedHours,
+        status: (row.status || "completed") as "scheduled" | "completed" | "cancelled",
+        notes: row.notes || "",
+        tachometerStart,
+        tachometerEnd,
+        createdAt: row.created_at || new Date().toISOString(),
+      }
+    })
 
     return NextResponse.json(flights)
   } catch (error) {
@@ -109,8 +126,8 @@ export async function POST(req: Request) {
       duration: parseDurationToHours(row.duration),
       status: row.status as "scheduled" | "completed" | "cancelled",
       notes: row.notes || "",
-      tachometerStart: row.tachometer_start ? Number.parseFloat(row.tachometer_start) : undefined,
-      tachometerEnd: row.tachometer_end ? Number.parseFloat(row.tachometer_end) : undefined,
+      tachometerStart: row.tachometer_start ? Number(row.tachometer_start) : undefined,
+      tachometerEnd: row.tachometer_end ? Number(row.tachometer_end) : undefined,
       createdAt: row.created_at,
     }
 
@@ -183,8 +200,8 @@ export async function PUT(req: Request) {
       duration: parseDurationToHours(row.duration),
       status: row.status as "scheduled" | "completed" | "cancelled",
       notes: row.notes || "",
-      tachometerStart: row.tachometer_start ? Number.parseFloat(row.tachometer_start) : undefined,
-      tachometerEnd: row.tachometer_end ? Number.parseFloat(row.tachometer_end) : undefined,
+      tachometerStart: row.tachometer_start ? Number(row.tachometer_start) : undefined,
+      tachometerEnd: row.tachometer_end ? Number(row.tachometer_end) : undefined,
       createdAt: row.created_at,
     }
 
