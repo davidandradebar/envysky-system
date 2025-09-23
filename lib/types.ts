@@ -1,15 +1,16 @@
-export type Pilot = {
+// Types for the application
+export interface Pilot {
   id: string
   fullName: string
   email: string
   phone?: string
   country?: string
-  birthDate?: string // YYYY-MM-DD
+  birthDate?: string
   licenseType?: string
   createdAt: string
 }
 
-export type Aircraft = {
+export interface Aircraft {
   id: string
   tailNumber: string
   model: string
@@ -19,35 +20,36 @@ export type Aircraft = {
   createdAt: string
 }
 
-export type Purchase = {
+export interface Flight {
+  id: string
+  pilotId: string
+  pilotId2?: string
+  aircraftId: string
+  date: string
+  time: string
+  duration: number
+  status: "scheduled" | "completed" | "cancelled"
+  notes?: string
+  tachometerStart?: number
+  tachometerEnd?: number
+  createdAt: string
+}
+
+export interface Purchase {
   id: string
   pilotId: string
   hours: number
-  date: string // YYYY-MM-DD
+  date: string
   createdAt: string
 }
 
-export type Flight = {
-  id: string
-  pilotId: string
-  pilotId2?: string // Copiloto opcional
-  aircraftId: string
-  date: string // YYYY-MM-DD
-  time: string // HH:mm
-  duration: number // hours (decimal) - DEPRECATED: usar tacómetro
-  tachometerStart?: number // Tacómetro inicial
-  tachometerEnd?: number // Tacómetro final
-  status: "scheduled" | "completed"
-  notes?: string
-  createdAt: string
-}
-
-// Helper function para calcular horas desde tacómetro
+// Helper function to calculate flight hours based on tachometer or duration
 export function calculateFlightHours(flight: Flight): number {
-  // Si tiene tacómetros, usar esos
-  if (flight.tachometerEnd !== undefined && flight.tachometerStart !== undefined) {
+  // If tachometer values are available, use them
+  if (flight.tachometerStart !== undefined && flight.tachometerEnd !== undefined) {
     return flight.tachometerEnd - flight.tachometerStart
   }
-  // Fallback a duration para compatibilidad con vuelos antiguos
-  return flight.duration || 0
+
+  // Otherwise use duration
+  return flight.duration
 }
