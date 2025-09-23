@@ -1,77 +1,71 @@
 import { NextResponse } from "next/server"
 import { neon } from "@neondatabase/serverless"
 
+// Helper function to generate flight IDs
+function generateFlightId(): string {
+  return `flight_${Math.random().toString(36).substr(2, 9)}`
+}
+
+// Helper function to convert duration format (06:54:00) to decimal hours
+function parseDurationToHours(duration: string): number {
+  if (!duration) return 0
+
+  try {
+    const parts = duration.split(":")
+    const hours = Number.parseInt(parts[0]) || 0
+    const minutes = Number.parseInt(parts[1]) || 0
+    const seconds = Number.parseInt(parts[2]) || 0
+
+    return hours + minutes / 60 + seconds / 3600
+  } catch (error) {
+    console.error("Error parsing duration:", duration, error)
+    return 0
+  }
+}
+
+// Helper function to convert decimal hours to duration format (HH:MM:SS)
+function formatHoursToDuration(hours: number): string {
+  const totalSeconds = Math.round(hours * 3600)
+  const h = Math.floor(totalSeconds / 3600)
+  const m = Math.floor((totalSeconds % 3600) / 60)
+  const s = totalSeconds % 60
+
+  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`
+}
+
 export async function GET() {
-  if (!process.env.DATABASE_URL) return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 400 })
+  if (!process.env.DATABASE_URL) {
+    return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 400 })
+  }
 
   try {
     const sql = neon(process.env.DATABASE_URL!)
 
-    // Check if pilot_id_2 and tachometer columns exist
-    const columnCheck = await sql`
-      SELECT column_name 
-      FROM information_schema.columns 
-      WHERE table_name = 'flights' AND column_name IN ('pilot_id_2', 'tachometer_start', 'tachometer_end')
+    const rows = await sql`
+      SELECT flight_id, pilot_id, copilot_id, aircraft_id, flight_time, duration, 
+             status, notes, tachometer_start, tachometer_end, created_at
+      FROM flights 
+      ORDER BY flight_time DESC
     `
 
-    const hasPilotId2 = columnCheck.some((col) => col.column_name === "pilot_id_2")
-    const hasTachometer =
-      columnCheck.filter((col) => col.column_name === "tachometer_start" || col.column_name === "tachometer_end")
-        .length === 2
+    const flights = rows.map((row: any) => ({
+      id: row.flight_id || generateFlightId(),
+      pilotId: row.pilot_id,
+      pilotId2: row.copilot_id || undefined,
+      aircraftId: row.aircraft_id || "unknown",
+      // Split flight_time into date and time
+      date: row.flight_time ? row.flight_time.split(" ")[0] : new Date().toISOString().split("T")[0],
+      time: row.flight_time ? row.flight_time.split(" ")[1] : "00:00",
+      // Convert duration from HH:MM:SS to decimal hours
+      duration: parseDurationToHours(row.duration),
+      status: (row.status || "completed") as "scheduled" | "completed" | "cancelled",
+      notes: row.notes || "",
+      tachometerStart: row.tachometer_start ? Number.parseFloat(row.tachometer_start) : undefined,
+      tachometerEnd: row.tachometer_end ? Number.parseFloat(row.tachometer_end) : undefined,
+      createdAt: row.created_at || new Date().toISOString(),
+    }))
 
-    let rows
-    if (hasPilotId2 && hasTachometer) {
-      // New query with pilot_id_2 and tachometer fields
-      rows = await sql`
-        SELECT id, pilot_id as "pilotId", pilot_id_2 as "pilotId2", aircraft_id as "aircraftId", 
-               date, time, duration, tachometer_start as "tachometerStart", tachometer_end as "tachometerEnd",
-               status, notes, created_at as "createdAt"
-        FROM flights
-        ORDER BY date DESC, time DESC
-      `
-    } else if (hasPilotId2 && !hasTachometer) {
-      // Query with pilot_id_2 but without tachometer
-      rows = await sql`
-        SELECT id, pilot_id as "pilotId", pilot_id_2 as "pilotId2", aircraft_id as "aircraftId", 
-               date, time, duration, status, notes, created_at as "createdAt"
-        FROM flights
-        ORDER BY date DESC, time DESC
-      `
-      // Add tachometer fields as undefined for compatibility
-      rows = rows.map((row) => ({
-        ...row,
-        tachometerStart: undefined,
-        tachometerEnd: undefined,
-      }))
-    } else if (!hasPilotId2 && hasTachometer) {
-      // Query without pilot_id_2 but with tachometer
-      rows = await sql`
-        SELECT id, pilot_id as "pilotId", aircraft_id as "aircraftId", 
-               date, time, duration, tachometer_start as "tachometerStart", tachometer_end as "tachometerEnd",
-               status, notes, created_at as "createdAt"
-        FROM flights
-        ORDER BY date DESC, time DESC
-      `
-      // Add pilotId2 as null for compatibility
-      rows = rows.map((row) => ({ ...row, pilotId2: null }))
-    } else {
-      // Legacy query without pilot_id_2 and tachometer
-      rows = await sql`
-        SELECT id, pilot_id as "pilotId", aircraft_id as "aircraftId", 
-               date, time, duration, status, notes, created_at as "createdAt"
-        FROM flights
-        ORDER BY date DESC, time DESC
-      `
-      // Add pilotId2 and tachometer fields as null/undefined for compatibility
-      rows = rows.map((row) => ({
-        ...row,
-        pilotId2: null,
-        tachometerStart: undefined,
-        tachometerEnd: undefined,
-      }))
-    }
-
-    return NextResponse.json(rows)
+    return NextResponse.json(flights)
   } catch (error) {
     console.error("Error fetching flights:", error)
     return NextResponse.json({ error: "Failed to fetch flights" }, { status: 500 })
@@ -79,83 +73,48 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  if (!process.env.DATABASE_URL) return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 400 })
+  if (!process.env.DATABASE_URL) {
+    return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 400 })
+  }
 
   try {
     const body = await req.json()
     const sql = neon(process.env.DATABASE_URL!)
 
-    // Check if pilot_id_2 and tachometer columns exist
-    const columnCheck = await sql`
-      SELECT column_name 
-      FROM information_schema.columns 
-      WHERE table_name = 'flights' AND column_name IN ('pilot_id_2', 'tachometer_start', 'tachometer_end')
+    const flightId = generateFlightId()
+    // Combine date and time into flight_time
+    const flightTime = `${body.date} ${body.time}`
+    // Convert duration from decimal hours to HH:MM:SS
+    const durationFormatted = formatHoursToDuration(body.duration || 0)
+
+    const rows = await sql`
+      INSERT INTO flights (flight_id, pilot_id, copilot_id, aircraft_id, flight_time, duration, 
+                          status, notes, tachometer_start, tachometer_end, created_at)
+      VALUES (${flightId}, ${body.pilotId}, ${body.pilotId2 || null}, ${body.aircraftId || "unknown"}, 
+              ${flightTime}, ${durationFormatted}, ${body.status || "scheduled"},
+              ${body.notes || ""}, ${body.tachometerStart || null}, 
+              ${body.tachometerEnd || null}, NOW())
+      RETURNING flight_id, pilot_id, copilot_id, aircraft_id, flight_time, duration, 
+                status, notes, tachometer_start, tachometer_end, created_at
     `
 
-    const hasPilotId2 = columnCheck.some((col) => col.column_name === "pilot_id_2")
-    const hasTachometer =
-      columnCheck.filter((col) => col.column_name === "tachometer_start" || col.column_name === "tachometer_end")
-        .length === 2
-
-    let rows
-    if (hasPilotId2 && hasTachometer) {
-      // Insert with pilot_id_2 and tachometer fields
-      rows = await sql`
-        INSERT INTO flights (pilot_id, pilot_id_2, aircraft_id, date, time, duration, tachometer_start, tachometer_end, status, notes)
-        VALUES (${body.pilotId}, ${body.pilotId2 || null}, ${body.aircraftId}, ${body.date}, ${body.time}, 
-                ${body.duration || 0}, ${body.tachometerStart || null}, ${body.tachometerEnd || null}, 
-                ${body.status}, ${body.notes || ""})
-        RETURNING id, pilot_id as "pilotId", pilot_id_2 as "pilotId2", aircraft_id as "aircraftId", 
-                  date, time, duration, tachometer_start as "tachometerStart", tachometer_end as "tachometerEnd",
-                  status, notes, created_at as "createdAt"
-      `
-    } else if (hasPilotId2 && !hasTachometer) {
-      // Insert with pilot_id_2 but without tachometer
-      rows = await sql`
-        INSERT INTO flights (pilot_id, pilot_id_2, aircraft_id, date, time, duration, status, notes)
-        VALUES (${body.pilotId}, ${body.pilotId2 || null}, ${body.aircraftId}, ${body.date}, ${body.time}, 
-                ${body.duration || 0}, ${body.status}, ${body.notes || ""})
-        RETURNING id, pilot_id as "pilotId", pilot_id_2 as "pilotId2", aircraft_id as "aircraftId", 
-                  date, time, duration, status, notes, created_at as "createdAt"
-      `
-      // Add tachometer fields as undefined for compatibility
-      rows = rows.map((row) => ({
-        ...row,
-        tachometerStart: undefined,
-        tachometerEnd: undefined,
-      }))
-    } else if (!hasPilotId2 && hasTachometer) {
-      // Insert without pilot_id_2 but with tachometer
-      rows = await sql`
-        INSERT INTO flights (pilot_id, aircraft_id, date, time, duration, tachometer_start, tachometer_end, status, notes)
-        VALUES (${body.pilotId}, ${body.aircraftId}, ${body.date}, ${body.time}, 
-                ${body.duration || 0}, ${body.tachometerStart || null}, ${body.tachometerEnd || null}, 
-                ${body.status}, ${body.notes || ""})
-        RETURNING id, pilot_id as "pilotId", aircraft_id as "aircraftId", 
-                  date, time, duration, tachometer_start as "tachometerStart", tachometer_end as "tachometerEnd",
-                  status, notes, created_at as "createdAt"
-      `
-      // Add pilotId2 as null for compatibility
-      rows = rows.map((row) => ({ ...row, pilotId2: null }))
-    } else {
-      // Legacy insert without pilot_id_2 and tachometer
-      rows = await sql`
-        INSERT INTO flights (pilot_id, aircraft_id, date, time, duration, status, notes)
-        VALUES (${body.pilotId}, ${body.aircraftId}, ${body.date}, ${body.time}, 
-                ${body.duration || 0}, ${body.status}, ${body.notes || ""})
-        RETURNING id, pilot_id as "pilotId", aircraft_id as "aircraftId", 
-                  date, time, duration, status, notes, created_at as "createdAt"
-      `
-      // Add pilotId2 and tachometer fields as null/undefined for compatibility
-      rows = rows.map((row) => ({
-        ...row,
-        pilotId2: null,
-        tachometerStart: undefined,
-        tachometerEnd: undefined,
-      }))
+    const row = rows[0]
+    const newFlight = {
+      id: row.flight_id,
+      pilotId: row.pilot_id,
+      pilotId2: row.copilot_id || undefined,
+      aircraftId: row.aircraft_id || "unknown",
+      date: row.flight_time ? row.flight_time.split(" ")[0] : body.date,
+      time: row.flight_time ? row.flight_time.split(" ")[1] : body.time,
+      duration: parseDurationToHours(row.duration),
+      status: row.status as "scheduled" | "completed" | "cancelled",
+      notes: row.notes || "",
+      tachometerStart: row.tachometer_start ? Number.parseFloat(row.tachometer_start) : undefined,
+      tachometerEnd: row.tachometer_end ? Number.parseFloat(row.tachometer_end) : undefined,
+      createdAt: row.created_at,
     }
 
-    return NextResponse.json(rows[0])
+    return NextResponse.json(newFlight)
   } catch (error) {
     console.error("Error creating flight:", error)
     return NextResponse.json({ error: "Failed to create flight" }, { status: 500 })
@@ -163,27 +122,15 @@ export async function POST(req: Request) {
 }
 
 export async function PUT(req: Request) {
-  if (!process.env.DATABASE_URL) return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 400 })
+  if (!process.env.DATABASE_URL) {
+    return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 400 })
+  }
 
   try {
     const body = await req.json()
     const sql = neon(process.env.DATABASE_URL!)
 
     console.log("PUT request body:", body)
-
-    // Check if pilot_id_2 and tachometer columns exist
-    const columnCheck = await sql`
-      SELECT column_name 
-      FROM information_schema.columns 
-      WHERE table_name = 'flights' AND column_name IN ('pilot_id_2', 'tachometer_start', 'tachometer_end')
-    `
-
-    const hasPilotId2 = columnCheck.some((col) => col.column_name === "pilot_id_2")
-    const hasTachometer =
-      columnCheck.filter((col) => col.column_name === "tachometer_start" || col.column_name === "tachometer_end")
-        .length === 2
-
-    console.log("Column availability:", { hasPilotId2, hasTachometer })
 
     // Calculate duration if both tachometer values are provided
     let calculatedDuration = null
@@ -192,103 +139,57 @@ export async function PUT(req: Request) {
       console.log("Calculated duration:", calculatedDuration)
     }
 
-    let rows
-    if (hasPilotId2 && hasTachometer) {
-      // Update with pilot_id_2 and tachometer fields - USING TAGGED TEMPLATE
-      if (calculatedDuration !== null) {
-        // Update with calculated duration
-        rows = await sql`
-          UPDATE flights
-          SET status = ${body.status},
-              pilot_id_2 = ${body.pilotId2 !== undefined ? body.pilotId2 : sql`pilot_id_2`},
-              tachometer_start = ${body.tachometerStart !== undefined ? Number(body.tachometerStart) : sql`tachometer_start`},
-              tachometer_end = ${body.tachometerEnd !== undefined ? Number(body.tachometerEnd) : sql`tachometer_end`},
-              duration = ${calculatedDuration}
-          WHERE id = ${body.id}
-          RETURNING id, pilot_id as "pilotId", pilot_id_2 as "pilotId2", aircraft_id as "aircraftId", 
-                    date, time, duration, tachometer_start as "tachometerStart", tachometer_end as "tachometerEnd",
-                    status, notes, created_at as "createdAt"
-        `
-      } else {
-        // Update without duration calculation
-        rows = await sql`
-          UPDATE flights
-          SET status = ${body.status},
-              pilot_id_2 = ${body.pilotId2 !== undefined ? body.pilotId2 : sql`pilot_id_2`},
-              tachometer_start = ${body.tachometerStart !== undefined ? Number(body.tachometerStart) : sql`tachometer_start`},
-              tachometer_end = ${body.tachometerEnd !== undefined ? Number(body.tachometerEnd) : sql`tachometer_end`}
-          WHERE id = ${body.id}
-          RETURNING id, pilot_id as "pilotId", pilot_id_2 as "pilotId2", aircraft_id as "aircraftId", 
-                    date, time, duration, tachometer_start as "tachometerStart", tachometer_end as "tachometerEnd",
-                    status, notes, created_at as "createdAt"
-        `
-      }
-    } else if (hasPilotId2 && !hasTachometer) {
-      // Update with pilot_id_2 but without tachometer
-      rows = await sql`
+    let updateQuery
+    if (calculatedDuration !== null) {
+      // Update with calculated duration (convert to HH:MM:SS format)
+      const durationFormatted = formatHoursToDuration(calculatedDuration)
+      updateQuery = await sql`
         UPDATE flights
         SET status = ${body.status},
-            pilot_id_2 = ${body.pilotId2 !== undefined ? body.pilotId2 : sql`pilot_id_2`}
-        WHERE id = ${body.id}
-        RETURNING id, pilot_id as "pilotId", pilot_id_2 as "pilotId2", aircraft_id as "aircraftId", 
-                  date, time, duration, status, notes, created_at as "createdAt"
+            copilot_id = ${body.pilotId2 !== undefined ? body.pilotId2 : sql`copilot_id`},
+            tachometer_start = ${body.tachometerStart !== undefined ? Number(body.tachometerStart) : sql`tachometer_start`},
+            tachometer_end = ${body.tachometerEnd !== undefined ? Number(body.tachometerEnd) : sql`tachometer_end`},
+            duration = ${durationFormatted}
+        WHERE flight_id = ${body.id}
+        RETURNING flight_id, pilot_id, copilot_id, aircraft_id, flight_time, duration, 
+                  status, notes, tachometer_start, tachometer_end, created_at
       `
-      // Add tachometer fields as undefined for compatibility
-      rows = rows.map((row) => ({
-        ...row,
-        tachometerStart: undefined,
-        tachometerEnd: undefined,
-      }))
-    } else if (!hasPilotId2 && hasTachometer) {
-      // Update without pilot_id_2 but with tachometer
-      if (calculatedDuration !== null) {
-        // Update with calculated duration
-        rows = await sql`
-          UPDATE flights
-          SET status = ${body.status},
-              tachometer_start = ${body.tachometerStart !== undefined ? Number(body.tachometerStart) : sql`tachometer_start`},
-              tachometer_end = ${body.tachometerEnd !== undefined ? Number(body.tachometerEnd) : sql`tachometer_end`},
-              duration = ${calculatedDuration}
-          WHERE id = ${body.id}
-          RETURNING id, pilot_id as "pilotId", aircraft_id as "aircraftId", 
-                    date, time, duration, tachometer_start as "tachometerStart", tachometer_end as "tachometerEnd",
-                    status, notes, created_at as "createdAt"
-        `
-      } else {
-        // Update without duration calculation
-        rows = await sql`
-          UPDATE flights
-          SET status = ${body.status},
-              tachometer_start = ${body.tachometerStart !== undefined ? Number(body.tachometerStart) : sql`tachometer_start`},
-              tachometer_end = ${body.tachometerEnd !== undefined ? Number(body.tachometerEnd) : sql`tachometer_end`}
-          WHERE id = ${body.id}
-          RETURNING id, pilot_id as "pilotId", aircraft_id as "aircraftId", 
-                    date, time, duration, tachometer_start as "tachometerStart", tachometer_end as "tachometerEnd",
-                    status, notes, created_at as "createdAt"
-        `
-      }
-      // Add pilotId2 as null for compatibility
-      rows = rows.map((row) => ({ ...row, pilotId2: null }))
     } else {
-      // Legacy update without pilot_id_2 and tachometer
-      rows = await sql`
+      // Update without duration calculation
+      updateQuery = await sql`
         UPDATE flights
-        SET status = ${body.status}
-        WHERE id = ${body.id}
-        RETURNING id, pilot_id as "pilotId", aircraft_id as "aircraftId", 
-                  date, time, duration, status, notes, created_at as "createdAt"
+        SET status = ${body.status},
+            copilot_id = ${body.pilotId2 !== undefined ? body.pilotId2 : sql`copilot_id`},
+            tachometer_start = ${body.tachometerStart !== undefined ? Number(body.tachometerStart) : sql`tachometer_start`},
+            tachometer_end = ${body.tachometerEnd !== undefined ? Number(body.tachometerEnd) : sql`tachometer_end`}
+        WHERE flight_id = ${body.id}
+        RETURNING flight_id, pilot_id, copilot_id, aircraft_id, flight_time, duration, 
+                  status, notes, tachometer_start, tachometer_end, created_at
       `
-      // Add pilotId2 and tachometer fields as null/undefined for compatibility
-      rows = rows.map((row) => ({
-        ...row,
-        pilotId2: null,
-        tachometerStart: undefined,
-        tachometerEnd: undefined,
-      }))
     }
 
-    console.log("Update result:", rows[0])
-    return NextResponse.json(rows[0])
+    if (updateQuery.length === 0) {
+      return NextResponse.json({ error: "Flight not found" }, { status: 404 })
+    }
+
+    const row = updateQuery[0]
+    const updatedFlight = {
+      id: row.flight_id,
+      pilotId: row.pilot_id,
+      pilotId2: row.copilot_id || undefined,
+      aircraftId: row.aircraft_id || "unknown",
+      date: row.flight_time ? row.flight_time.split(" ")[0] : new Date().toISOString().split("T")[0],
+      time: row.flight_time ? row.flight_time.split(" ")[1] : "00:00",
+      duration: parseDurationToHours(row.duration),
+      status: row.status as "scheduled" | "completed" | "cancelled",
+      notes: row.notes || "",
+      tachometerStart: row.tachometer_start ? Number.parseFloat(row.tachometer_start) : undefined,
+      tachometerEnd: row.tachometer_end ? Number.parseFloat(row.tachometer_end) : undefined,
+      createdAt: row.created_at,
+    }
+
+    console.log("Update result:", updatedFlight)
+    return NextResponse.json(updatedFlight)
   } catch (error) {
     console.error("Error updating flight:", error)
     return NextResponse.json({ error: "Failed to update flight", details: error.message }, { status: 500 })
