@@ -39,7 +39,7 @@ export async function GET() {
   }
 
   try {
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = neon(process.env.DATABASE_URL)
 
     const rows = await sql`
       SELECT flight_id, pilot_id, copilot_id, aircraft_id, flight_time, duration, 
@@ -60,8 +60,32 @@ export async function GET() {
 
       // Calcular horas basadas en tacómetro si ambos valores existen
       let calculatedHours = durationHours
-      if (tachometerStart !== undefined && tachometerEnd !== undefined) {
+      if (
+        tachometerStart !== undefined &&
+        tachometerEnd !== undefined &&
+        !isNaN(tachometerStart) &&
+        !isNaN(tachometerEnd)
+      ) {
         calculatedHours = tachometerEnd - tachometerStart
+      }
+
+      // Extraer fecha y hora del flight_time
+      let date = ""
+      let time = ""
+      if (row.flight_time) {
+        try {
+          const dateObj = new Date(row.flight_time)
+          date = dateObj.toISOString().split("T")[0]
+          time = dateObj.toISOString().split("T")[1].substring(0, 5)
+        } catch (e) {
+          console.error("Error parsing flight_time:", row.flight_time)
+          // Intentar dividir manualmente si es un string con formato "YYYY-MM-DD HH:MM:SS"
+          const parts = String(row.flight_time).split(" ")
+          if (parts.length >= 2) {
+            date = parts[0]
+            time = parts[1].substring(0, 5)
+          }
+        }
       }
 
       return {
@@ -69,10 +93,8 @@ export async function GET() {
         pilotId: row.pilot_id,
         pilotId2: row.copilot_id || undefined,
         aircraftId: row.aircraft_id || "unknown",
-        // Split flight_time into date and time
-        date: row.flight_time ? row.flight_time.split(" ")[0] : new Date().toISOString().split("T")[0],
-        time: row.flight_time ? row.flight_time.split(" ")[1] : "00:00",
-        // Use calculated hours (either from duration or tachometer)
+        date,
+        time,
         duration: calculatedHours,
         status: (row.status || "completed") as "scheduled" | "completed" | "cancelled",
         notes: row.notes || "",
@@ -96,9 +118,9 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json()
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = neon(process.env.DATABASE_URL)
 
-    const flightId = generateFlightId()
+    const flightId = body.id || generateFlightId()
     // Combine date and time into flight_time
     const flightTime = `${body.date} ${body.time}`
     // Convert duration from decimal hours to HH:MM:SS
@@ -145,7 +167,7 @@ export async function PUT(req: Request) {
 
   try {
     const body = await req.json()
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = neon(process.env.DATABASE_URL)
 
     console.log("PUT request body:", body)
 
