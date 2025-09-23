@@ -1,7 +1,8 @@
+// Aggregate functions for calculating pilot hours, aircraft hours, etc.
 import type { Aircraft, Flight, Purchase } from "./types"
 import { calculateFlightHours } from "./types"
 
-// Pilot aggregates: purchased, flown, remaining
+// Calculate pilot hours (purchased, flown, remaining)
 export function calcPilotHours(pilotId: string, purchases: Purchase[], flights: Flight[]) {
   // Ensure we have valid arrays
   const validPurchases = Array.isArray(purchases) ? purchases : []
@@ -16,26 +17,26 @@ export function calcPilotHours(pilotId: string, purchases: Purchase[], flights: 
     (f) => f && (f.pilotId === pilotId || f.pilotId2 === pilotId) && f.status === "completed",
   )
 
-  console.log(
-    `✈️ Vuelos donde participó este piloto:`,
-    pilotFlights.map((f) => ({
-      id: f.id,
-      date: f.date,
-      pilotId: f.pilotId,
-      pilotId2: f.pilotId2,
-      isPilot1: f.pilotId === pilotId,
-      isPilot2: f.pilotId2 === pilotId,
-      duration: calculateFlightHours(f),
-    })),
-  )
+  console.log(`✈️ Vuelos donde participó este piloto: ${pilotFlights.length}`)
 
+  // Log detallado de cada vuelo
+  pilotFlights.forEach((f) => {
+    console.log(`   🛫 Vuelo ${f.id}: ${f.date} - Piloto: ${f.pilotId}, Copiloto: ${f.pilotId2 || "ninguno"}`)
+    console.log(`      Duración: ${calculateFlightHours(f)} horas`)
+    if (f.tachometerStart !== undefined && f.tachometerEnd !== undefined) {
+      console.log(`      Tacómetro: ${f.tachometerStart} → ${f.tachometerEnd}`)
+    }
+  })
+
+  // Calcular horas compradas
   const purchased = validPurchases
     .filter((p) => p && p.pilotId === pilotId)
     .reduce((sum, p) => {
-      const hours = typeof p.hours === "number" ? p.hours : Number.parseFloat(p.hours) || 0
+      const hours = typeof p.hours === "number" ? p.hours : Number.parseFloat(String(p.hours)) || 0
       return sum + hours
     }, 0)
 
+  // Calcular horas voladas
   const flown = pilotFlights.reduce((sum, f) => {
     // Use new tachometer calculation
     const duration = calculateFlightHours(f)
@@ -56,8 +57,11 @@ export function calcPilotHours(pilotId: string, purchases: Purchase[], flights: 
 
 // Calculate aircraft accumulated hours
 export function calcAircraftAccumulatedHours(aircraft: Aircraft, flights: Flight[]) {
-  const flownHours = flights
-    .filter((f) => f.aircraftId === aircraft.id && f.status === "completed")
+  // Ensure we have valid arrays
+  const validFlights = Array.isArray(flights) ? flights : []
+
+  const flownHours = validFlights
+    .filter((f) => f && f.aircraftId === aircraft.id && f.status === "completed")
     .reduce((sum, f) => sum + calculateFlightHours(f), 0)
 
   const accumulated = aircraft.initialHours + flownHours
