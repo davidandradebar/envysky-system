@@ -1,46 +1,38 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { getPurchases, savePurchase } from "@/lib/db"
+import { NextResponse } from "next/server"
+import { neon } from "@neondatabase/serverless"
 
 export async function GET() {
-  try {
-    console.log("🔍 GET /api/purchases - Fetching purchases...")
-    const purchases = await getPurchases()
-    console.log(`✅ Found ${purchases.length} purchases`)
-    return NextResponse.json(purchases)
-  } catch (error) {
-    console.error("❌ Error fetching purchases:", error)
-    return NextResponse.json({ error: "Failed to fetch purchases" }, { status: 500 })
-  }
+  if (!process.env.DATABASE_URL) return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 400 })
+  const sql = neon(process.env.DATABASE_URL!)
+  const rows = await sql`
+    SELECT id, pilot_id as "pilotId", hours, date, created_at as "createdAt"
+    FROM purchases
+    ORDER BY created_at DESC
+  `
+  return NextResponse.json(rows)
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    console.log("📝 POST /api/purchases - Creating purchase...")
-    const body = await request.json()
-    console.log("📋 Request body:", body)
-
-    const { pilotEmail, hours, date, fullName, phone, country, birthDate, licenseType } = body
-
-    if (!pilotEmail || !hours || !date) {
-      console.log("❌ Missing required fields")
-      return NextResponse.json({ error: "Pilot email, hours, and date are required" }, { status: 400 })
-    }
-
-    const purchase = await savePurchase({
-      pilotEmail,
-      hours: Number(hours),
-      date,
-      fullName,
-      phone,
-      country,
-      birthDate,
-      licenseType,
-    })
-
-    console.log("✅ Purchase created:", purchase)
-    return NextResponse.json(purchase)
-  } catch (error) {
-    console.error("❌ Error creating purchase:", error)
-    return NextResponse.json({ error: "Failed to create purchase" }, { status: 500 })
+export async function POST(req: Request) {
+  if (!process.env.DATABASE_URL) return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 400 })
+  const sql = neon(process.env.DATABASE_URL!)
+  const body = await req.json()
+  // ensure pilot exists (by email)
+  let pilotId = body.pilotId as string | null
+  if (!pilotId && body.pilotEmail) {
+    const pilots = await sql`SELECT id FROM pilots WHERE email = ${body.pilotEmail} LIMIT 1`
+    if (pilots.length === 0) {
+      const inserted = await sql`
+        INSERT INTO pilots (full_name, email, phone, country, birth_date, license_type)
+        VALUES (${body.fullName || "Sin nombre"}, ${body.pilotEmail}, ${body.phone || ""}, ${body.country || ""}, ${body.birthDate || null}, ${body.licenseType || ""})
+        RETURNING id
+      `
+      pilotId = inserted[0].id as string
+    } else pilotId = pilots[0].id as string
   }
+  const rows = await sql`
+    INSERT INTO purchases (pilot_id, hours, date)
+    VALUES (${pilotId || body.pilotId}, ${body.hours}, ${body.date})
+    RETURNING id, pilot_id as "pilotId", hours, date, created_at as "createdAt"
+  `
+  return NextResponse.json(rows[0])
 }
