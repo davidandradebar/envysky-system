@@ -1,78 +1,74 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { neon } from "@neondatabase/serverless"
 
-function generateFlightId(): string {
-  return `flight_${Math.random().toString(36).substr(2, 9)}`
-}
+const sql = neon(process.env.DATABASE_URL!)
 
 export async function GET() {
   try {
-    const sql = neon(process.env.DATABASE_URL!)
-    const rows = await sql`SELECT * FROM flights ORDER BY created_at DESC`
+    console.log("🔍 GET /api/flights - Fetching flights...")
 
-    const flights = rows.map((row: any) => {
-      let date = ""
-      let time = ""
-      if (row.flight_time) {
-        const parts = String(row.flight_time).split(" ")
-        date = parts[0] || ""
-        time = parts[1] ? parts[1].substring(0, 5) : ""
-      }
+    const flights = await sql`
+      SELECT 
+        flight_id as id,
+        pilot_id as "pilotId",
+        copilot_id as "pilotId2",
+        aircraft_id as "aircraftId",
+        flight_time as date,
+        '00:00' as time,
+        duration,
+        status,
+        notes,
+        tachometer_start as "tachometerStart",
+        tachometer_end as "tachometerEnd",
+        created_at as "createdAt"
+      FROM flights 
+      ORDER BY created_at DESC
+    `
 
-      return {
-        id: row.flight_id || generateFlightId(),
-        pilotId: row.pilot_id || "",
-        pilotId2: row.copilot_id || undefined,
-        aircraftId: row.aircraft_id || "",
-        date,
-        time,
-        duration: 0,
-        status: row.status || "completed",
-        notes: row.notes || "",
-        tachometerStart: row.tachometer_start ? Number(row.tachometer_start) : undefined,
-        tachometerEnd: row.tachometer_end ? Number(row.tachometer_end) : undefined,
-        createdAt: row.created_at || new Date().toISOString(),
-      }
-    })
-
+    console.log("✅ Flights fetched:", flights.length)
     return NextResponse.json(flights)
   } catch (error) {
-    console.error("Error:", error)
+    console.error("❌ Error fetching flights:", error)
     return NextResponse.json({ error: "Failed to fetch flights" }, { status: 500 })
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json()
-    const sql = neon(process.env.DATABASE_URL!)
-    const flightId = generateFlightId()
+    console.log("📝 POST /api/flights - Creating flight...")
 
-    await sql`
-      INSERT INTO flights (flight_id, pilot_id, copilot_id, aircraft_id, flight_time, duration, status, notes, tachometer_start, tachometer_end, created_at)
-      VALUES (${flightId}, ${body.pilotId || ""}, ${body.pilotId2 || null}, ${body.aircraftId || ""}, 
-              ${body.date + " " + body.time}, '00:00:00', ${body.status || "completed"}, ${body.notes || ""}, 
-              ${body.tachometerStart || null}, ${body.tachometerEnd || null}, NOW())
-    `
+    const body = await request.json()
+    console.log("📦 Request body:", body)
 
-    const flight = {
-      id: flightId,
-      pilotId: body.pilotId || "",
-      pilotId2: body.pilotId2 || undefined,
-      aircraftId: body.aircraftId || "",
-      date: body.date || "",
-      time: body.time || "",
-      duration: 0,
-      status: body.status || "completed",
-      notes: body.notes || "",
-      tachometerStart: body.tachometerStart || undefined,
-      tachometerEnd: body.tachometerEnd || undefined,
-      createdAt: new Date().toISOString(),
+    const { pilotId, pilotId2, aircraftId, date, time, tachometerStart, tachometerEnd, notes } = body
+
+    if (!pilotId || !aircraftId || !date) {
+      return NextResponse.json({ error: "Pilot, aircraft and date are required" }, { status: 400 })
     }
 
-    return NextResponse.json(flight)
+    const duration = tachometerEnd && tachometerStart ? Number(tachometerEnd) - Number(tachometerStart) : 0
+
+    const flight = await sql`
+      INSERT INTO flights (pilot_id, copilot_id, aircraft_id, flight_time, duration, status, notes, tachometer_start, tachometer_end)
+      VALUES (${pilotId}, ${pilotId2 || null}, ${aircraftId}, ${date}, ${duration}, 'completed', ${notes || ""}, ${Number(tachometerStart) || null}, ${Number(tachometerEnd) || null})
+      RETURNING 
+        flight_id as id,
+        pilot_id as "pilotId",
+        copilot_id as "pilotId2",
+        aircraft_id as "aircraftId",
+        flight_time as date,
+        duration,
+        status,
+        notes,
+        tachometer_start as "tachometerStart",
+        tachometer_end as "tachometerEnd",
+        created_at as "createdAt"
+    `
+
+    console.log("✅ Flight created:", flight[0])
+    return NextResponse.json(flight[0])
   } catch (error) {
-    console.error("Error:", error)
+    console.error("❌ Error creating flight:", error)
     return NextResponse.json({ error: "Failed to create flight" }, { status: 500 })
   }
 }
