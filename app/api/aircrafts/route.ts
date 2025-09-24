@@ -1,29 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { neon } from "@neondatabase/serverless"
-
-const sql = neon(process.env.DATABASE_URL!)
+import { getAircrafts, createAircraft } from "@/lib/db"
 
 export async function GET() {
   try {
-    console.log("🔍 GET /api/aircrafts - Fetching aircrafts...")
-
-    const aircrafts = await sql`
-      SELECT 
-        id_flights as id,
-        tail_number as "tailNumber",
-        model,
-        initial_hours as "initialHours",
-        maintenace_interval as "maintenanceIntervalHours",
-        status,
-        created_at as "createdAt"
-      FROM aircrafts 
-      ORDER BY created_at DESC
-    `
-
-    console.log(`✅ Found ${aircrafts.length} aircrafts`)
+    console.log("🔍 API /api/aircrafts - Fetching aircrafts...")
+    const aircrafts = await getAircrafts()
+    console.log("✅ API /api/aircrafts - Success:", aircrafts.length, "aircrafts found")
     return NextResponse.json(aircrafts)
   } catch (error) {
-    console.error("❌ Error fetching aircrafts:", error)
+    console.error("❌ API /api/aircrafts - Error:", error)
     return NextResponse.json({ error: "Failed to fetch aircrafts" }, { status: 500 })
   }
 }
@@ -42,25 +27,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Tail number and model are required" }, { status: 400 })
     }
 
-    const aircraft = await sql`
-      INSERT INTO aircrafts (tail_number, model, initial_hours, maintenace_interval, status)
-      VALUES (
-        ${tailNumber}, 
-        ${model}, 
-        ${Number(initialHours) || 0}, 
-        ${Number(maintenanceIntervalHours) || 100}, 
-        ${status || "active"}
-      )
-      RETURNING 
-        id_flights as id,
-        tail_number as "tailNumber",
-        model,
-        initial_hours as "initialHours",
-        maintenace_interval as "maintenanceIntervalHours",
-        status,
-        created_at as "createdAt"
-    `
-
+    const aircraft = await createAircraft(tailNumber, model, initialHours, maintenanceIntervalHours, status)
     console.log("✅ Aircraft created:", aircraft[0])
     return NextResponse.json(aircraft[0])
   } catch (error) {
