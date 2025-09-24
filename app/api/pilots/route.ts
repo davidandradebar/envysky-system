@@ -15,35 +15,36 @@ export async function GET() {
     const sql = neon(process.env.DATABASE_URL!)
     const rows = await sql`
       SELECT 
-        pilot_id as "id",
-        full_name as "fullName", 
+        pilot_id,
+        full_name, 
         email, 
         phone, 
         country, 
-        birth_date as "birthDate", 
-        license_type as "licenseType", 
-        created_at as "createdAt",
+        birth_date, 
+        license_type, 
+        created_at,
         COALESCE(purchases, 0) as purchases
       FROM pilots
       ORDER BY created_at DESC
     `
 
+    console.log(`Fetched ${rows.length} pilots from database`)
+
     const pilots = rows.map((row: any) => ({
-      id: row.id || generatePilotId(),
-      fullName: row.fullName || "",
+      id: row.pilot_id || generatePilotId(),
+      fullName: row.full_name || "",
       email: row.email || "",
       phone: row.phone || "",
       country: row.country || "",
-      birthDate: row.birthDate || "",
-      licenseType: row.licenseType || "",
-      createdAt: row.createdAt || new Date().toISOString(),
-      purchases: Number(row.purchases) || 0,
+      birthDate: row.birth_date || "",
+      licenseType: row.license_type || "",
+      createdAt: row.created_at || new Date().toISOString(),
     }))
 
     return NextResponse.json(pilots)
   } catch (error) {
     console.error("Error fetching pilots:", error)
-    return NextResponse.json({ error: "Failed to fetch pilots" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to fetch pilots", details: error.message }, { status: 500 })
   }
 }
 
@@ -54,12 +55,12 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json()
-    console.log("Creating pilot:", body.fullName, body.email)
+    console.log("Creating pilot with data:", body)
 
     const sql = neon(process.env.DATABASE_URL!)
     const pilotId = body.id || generatePilotId()
 
-    // SOLUCIÓN: No insertar el campo 'purchases' porque se calcula automáticamente
+    // Insert pilot with correct column names
     const rows = await sql`
       INSERT INTO pilots (
         pilot_id, 
@@ -68,7 +69,9 @@ export async function POST(req: Request) {
         phone, 
         country, 
         birth_date, 
-        license_type
+        license_type,
+        created_at,
+        purchases
       )
       VALUES (
         ${pilotId}, 
@@ -77,32 +80,33 @@ export async function POST(req: Request) {
         ${body.phone || null}, 
         ${body.country || null}, 
         ${body.birthDate || null}, 
-        ${body.licenseType || null}
+        ${body.licenseType || null},
+        NOW(),
+        0
       )
       RETURNING 
-        pilot_id as "id",
-        full_name as "fullName", 
+        pilot_id,
+        full_name, 
         email, 
         phone, 
         country, 
-        birth_date as "birthDate", 
-        license_type as "licenseType", 
-        created_at as "createdAt",
-        COALESCE(purchases, 0) as purchases
+        birth_date, 
+        license_type, 
+        created_at,
+        purchases
     `
 
-    console.log("Pilot created successfully:", rows[0].fullName)
+    console.log("Pilot created successfully:", rows[0])
 
     const pilot = {
-      id: rows[0].id,
-      fullName: rows[0].fullName || "",
+      id: rows[0].pilot_id,
+      fullName: rows[0].full_name || "",
       email: rows[0].email || "",
       phone: rows[0].phone || "",
       country: rows[0].country || "",
-      birthDate: rows[0].birthDate || "",
-      licenseType: rows[0].licenseType || "",
-      createdAt: rows[0].createdAt,
-      purchases: Number(rows[0].purchases) || 0,
+      birthDate: rows[0].birth_date || "",
+      licenseType: rows[0].license_type || "",
+      createdAt: rows[0].created_at,
     }
 
     return NextResponse.json(pilot)
