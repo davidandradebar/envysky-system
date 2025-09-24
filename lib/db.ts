@@ -13,6 +13,8 @@ const hasDatabase = () => {
 
 // Generic API call function
 async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  console.log(`[v0] API call starting: ${endpoint}`, { options })
+
   try {
     const response = await fetch(`${API_BASE}${endpoint}`, {
       headers: {
@@ -22,15 +24,26 @@ async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
       ...options,
     })
 
+    console.log(`[v0] API response received: ${endpoint}`, {
+      status: response.status,
+      ok: response.ok,
+      statusText: response.statusText,
+    })
+
     if (!response.ok) {
       const errorText = await response.text()
-      console.error(`API call to ${endpoint} failed:`, response.status, errorText)
+      console.error(`[v0] API call to ${endpoint} failed:`, response.status, errorText)
       throw new Error(`API call failed: ${response.status} ${response.statusText}`)
     }
 
-    return await response.json()
+    const data = await response.json()
+    console.log(`[v0] API call successful: ${endpoint}`, {
+      dataLength: Array.isArray(data) ? data.length : "not array",
+      data,
+    })
+    return data
   } catch (error) {
-    console.error(`API call to ${endpoint} failed:`, error)
+    console.error(`[v0] API call to ${endpoint} failed:`, error)
     throw error
   }
 }
@@ -53,15 +66,23 @@ function writeLocal<T>(key: string, value: T) {
 
 // PILOTS
 export async function getPilots(): Promise<Pilot[]> {
+  console.log(`[v0] getPilots called, hasDatabase: ${hasDatabase()}`)
+
   if (hasDatabase()) {
     try {
-      return await apiCall<Pilot[]>("/pilots")
+      const pilots = await apiCall<Pilot[]>("/pilots")
+      console.log(`[v0] getPilots from API successful:`, pilots)
+      return pilots
     } catch (error) {
-      console.warn("Database unavailable, using localStorage:", error)
-      return readLocal<Pilot[]>("envysky:pilots", [])
+      console.warn("[v0] Database unavailable for getPilots, using localStorage:", error)
+      const localPilots = readLocal<Pilot[]>("envysky:pilots", [])
+      console.log(`[v0] getPilots from localStorage:`, localPilots)
+      return localPilots
     }
   }
-  return readLocal<Pilot[]>("envysky:pilots", [])
+  const localPilots = readLocal<Pilot[]>("envysky:pilots", [])
+  console.log(`[v0] getPilots from localStorage (no database):`, localPilots)
+  return localPilots
 }
 
 export async function savePilot(pilot: Omit<Pilot, "id" | "createdAt">): Promise<Pilot> {
@@ -100,15 +121,23 @@ export async function savePilot(pilot: Omit<Pilot, "id" | "createdAt">): Promise
 
 // AIRCRAFTS
 export async function getAircrafts(): Promise<Aircraft[]> {
+  console.log(`[v0] getAircrafts called, hasDatabase: ${hasDatabase()}`)
+
   if (hasDatabase()) {
     try {
-      return await apiCall<Aircraft[]>("/aircrafts")
+      const aircrafts = await apiCall<Aircraft[]>("/aircrafts")
+      console.log(`[v0] getAircrafts from API successful:`, aircrafts)
+      return aircrafts
     } catch (error) {
-      console.warn("Database unavailable, using localStorage:", error)
-      return readLocal<Aircraft[]>("envysky:aircrafts", [])
+      console.warn("[v0] Database unavailable for getAircrafts, using localStorage:", error)
+      const localAircrafts = readLocal<Aircraft[]>("envysky:aircrafts", [])
+      console.log(`[v0] getAircrafts from localStorage:`, localAircrafts)
+      return localAircrafts
     }
   }
-  return readLocal<Aircraft[]>("envysky:aircrafts", [])
+  const localAircrafts = readLocal<Aircraft[]>("envysky:aircrafts", [])
+  console.log(`[v0] getAircrafts from localStorage (no database):`, localAircrafts)
+  return localAircrafts
 }
 
 export async function saveAircraft(aircraft: Omit<Aircraft, "id" | "createdAt">): Promise<Aircraft> {
@@ -170,15 +199,23 @@ export async function updateAircraft(aircraft: Aircraft): Promise<Aircraft> {
 
 // PURCHASES
 export async function getPurchases(): Promise<Purchase[]> {
+  console.log(`[v0] getPurchases called, hasDatabase: ${hasDatabase()}`)
+
   if (hasDatabase()) {
     try {
-      return await apiCall<Purchase[]>("/purchases")
+      const purchases = await apiCall<Purchase[]>("/purchases")
+      console.log(`[v0] getPurchases from API successful:`, purchases)
+      return purchases
     } catch (error) {
-      console.warn("Database unavailable, using localStorage:", error)
-      return readLocal<Purchase[]>("envysky:purchases", [])
+      console.warn("[v0] Database unavailable for getPurchases, using localStorage:", error)
+      const localPurchases = readLocal<Purchase[]>("envysky:purchases", [])
+      console.log(`[v0] getPurchases from localStorage:`, localPurchases)
+      return localPurchases
     }
   }
-  return readLocal<Purchase[]>("envysky:purchases", [])
+  const localPurchases = readLocal<Purchase[]>("envysky:purchases", [])
+  console.log(`[v0] getPurchases from localStorage (no database):`, localPurchases)
+  return localPurchases
 }
 
 export async function savePurchase(purchase: {
@@ -266,15 +303,23 @@ export async function savePurchase(purchase: {
 
 // FLIGHTS
 export async function getFlights(): Promise<Flight[]> {
+  console.log(`[v0] getFlights called, hasDatabase: ${hasDatabase()}`)
+
   if (hasDatabase()) {
     try {
-      return await apiCall<Flight[]>("/flights")
+      const flights = await apiCall<Flight[]>("/flights")
+      console.log(`[v0] getFlights from API successful:`, flights)
+      return flights
     } catch (error) {
-      console.warn("Database unavailable, using localStorage:", error)
-      return readLocal<Flight[]>("envysky:flights", [])
+      console.warn("[v0] Database unavailable for getFlights, using localStorage:", error)
+      const localFlights = readLocal<Flight[]>("envysky:flights", [])
+      console.log(`[v0] getFlights from localStorage:`, localFlights)
+      return localFlights
     }
   }
-  return readLocal<Flight[]>("envysky:flights", [])
+  const localFlights = readLocal<Flight[]>("envysky:flights", [])
+  console.log(`[v0] getFlights from localStorage (no database):`, localFlights)
+  return localFlights
 }
 
 export async function saveFlight(flight: Omit<Flight, "id" | "createdAt">): Promise<Flight> {
