@@ -20,7 +20,7 @@ export async function GET() {
       ORDER BY created_at DESC
     `
 
-    console.log("✅ Aircrafts fetched:", aircrafts.length)
+    console.log(`✅ Found ${aircrafts.length} aircrafts`)
     return NextResponse.json(aircrafts)
   } catch (error) {
     console.error("❌ Error fetching aircrafts:", error)
@@ -33,17 +33,24 @@ export async function POST(request: NextRequest) {
     console.log("📝 POST /api/aircrafts - Creating aircraft...")
 
     const body = await request.json()
-    console.log("📦 Request body:", body)
+    console.log("📋 Request body:", body)
 
     const { tailNumber, model, initialHours, maintenanceIntervalHours, status } = body
 
     if (!tailNumber || !model) {
+      console.log("❌ Missing required fields")
       return NextResponse.json({ error: "Tail number and model are required" }, { status: 400 })
     }
 
     const aircraft = await sql`
       INSERT INTO aircrafts (tail_number, model, initial_hours, maintenace_interval, status)
-      VALUES (${tailNumber}, ${model}, ${Number(initialHours) || 0}, ${Number(maintenanceIntervalHours) || 100}, ${status || "active"})
+      VALUES (
+        ${tailNumber}, 
+        ${model}, 
+        ${Number(initialHours) || 0}, 
+        ${Number(maintenanceIntervalHours) || 100}, 
+        ${status || "active"}
+      )
       RETURNING 
         id_flights as id,
         tail_number as "tailNumber",
