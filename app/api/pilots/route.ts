@@ -1,44 +1,39 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { getPilots, savePilot } from "@/lib/db"
+import { NextResponse } from "next/server"
+import { neon } from "@neondatabase/serverless"
+
+// NOTE: These API endpoints are optional for production use with Neon (PostgreSQL).
+// They require process.env.DATABASE_URL to be set in Vercel.
+// In preview (Next.js) without env, use the local mode already implemented.
 
 export async function GET() {
-  try {
-    console.log("🔍 GET /api/pilots - Fetching pilots...")
-    const pilots = await getPilots()
-    console.log(`✅ Found ${pilots.length} pilots`)
-    return NextResponse.json(pilots)
-  } catch (error) {
-    console.error("❌ Error fetching pilots:", error)
-    return NextResponse.json({ error: "Failed to fetch pilots" }, { status: 500 })
+  if (!process.env.DATABASE_URL) {
+    return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 400 })
   }
+  const sql = neon(process.env.DATABASE_URL!)
+  const rows = await sql`
+    SELECT id, full_name as "fullName", email, phone, country, birth_date as "birthDate", license_type as "licenseType", created_at as "createdAt"
+    FROM pilots
+    ORDER BY created_at DESC
+  `
+  return NextResponse.json(rows)
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    console.log("📝 POST /api/pilots - Creating pilot...")
-    const body = await request.json()
-    console.log("📋 Request body:", body)
-
-    const { fullName, email, phone, country, birthDate, licenseType } = body
-
-    if (!fullName || !email) {
-      console.log("❌ Missing required fields")
-      return NextResponse.json({ error: "Full name and email are required" }, { status: 400 })
-    }
-
-    const pilot = await savePilot({
-      fullName,
-      email,
-      phone,
-      country,
-      birthDate,
-      licenseType,
-    })
-
-    console.log("✅ Pilot created:", pilot)
-    return NextResponse.json(pilot)
-  } catch (error) {
-    console.error("❌ Error creating pilot:", error)
-    return NextResponse.json({ error: "Failed to create pilot" }, { status: 500 })
+export async function POST(req: Request) {
+  if (!process.env.DATABASE_URL) {
+    return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 400 })
   }
+  const body = await req.json()
+  const sql = neon(process.env.DATABASE_URL!)
+  const rows = await sql`
+    INSERT INTO pilots (full_name, email, phone, country, birth_date, license_type)
+    VALUES (${body.fullName}, ${body.email}, ${body.phone}, ${body.country}, ${body.birthDate}, ${body.licenseType})
+    ON CONFLICT (email) DO UPDATE SET
+      full_name = EXCLUDED.full_name,
+      phone = EXCLUDED.phone,
+      country = EXCLUDED.country,
+      birth_date = EXCLUDED.birth_date,
+      license_type = EXCLUDED.license_type
+    RETURNING id, full_name as "fullName", email, phone, country, birth_date as "birthDate", license_type as "licenseType", created_at as "createdAt"
+  `
+  return NextResponse.json(rows[0])
 }
