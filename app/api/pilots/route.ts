@@ -13,6 +13,22 @@ export async function GET() {
 
   try {
     const sql = neon(process.env.DATABASE_URL!)
+
+    // Primero asegurar que la tabla existe
+    await sql`
+      CREATE TABLE IF NOT EXISTS pilots (
+        pilot_id VARCHAR(255) PRIMARY KEY,
+        full_name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        phone VARCHAR(255),
+        country VARCHAR(255),
+        birth_date VARCHAR(255),
+        license_type VARCHAR(255),
+        created_at TIMESTAMP DEFAULT NOW(),
+        purchases DECIMAL(10,2) DEFAULT 0
+      )
+    `
+
     const rows = await sql`
       SELECT 
         pilot_id as "id",
@@ -54,11 +70,29 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json()
-    console.log("Creating pilot:", body.fullName, body.email)
+    console.log("🚀 Creating pilot:", body.fullName, body.email)
 
     const sql = neon(process.env.DATABASE_URL!)
-    const pilotId = body.id || generatePilotId()
 
+    // Asegurar que la tabla existe antes de insertar
+    await sql`
+      CREATE TABLE IF NOT EXISTS pilots (
+        pilot_id VARCHAR(255) PRIMARY KEY,
+        full_name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        phone VARCHAR(255),
+        country VARCHAR(255),
+        birth_date VARCHAR(255),
+        license_type VARCHAR(255),
+        created_at TIMESTAMP DEFAULT NOW(),
+        purchases DECIMAL(10,2) DEFAULT 0
+      )
+    `
+
+    const pilotId = body.id || generatePilotId()
+    console.log("🆔 Using pilot ID:", pilotId)
+
+    // Inserción simple sin complicaciones
     const rows = await sql`
       INSERT INTO pilots (
         pilot_id, 
@@ -68,18 +102,16 @@ export async function POST(req: Request) {
         country, 
         birth_date, 
         license_type, 
-        created_at,
         purchases
       )
       VALUES (
         ${pilotId}, 
-        ${body.fullName}, 
-        ${body.email}, 
-        ${body.phone || null}, 
-        ${body.country || null}, 
-        ${body.birthDate || null}, 
-        ${body.licenseType || null}, 
-        NOW(),
+        ${body.fullName || "Sin nombre"}, 
+        ${body.email || "sin-email@example.com"}, 
+        ${body.phone || ""}, 
+        ${body.country || ""}, 
+        ${body.birthDate || ""}, 
+        ${body.licenseType || ""}, 
         ${Number(body.purchases) || 0}
       )
       RETURNING 
@@ -94,7 +126,7 @@ export async function POST(req: Request) {
         purchases
     `
 
-    console.log("Pilot created successfully:", rows[0].fullName)
+    console.log("✅ Pilot created successfully:", rows[0].fullName)
 
     const pilot = {
       id: rows[0].id,
@@ -110,7 +142,15 @@ export async function POST(req: Request) {
 
     return NextResponse.json(pilot)
   } catch (error) {
-    console.error("Error creating pilot:", error)
-    return NextResponse.json({ error: "Failed to create pilot", details: error.message }, { status: 500 })
+    console.error("❌ Error creating pilot:", error)
+    console.error("❌ Error message:", error.message)
+    return NextResponse.json(
+      {
+        error: "Failed to create pilot",
+        details: error.message,
+        received_data: req.body,
+      },
+      { status: 500 },
+    )
   }
 }
