@@ -1,37 +1,27 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { getAircrafts, createAircraft } from "@/lib/db"
+import { NextResponse } from "next/server"
+import { neon } from "@neondatabase/serverless"
 
 export async function GET() {
-  try {
-    console.log("🔍 API /api/aircrafts - Fetching aircrafts...")
-    const aircrafts = await getAircrafts()
-    console.log("✅ API /api/aircrafts - Success:", aircrafts.length, "aircrafts found")
-    return NextResponse.json(aircrafts)
-  } catch (error) {
-    console.error("❌ API /api/aircrafts - Error:", error)
-    return NextResponse.json({ error: "Failed to fetch aircrafts" }, { status: 500 })
-  }
+  if (!process.env.DATABASE_URL) return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 400 })
+  const sql = neon(process.env.DATABASE_URL!)
+  const rows = await sql`
+    SELECT id, tail_number as "tailNumber", model, initial_hours as "initialHours",
+           maintenance_interval_hours as "maintenanceIntervalHours", status, created_at as "createdAt"
+    FROM aircrafts
+    ORDER BY created_at DESC
+  `
+  return NextResponse.json(rows)
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    console.log("📝 POST /api/aircrafts - Creating aircraft...")
-
-    const body = await request.json()
-    console.log("📋 Request body:", body)
-
-    const { tailNumber, model, initialHours, maintenanceIntervalHours, status } = body
-
-    if (!tailNumber || !model) {
-      console.log("❌ Missing required fields")
-      return NextResponse.json({ error: "Tail number and model are required" }, { status: 400 })
-    }
-
-    const aircraft = await createAircraft(tailNumber, model, initialHours, maintenanceIntervalHours, status)
-    console.log("✅ Aircraft created:", aircraft[0])
-    return NextResponse.json(aircraft[0])
-  } catch (error) {
-    console.error("❌ Error creating aircraft:", error)
-    return NextResponse.json({ error: "Failed to create aircraft" }, { status: 500 })
-  }
+export async function POST(req: Request) {
+  if (!process.env.DATABASE_URL) return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 400 })
+  const body = await req.json()
+  const sql = neon(process.env.DATABASE_URL!)
+  const rows = await sql`
+    INSERT INTO aircrafts (tail_number, model, initial_hours, maintenance_interval_hours, status)
+    VALUES (${body.tailNumber}, ${body.model}, ${body.initialHours}, ${body.maintenanceIntervalHours}, ${body.status})
+    RETURNING id, tail_number as "tailNumber", model, initial_hours as "initialHours",
+              maintenance_interval_hours as "maintenanceIntervalHours", status, created_at as "createdAt"
+  `
+  return NextResponse.json(rows[0])
 }
