@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server"
 import { neon } from "@neondatabase/serverless"
 
-// NOTE: These API endpoints are optional for production use with Neon (PostgreSQL).
-// They require process.env.DATABASE_URL to be set in Vercel.
-// In preview (Next.js) without env, use the local mode already implemented.
-
 // Helper function to generate pilot_id if needed
 function generatePilotId(): string {
   return `pilot_${Math.random().toString(36).substr(2, 9)}`
@@ -32,7 +28,6 @@ export async function GET() {
       ORDER BY created_at DESC
     `
 
-    // Ensure all fields have default values
     const pilots = rows.map((row: any) => ({
       id: row.id || generatePilotId(),
       fullName: row.fullName || "",
@@ -59,9 +54,9 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json()
-    const sql = neon(process.env.DATABASE_URL!)
+    console.log("Creating pilot:", body.fullName, body.email)
 
-    // Generate pilot_id if not provided
+    const sql = neon(process.env.DATABASE_URL!)
     const pilotId = body.id || generatePilotId()
 
     const rows = await sql`
@@ -78,12 +73,12 @@ export async function POST(req: Request) {
       )
       VALUES (
         ${pilotId}, 
-        ${body.fullName || ""}, 
-        ${body.email || ""}, 
-        ${body.phone || ""}, 
-        ${body.country || ""}, 
-        ${body.birthDate || ""}, 
-        ${body.licenseType || ""}, 
+        ${body.fullName}, 
+        ${body.email}, 
+        ${body.phone || null}, 
+        ${body.country || null}, 
+        ${body.birthDate || null}, 
+        ${body.licenseType || null}, 
         NOW(),
         ${Number(body.purchases) || 0}
       )
@@ -99,6 +94,8 @@ export async function POST(req: Request) {
         purchases
     `
 
+    console.log("Pilot created successfully:", rows[0].fullName)
+
     const pilot = {
       id: rows[0].id,
       fullName: rows[0].fullName || "",
@@ -113,7 +110,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(pilot)
   } catch (error) {
-    console.error("Error saving pilot:", error)
-    return NextResponse.json({ error: "Failed to save pilot" }, { status: 500 })
+    console.error("Error creating pilot:", error)
+    return NextResponse.json({ error: "Failed to create pilot", details: error.message }, { status: 500 })
   }
 }
