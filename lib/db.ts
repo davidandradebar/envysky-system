@@ -5,7 +5,11 @@ import { newId } from "./id"
 const API_BASE = "/api"
 
 // Check if we're in production with database
-const hasDatabase = () => typeof window !== "undefined" && window.location.hostname !== "localhost"
+const hasDatabase = () => {
+  // Always try to use the database if we're in a browser environment
+  // The API calls will handle fallback to localStorage if database is unavailable
+  return typeof window !== "undefined"
+}
 
 // Generic API call function
 async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
