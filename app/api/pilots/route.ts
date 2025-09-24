@@ -87,14 +87,6 @@ export async function POST(req: Request) {
         NOW(),
         ${Number(body.purchases) || 0}
       )
-      ON CONFLICT (email) DO UPDATE SET
-        pilot_id = EXCLUDED.pilot_id,
-        full_name = EXCLUDED.full_name,
-        phone = EXCLUDED.phone,
-        country = EXCLUDED.country,
-        birth_date = EXCLUDED.birth_date,
-        license_type = EXCLUDED.license_type,
-        purchases = EXCLUDED.purchases
       RETURNING 
         pilot_id as "id",
         full_name as "fullName", 
