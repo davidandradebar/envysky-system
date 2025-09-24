@@ -1,55 +1,44 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { neon } from "@neondatabase/serverless"
-
-const sql = neon(process.env.DATABASE_URL!)
+import { getPilots, savePilot } from "@/lib/db"
 
 export async function GET() {
   try {
-    console.log("🔍 GET /api/purchases - Fetching purchases...")
-
-    const purchases = await sql`
-      SELECT 
-        purchase_id as id,
-        pilot_id as "pilotId",
-        hours,
-        date,
-        created_at as "createdAt"
-      FROM purchases 
-      ORDER BY created_at DESC
-    `
-
-    console.log(`✅ Found ${purchases.length} purchases`)
-    return NextResponse.json(purchases)
+    console.log("🔍 GET /api/pilots - Fetching pilots...")
+    const pilots = await getPilots()
+    console.log(`✅ Found ${pilots.length} pilots`)
+    return NextResponse.json(pilots)
   } catch (error) {
-    console.error("❌ Error fetching purchases:", error)
-    return NextResponse.json({ error: "Failed to fetch purchases" }, { status: 500 })
+    console.error("❌ Error fetching pilots:", error)
+    return NextResponse.json({ error: "Failed to fetch pilots" }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("📝 POST /api/purchases - Creating purchase...")
-
+    console.log("📝 POST /api/pilots - Creating pilot...")
     const body = await request.json()
     console.log("📋 Request body:", body)
 
-    const { pilotId, hours, date } = body
+    const { fullName, email, phone, country, birthDate, licenseType } = body
 
-    if (!pilotId || !hours) {
+    if (!fullName || !email) {
       console.log("❌ Missing required fields")
-      return NextResponse.json({ error: "Pilot ID and hours are required" }, { status: 400 })
+      return NextResponse.json({ error: "Full name and email are required" }, { status: 400 })
     }
 
-    const purchase = await sql`
-      INSERT INTO purchases (pilot_id, hours, date)
-      VALUES (${pilotId}, ${Number(hours)}, ${date || new Date().toISOString().split("T")[0]})
-      RETURNING purchase_id as id, pilot_id as "pilotId", hours, date, created_at as "createdAt"
-    `
+    const pilot = await savePilot({
+      fullName,
+      email,
+      phone,
+      country,
+      birthDate,
+      licenseType,
+    })
 
-    console.log("✅ Purchase created:", purchase[0])
-    return NextResponse.json(purchase[0])
+    console.log("✅ Pilot created:", pilot)
+    return NextResponse.json(pilot)
   } catch (error) {
-    console.error("❌ Error creating purchase:", error)
-    return NextResponse.json({ error: "Failed to create purchase" }, { status: 500 })
+    console.error("❌ Error creating pilot:", error)
+    return NextResponse.json({ error: "Failed to create pilot" }, { status: 500 })
   }
 }
