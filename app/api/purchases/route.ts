@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server"
 import { neon } from "@neondatabase/serverless"
 
-// Helper function to generate purchase IDs
+// Helper function to generate purchase_id
 function generatePurchaseId(): string {
   return `purchase_${Math.random().toString(36).substr(2, 9)}`
+}
+
+// Helper function to generate pilot_id if needed
+function generatePilotId(): string {
+  return `pilot_${Math.random().toString(36).substr(2, 9)}`
 }
 
 export async function GET() {
@@ -13,34 +18,32 @@ export async function GET() {
 
   try {
     const sql = neon(process.env.DATABASE_URL!)
-
     const rows = await sql`
       SELECT 
-        purchase_id as "id",
-        pilot_id as "pilotId", 
-        hours, 
-        date, 
-        created_at as "createdAt",
-        pilot,
-        id as "originalId"
+        purchase_id,
+        pilot_id,
+        hours,
+        date,
+        created_at,
+        pilot
       FROM purchases
-      ORDER BY created_at DESC
+      ORDER BY date DESC
     `
 
-    // Map the results to handle your specific structure
+    console.log(`Fetched ${rows.length} purchases from database`)
+
     const purchases = rows.map((row: any) => ({
-      id: row.id || row.originalId || generatePurchaseId(),
-      pilotId: row.pilotId,
+      id: row.purchase_id || row.id || generatePurchaseId(),
+      pilotId: row.pilot_id,
       hours: Number.parseFloat(row.hours) || 0,
-      date: row.date || row.createdAt,
-      createdAt: row.createdAt || new Date().toISOString(),
-      pilot: row.pilot || "", // Additional field from your structure
+      date: row.date,
+      createdAt: row.created_at || new Date().toISOString(),
     }))
 
     return NextResponse.json(purchases)
   } catch (error) {
     console.error("Error fetching purchases:", error)
-    return NextResponse.json({ error: "Failed to fetch purchases" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to fetch purchases", details: error.message }, { status: 500 })
   }
 }
 
@@ -50,98 +53,103 @@ export async function POST(req: Request) {
   }
 
   try {
-    const sql = neon(process.env.DATABASE_URL!)
     const body = await req.json()
+    console.log("Creating purchase with data:", body)
 
-    // Ensure pilot exists (by email) - adapted for your structure
-    let pilotId = body.pilotId as string | null
-    let pilotName = body.fullName || "Sin nombre"
+    const sql = neon(process.env.DATABASE_URL!)
 
-    if (!pilotId && body.pilotEmail) {
-      // Check if pilot exists using pilot_id field
-      const pilots = await sql`
-        SELECT pilot_id, full_name 
-        FROM pilots 
-        WHERE email = ${body.pilotEmail} 
-        LIMIT 1
+    // Check if pilot exists by email
+    const pilotRows = await sql`
+      SELECT pilot_id, full_name FROM pilots WHERE email = ${body.pilotEmail}
+    `
+
+    let pilotId: string
+    let pilotName: string
+
+    if (pilotRows.length === 0) {
+      // Create new pilot
+      console.log("Pilot doesn't exist, creating new pilot")
+      pilotId = generatePilotId()
+      pilotName = body.fullName || "Sin nombre"
+
+      await sql`
+        INSERT INTO pilots (
+          pilot_id, 
+          full_name, 
+          email, 
+          phone, 
+          country, 
+          birth_date, 
+          license_type,
+          created_at,
+          purchases
+        )
+        VALUES (
+          ${pilotId}, 
+          ${pilotName}, 
+          ${body.pilotEmail}, 
+          ${body.phone || null}, 
+          ${body.country || null}, 
+          ${body.birthDate || null}, 
+          ${body.licenseType || null},
+          NOW(),
+          ${body.hours}
+        )
       `
+    } else {
+      // Use existing pilot
+      pilotId = pilotRows[0].pilot_id
+      pilotName = pilotRows[0].full_name
 
-      if (pilots.length === 0) {
-        // Create new pilot with your structure
-        const newPilotId = `pilot_${Math.random().toString(36).substr(2, 9)}`
-        const inserted = await sql`
-          INSERT INTO pilots (
-            pilot_id, 
-            full_name, 
-            email, 
-            phone, 
-            country, 
-            birth_date, 
-            license_type, 
-            created_at,
-            purchases
-          )
-          VALUES (
-            ${newPilotId}, 
-            ${body.fullName || "Sin nombre"}, 
-            ${body.pilotEmail}, 
-            ${body.phone || ""}, 
-            ${body.country || ""}, 
-            ${body.birthDate || null}, 
-            ${body.licenseType || ""}, 
-            NOW(),
-            0
-          )
-          RETURNING pilot_id, full_name
-        `
-        pilotId = inserted[0].pilot_id as string
-        pilotName = inserted[0].full_name
-      } else {
-        pilotId = pilots[0].pilot_id as string
-        pilotName = pilots[0].full_name
-      }
+      // Update pilot's total purchases
+      await sql`
+        UPDATE pilots 
+        SET purchases = COALESCE(purchases, 0) + ${body.hours}
+        WHERE pilot_id = ${pilotId}
+      `
     }
 
-    // Create purchase with your structure
+    // Create purchase record
     const purchaseId = generatePurchaseId()
-    const rows = await sql`
+
+    const purchaseRows = await sql`
       INSERT INTO purchases (
         purchase_id,
-        pilot_id, 
-        hours, 
-        date, 
+        pilot_id,
+        hours,
+        date,
         created_at,
-        pilot,
-        id
+        pilot
       )
       VALUES (
         ${purchaseId},
-        ${pilotId || body.pilotId}, 
-        ${body.hours}, 
+        ${pilotId},
+        ${body.hours},
         ${body.date},
         NOW(),
-        ${pilotName},
-        ${purchaseId}
+        ${pilotName}
       )
       RETURNING 
-        purchase_id as "id",
-        pilot_id as "pilotId", 
-        hours, 
-        date, 
-        created_at as "createdAt",
-        pilot
+        purchase_id,
+        pilot_id,
+        hours,
+        date,
+        created_at
     `
 
-    // Update pilot's total purchased hours
-    await sql`
-      UPDATE pilots 
-      SET purchases = COALESCE(purchases, 0) + ${body.hours}
-      WHERE pilot_id = ${pilotId || body.pilotId}
-    `
+    console.log("Purchase created successfully:", purchaseRows[0])
 
-    return NextResponse.json(rows[0])
+    const purchase = {
+      id: purchaseRows[0].purchase_id,
+      pilotId: purchaseRows[0].pilot_id,
+      hours: Number.parseFloat(purchaseRows[0].hours),
+      date: purchaseRows[0].date,
+      createdAt: purchaseRows[0].created_at,
+    }
+
+    return NextResponse.json(purchase)
   } catch (error) {
     console.error("Error creating purchase:", error)
-    return NextResponse.json({ error: "Failed to create purchase" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to create purchase", details: error.message }, { status: 500 })
   }
 }
