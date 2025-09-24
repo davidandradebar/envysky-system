@@ -1,7 +1,11 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { neon } from "@neondatabase/serverless"
 
-export async function GET() {
+function generateId(): string {
+  return Math.random().toString(36).substr(2, 9)
+}
+
+export async function GET(request: NextRequest) {
   if (!process.env.DATABASE_URL) return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 400 })
 
   try {
@@ -78,11 +82,11 @@ export async function GET() {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   if (!process.env.DATABASE_URL) return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 400 })
 
   try {
-    const body = await req.json()
+    const body = await request.json()
     const sql = neon(process.env.DATABASE_URL!)
 
     // Check if pilot_id_2 and tachometer columns exist
@@ -103,7 +107,7 @@ export async function POST(req: Request) {
       rows = await sql`
         INSERT INTO flights (pilot_id, pilot_id_2, aircraft_id, date, time, duration, tachometer_start, tachometer_end, status, notes)
         VALUES (${body.pilotId}, ${body.pilotId2 || null}, ${body.aircraftId}, ${body.date}, ${body.time}, 
-                ${body.duration || 0}, ${body.tachometerStart || null}, ${body.tachometerEnd || null}, 
+                ${Number(body.duration) || 0}, ${body.tachometerStart || null}, ${body.tachometerEnd || null}, 
                 ${body.status}, ${body.notes || ""})
         RETURNING id, pilot_id as "pilotId", pilot_id_2 as "pilotId2", aircraft_id as "aircraftId", 
                   date, time, duration, tachometer_start as "tachometerStart", tachometer_end as "tachometerEnd",
@@ -114,7 +118,7 @@ export async function POST(req: Request) {
       rows = await sql`
         INSERT INTO flights (pilot_id, pilot_id_2, aircraft_id, date, time, duration, status, notes)
         VALUES (${body.pilotId}, ${body.pilotId2 || null}, ${body.aircraftId}, ${body.date}, ${body.time}, 
-                ${body.duration || 0}, ${body.status}, ${body.notes || ""})
+                ${Number(body.duration) || 0}, ${body.status}, ${body.notes || ""})
         RETURNING id, pilot_id as "pilotId", pilot_id_2 as "pilotId2", aircraft_id as "aircraftId", 
                   date, time, duration, status, notes, created_at as "createdAt"
       `
@@ -129,7 +133,7 @@ export async function POST(req: Request) {
       rows = await sql`
         INSERT INTO flights (pilot_id, aircraft_id, date, time, duration, tachometer_start, tachometer_end, status, notes)
         VALUES (${body.pilotId}, ${body.aircraftId}, ${body.date}, ${body.time}, 
-                ${body.duration || 0}, ${body.tachometerStart || null}, ${body.tachometerEnd || null}, 
+                ${Number(body.duration) || 0}, ${body.tachometerStart || null}, ${body.tachometerEnd || null}, 
                 ${body.status}, ${body.notes || ""})
         RETURNING id, pilot_id as "pilotId", aircraft_id as "aircraftId", 
                   date, time, duration, tachometer_start as "tachometerStart", tachometer_end as "tachometerEnd",
@@ -142,7 +146,7 @@ export async function POST(req: Request) {
       rows = await sql`
         INSERT INTO flights (pilot_id, aircraft_id, date, time, duration, status, notes)
         VALUES (${body.pilotId}, ${body.aircraftId}, ${body.date}, ${body.time}, 
-                ${body.duration || 0}, ${body.status}, ${body.notes || ""})
+                ${Number(body.duration) || 0}, ${body.status}, ${body.notes || ""})
         RETURNING id, pilot_id as "pilotId", aircraft_id as "aircraftId", 
                   date, time, duration, status, notes, created_at as "createdAt"
       `
@@ -162,11 +166,11 @@ export async function POST(req: Request) {
   }
 }
 
-export async function PUT(req: Request) {
+export async function PUT(request: NextRequest) {
   if (!process.env.DATABASE_URL) return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 400 })
 
   try {
-    const body = await req.json()
+    const body = await request.json()
     const sql = neon(process.env.DATABASE_URL!)
 
     console.log("PUT request body:", body)
