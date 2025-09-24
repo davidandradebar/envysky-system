@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server"
 import { neon } from "@neondatabase/serverless"
 
-// Helper function to generate purchase_id
+// Helper function to generate purchase_id if needed
 function generatePurchaseId(): string {
   return `purchase_${Math.random().toString(36).substr(2, 9)}`
 }
 
-// Helper function to generate pilot_id if needed
 function generatePilotId(): string {
   return `pilot_${Math.random().toString(36).substr(2, 9)}`
 }
@@ -27,16 +26,16 @@ export async function GET() {
         created_at,
         pilot
       FROM purchases
-      ORDER BY date DESC
+      ORDER BY created_at DESC
     `
 
     console.log(`Fetched ${rows.length} purchases from database`)
 
     const purchases = rows.map((row: any) => ({
-      id: row.purchase_id || row.id || generatePurchaseId(),
-      pilotId: row.pilot_id,
+      id: row.purchase_id || generatePurchaseId(),
+      pilotId: row.pilot_id || "",
       hours: Number.parseFloat(row.hours) || 0,
-      date: row.date,
+      date: row.date || "",
       createdAt: row.created_at || new Date().toISOString(),
     }))
 
@@ -59,18 +58,18 @@ export async function POST(req: Request) {
     const sql = neon(process.env.DATABASE_URL!)
 
     // Check if pilot exists by email
-    const pilotRows = await sql`
-      SELECT pilot_id, full_name FROM pilots WHERE email = ${body.pilotEmail}
-    `
+    let pilot = null
+    if (body.pilotEmail) {
+      const pilotRows = await sql`
+        SELECT pilot_id, full_name, email FROM pilots WHERE email = ${body.pilotEmail}
+      `
+      pilot = pilotRows[0] || null
+    }
 
-    let pilotId: string
-    let pilotName: string
-
-    if (pilotRows.length === 0) {
-      // Create new pilot
-      console.log("Pilot doesn't exist, creating new pilot")
-      pilotId = generatePilotId()
-      pilotName = body.fullName || "Sin nombre"
+    // If pilot doesn't exist, create one
+    if (!pilot && body.pilotEmail) {
+      const newPilotId = generatePilotId()
+      console.log("Creating new pilot:", body.fullName, body.pilotEmail)
 
       await sql`
         INSERT INTO pilots (
@@ -85,34 +84,35 @@ export async function POST(req: Request) {
           purchases
         )
         VALUES (
-          ${pilotId}, 
-          ${pilotName}, 
+          ${newPilotId}, 
+          ${body.fullName || "Sin nombre"}, 
           ${body.pilotEmail}, 
           ${body.phone || null}, 
           ${body.country || null}, 
           ${body.birthDate || null}, 
           ${body.licenseType || null},
           NOW(),
-          ${body.hours}
+          0
         )
       `
-    } else {
-      // Use existing pilot
-      pilotId = pilotRows[0].pilot_id
-      pilotName = pilotRows[0].full_name
 
-      // Update pilot's total purchases
-      await sql`
-        UPDATE pilots 
-        SET purchases = COALESCE(purchases, 0) + ${body.hours}
-        WHERE pilot_id = ${pilotId}
-      `
+      pilot = {
+        pilot_id: newPilotId,
+        full_name: body.fullName || "Sin nombre",
+        email: body.pilotEmail,
+      }
     }
 
-    // Create purchase record
-    const purchaseId = generatePurchaseId()
+    if (!pilot) {
+      return NextResponse.json({ error: "Could not find or create pilot" }, { status: 400 })
+    }
 
-    const purchaseRows = await sql`
+    // Create the purchase
+    const purchaseId = generatePurchaseId()
+    const hours = Number.parseFloat(body.hours) || 0
+    const date = body.date || new Date().toISOString().split("T")[0]
+
+    await sql`
       INSERT INTO purchases (
         purchase_id,
         pilot_id,
@@ -123,28 +123,29 @@ export async function POST(req: Request) {
       )
       VALUES (
         ${purchaseId},
-        ${pilotId},
-        ${body.hours},
-        ${body.date},
+        ${pilot.pilot_id},
+        ${hours},
+        ${date},
         NOW(),
-        ${pilotName}
+        ${pilot.full_name}
       )
-      RETURNING 
-        purchase_id,
-        pilot_id,
-        hours,
-        date,
-        created_at
     `
 
-    console.log("Purchase created successfully:", purchaseRows[0])
+    // Update pilot's total purchases
+    await sql`
+      UPDATE pilots 
+      SET purchases = COALESCE(purchases, 0) + ${hours}
+      WHERE pilot_id = ${pilot.pilot_id}
+    `
+
+    console.log("Purchase created successfully:", purchaseId)
 
     const purchase = {
-      id: purchaseRows[0].purchase_id,
-      pilotId: purchaseRows[0].pilot_id,
-      hours: Number.parseFloat(purchaseRows[0].hours),
-      date: purchaseRows[0].date,
-      createdAt: purchaseRows[0].created_at,
+      id: purchaseId,
+      pilotId: pilot.pilot_id,
+      hours: hours,
+      date: date,
+      createdAt: new Date().toISOString(),
     }
 
     return NextResponse.json(purchase)
