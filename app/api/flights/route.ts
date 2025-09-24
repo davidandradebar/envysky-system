@@ -14,7 +14,7 @@ export async function GET() {
         copilot_id as "pilotId2",
         aircraft_id as "aircraftId",
         flight_time as date,
-        '00:00' as time,
+        flight_time as time,
         duration,
         status,
         notes,
@@ -25,7 +25,7 @@ export async function GET() {
       ORDER BY created_at DESC
     `
 
-    console.log("✅ Flights fetched:", flights.length)
+    console.log(`✅ Found ${flights.length} flights`)
     return NextResponse.json(flights)
   } catch (error) {
     console.error("❌ Error fetching flights:", error)
@@ -38,19 +38,28 @@ export async function POST(request: NextRequest) {
     console.log("📝 POST /api/flights - Creating flight...")
 
     const body = await request.json()
-    console.log("📦 Request body:", body)
+    console.log("📋 Request body:", body)
 
-    const { pilotId, pilotId2, aircraftId, date, time, tachometerStart, tachometerEnd, notes } = body
+    const { pilotId, pilotId2, aircraftId, date, time, duration, status, notes, tachometerStart, tachometerEnd } = body
 
     if (!pilotId || !aircraftId || !date) {
-      return NextResponse.json({ error: "Pilot, aircraft and date are required" }, { status: 400 })
+      console.log("❌ Missing required fields")
+      return NextResponse.json({ error: "Pilot ID, aircraft ID, and date are required" }, { status: 400 })
     }
-
-    const duration = tachometerEnd && tachometerStart ? Number(tachometerEnd) - Number(tachometerStart) : 0
 
     const flight = await sql`
       INSERT INTO flights (pilot_id, copilot_id, aircraft_id, flight_time, duration, status, notes, tachometer_start, tachometer_end)
-      VALUES (${pilotId}, ${pilotId2 || null}, ${aircraftId}, ${date}, ${duration}, 'completed', ${notes || ""}, ${Number(tachometerStart) || null}, ${Number(tachometerEnd) || null})
+      VALUES (
+        ${pilotId}, 
+        ${pilotId2 || null}, 
+        ${aircraftId}, 
+        ${date + " " + (time || "00:00")}, 
+        ${duration || 0}, 
+        ${status || "scheduled"}, 
+        ${notes || null},
+        ${tachometerStart || null},
+        ${tachometerEnd || null}
+      )
       RETURNING 
         flight_id as id,
         pilot_id as "pilotId",
