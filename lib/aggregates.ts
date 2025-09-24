@@ -1,71 +1,55 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { neon } from "@neondatabase/serverless"
+import type { Aircraft, Flight, Purchase } from "./types"
 
-const sql = neon(process.env.DATABASE_URL!)
+export function calcPilotHours(pilotId: string, purchases: Purchase[], flights: Flight[]) {
+  const purchased = purchases.filter((p) => p.pilotId === pilotId).reduce((sum, p) => sum + (p.hours || 0), 0)
 
-export async function GET() {
-  try {
-    console.log("🔍 GET /api/purchases - Fetching purchases...")
+  const flown = flights
+    .filter((f) => f.pilotId === pilotId || f.pilotId2 === pilotId)
+    .filter((f) => f.status === "completed")
+    .reduce((sum, f) => {
+      if (f.tachometerStart !== undefined && f.tachometerEnd !== undefined) {
+        return sum + (f.tachometerEnd - f.tachometerStart)
+      }
+      return sum + (f.duration || 0)
+    }, 0)
 
-    const purchases = await sql`
-      SELECT purchase_id as id, pilot_id as "pilotId", hours, date, created_at as "createdAt"
-      FROM purchases 
-      ORDER BY created_at DESC
-    `
-
-    console.log("✅ Purchases fetched:", purchases.length)
-    return NextResponse.json(purchases)
-  } catch (error) {
-    console.error("❌ Error fetching purchases:", error)
-    return NextResponse.json({ error: "Failed to fetch purchases" }, { status: 500 })
+  return {
+    purchased,
+    flown,
+    remaining: purchased - flown,
   }
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    console.log("📝 POST /api/purchases - Creating purchase...")
+export function calcAircraftAccumulatedHours(aircraft: Aircraft, flights: Flight[]) {
+  const flownHours = flights
+    .filter((f) => f.aircraftId === aircraft.id)
+    .filter((f) => f.status === "completed")
+    .reduce((sum, f) => {
+      if (f.tachometerStart !== undefined && f.tachometerEnd !== undefined) {
+        return sum + (f.tachometerEnd - f.tachometerStart)
+      }
+      return sum + (f.duration || 0)
+    }, 0)
 
-    const body = await request.json()
-    console.log("📦 Request body:", body)
+  const accumulated = aircraft.initialHours + flownHours
 
-    const { pilotEmail, hours, fullName, phone, country, birthDate, licenseType } = body
+  return {
+    initial: aircraft.initialHours,
+    flown: flownHours,
+    accumulated,
+  }
+}
 
-    if (!pilotEmail || !hours) {
-      return NextResponse.json({ error: "Pilot email and hours are required" }, { status: 400 })
-    }
+export function calcAircraftMaintenance(aircraft: Aircraft, accumulatedHours: number) {
+  const hoursSinceInitial = accumulatedHours - aircraft.initialHours
+  const intervalsCompleted = Math.floor(hoursSinceInitial / aircraft.maintenanceIntervalHours)
+  const nextMaintenanceAt = aircraft.initialHours + (intervalsCompleted + 1) * aircraft.maintenanceIntervalHours
+  const dueInHours = nextMaintenanceAt - accumulatedHours
+  const dueNow = dueInHours <= 0
 
-    // Find or create pilot
-    const pilot = await sql`
-      SELECT pilot_id FROM pilots WHERE email = ${pilotEmail}
-    `
-
-    let pilotId: string
-
-    if (pilot.length === 0) {
-      // Create new pilot
-      const newPilot = await sql`
-        INSERT INTO pilots (full_name, email, phone, country, birth_date, license_type, purchases)
-        VALUES (${fullName || "Unknown"}, ${pilotEmail}, ${phone || ""}, ${country || ""}, ${birthDate || null}, ${licenseType || ""}, ${Number(hours)})
-        RETURNING pilot_id
-      `
-      pilotId = newPilot[0].pilot_id
-      console.log("✅ New pilot created:", pilotId)
-    } else {
-      pilotId = pilot[0].pilot_id
-      console.log("👤 Using existing pilot:", pilotId)
-    }
-
-    // Create purchase
-    const purchase = await sql`
-      INSERT INTO purchases (pilot_id, hours, date)
-      VALUES (${pilotId}, ${Number(hours)}, ${new Date().toISOString().split("T")[0]})
-      RETURNING purchase_id as id, pilot_id as "pilotId", hours, date, created_at as "createdAt"
-    `
-
-    console.log("✅ Purchase created:", purchase[0])
-    return NextResponse.json(purchase[0])
-  } catch (error) {
-    console.error("❌ Error creating purchase:", error)
-    return NextResponse.json({ error: "Failed to create purchase" }, { status: 500 })
+  return {
+    nextMaintenanceAt,
+    dueInHours,
+    dueNow,
   }
 }
