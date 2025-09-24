@@ -9,13 +9,11 @@ export interface Pilot {
   createdAt: string
 }
 
-export interface Aircraft {
+export interface Purchase {
   id: string
-  tailNumber: string
-  model: string
-  initialHours: number
-  maintenanceIntervalHours: number
-  status: "active" | "maintenance"
+  pilotId: string
+  hours: number
+  date: string
   createdAt: string
 }
 
@@ -34,11 +32,13 @@ export interface Flight {
   createdAt: string
 }
 
-export interface Purchase {
+export interface Aircraft {
   id: string
-  pilotId: string
-  hours: number
-  date: string
+  tailNumber: string
+  model: string
+  initialHours: number
+  maintenanceIntervalHours: number
+  status: "active" | "maintenance"
   createdAt: string
 }
 
