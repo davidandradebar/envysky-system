@@ -13,22 +13,6 @@ export async function GET() {
 
   try {
     const sql = neon(process.env.DATABASE_URL!)
-
-    // Primero asegurar que la tabla existe
-    await sql`
-      CREATE TABLE IF NOT EXISTS pilots (
-        pilot_id VARCHAR(255) PRIMARY KEY,
-        full_name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        phone VARCHAR(255),
-        country VARCHAR(255),
-        birth_date VARCHAR(255),
-        license_type VARCHAR(255),
-        created_at TIMESTAMP DEFAULT NOW(),
-        purchases DECIMAL(10,2) DEFAULT 0
-      )
-    `
-
     const rows = await sql`
       SELECT 
         pilot_id as "id",
@@ -39,7 +23,7 @@ export async function GET() {
         birth_date as "birthDate", 
         license_type as "licenseType", 
         created_at as "createdAt",
-        purchases
+        COALESCE(purchases, 0) as purchases
       FROM pilots
       ORDER BY created_at DESC
     `
@@ -70,29 +54,12 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json()
-    console.log("🚀 Creating pilot:", body.fullName, body.email)
+    console.log("Creating pilot:", body.fullName, body.email)
 
     const sql = neon(process.env.DATABASE_URL!)
-
-    // Asegurar que la tabla existe antes de insertar
-    await sql`
-      CREATE TABLE IF NOT EXISTS pilots (
-        pilot_id VARCHAR(255) PRIMARY KEY,
-        full_name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        phone VARCHAR(255),
-        country VARCHAR(255),
-        birth_date VARCHAR(255),
-        license_type VARCHAR(255),
-        created_at TIMESTAMP DEFAULT NOW(),
-        purchases DECIMAL(10,2) DEFAULT 0
-      )
-    `
-
     const pilotId = body.id || generatePilotId()
-    console.log("🆔 Using pilot ID:", pilotId)
 
-    // Inserción simple sin complicaciones
+    // SOLUCIÓN: No insertar el campo 'purchases' porque se calcula automáticamente
     const rows = await sql`
       INSERT INTO pilots (
         pilot_id, 
@@ -101,18 +68,16 @@ export async function POST(req: Request) {
         phone, 
         country, 
         birth_date, 
-        license_type, 
-        purchases
+        license_type
       )
       VALUES (
         ${pilotId}, 
         ${body.fullName || "Sin nombre"}, 
         ${body.email || "sin-email@example.com"}, 
-        ${body.phone || ""}, 
-        ${body.country || ""}, 
-        ${body.birthDate || ""}, 
-        ${body.licenseType || ""}, 
-        ${Number(body.purchases) || 0}
+        ${body.phone || null}, 
+        ${body.country || null}, 
+        ${body.birthDate || null}, 
+        ${body.licenseType || null}
       )
       RETURNING 
         pilot_id as "id",
@@ -123,10 +88,10 @@ export async function POST(req: Request) {
         birth_date as "birthDate", 
         license_type as "licenseType", 
         created_at as "createdAt",
-        purchases
+        COALESCE(purchases, 0) as purchases
     `
 
-    console.log("✅ Pilot created successfully:", rows[0].fullName)
+    console.log("Pilot created successfully:", rows[0].fullName)
 
     const pilot = {
       id: rows[0].id,
@@ -142,15 +107,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(pilot)
   } catch (error) {
-    console.error("❌ Error creating pilot:", error)
-    console.error("❌ Error message:", error.message)
-    return NextResponse.json(
-      {
-        error: "Failed to create pilot",
-        details: error.message,
-        received_data: req.body,
-      },
-      { status: 500 },
-    )
+    console.error("Error creating pilot:", error)
+    return NextResponse.json({ error: "Failed to create pilot", details: error.message }, { status: 500 })
   }
 }
