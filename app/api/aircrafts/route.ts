@@ -3,6 +3,9 @@ import { neon } from "@neondatabase/serverless"
 
 export async function GET() {
   if (!process.env.DATABASE_URL) return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 400 })
+
+  console.log("🔍 [API] Fetching aircrafts from database...")
+
   const sql = neon(process.env.DATABASE_URL!)
   const rows = await sql`
     SELECT id, tail_number as "tailNumber", model, initial_hours as "initialHours",
@@ -10,12 +13,17 @@ export async function GET() {
     FROM aircrafts
     ORDER BY created_at DESC
   `
+
+  console.log("✅ [API] Raw aircrafts data:", rows)
   return NextResponse.json(rows)
 }
 
 export async function POST(req: Request) {
   if (!process.env.DATABASE_URL) return NextResponse.json({ error: "DATABASE_URL not configured" }, { status: 400 })
+
   const body = await req.json()
+  console.log("💾 [API] Creating aircraft:", body)
+
   const sql = neon(process.env.DATABASE_URL!)
   const rows = await sql`
     INSERT INTO aircrafts (tail_number, model, initial_hours, maintenance_interval_hours, status)
@@ -23,5 +31,7 @@ export async function POST(req: Request) {
     RETURNING id, tail_number as "tailNumber", model, initial_hours as "initialHours",
               maintenance_interval_hours as "maintenanceIntervalHours", status, created_at as "createdAt"
   `
+
+  console.log("✅ [API] Aircraft created:", rows[0])
   return NextResponse.json(rows[0])
 }
