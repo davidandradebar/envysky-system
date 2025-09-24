@@ -1,4 +1,3 @@
-// Base types for the flight management system
 export interface Pilot {
   id: string
   fullName: string
@@ -23,7 +22,7 @@ export interface Aircraft {
 export interface Flight {
   id: string
   pilotId: string
-  pilotId2?: string // Second pilot (optional)
+  pilotId2?: string
   aircraftId: string
   date: string
   time: string
@@ -43,27 +42,9 @@ export interface Purchase {
   createdAt: string
 }
 
-// Helper function to calculate flight hours
 export function calculateFlightHours(flight: Flight): number {
-  // Si no hay vuelo, retornar 0
-  if (!flight) return 0
-
-  // Si tenemos datos del tacómetro, usarlos
-  if (
-    flight.tachometerStart !== undefined &&
-    flight.tachometerEnd !== undefined &&
-    flight.tachometerStart !== null &&
-    flight.tachometerEnd !== null
-  ) {
-    const start = Number(flight.tachometerStart)
-    const end = Number(flight.tachometerEnd)
-
-    // Verificar que los valores son números válidos
-    if (!isNaN(start) && !isNaN(end) && end >= start) {
-      return end - start
-    }
+  if (flight.tachometerStart !== undefined && flight.tachometerEnd !== undefined) {
+    return flight.tachometerEnd - flight.tachometerStart
   }
-
-  // Si no hay tacómetro o hay un problema, usar duration
-  return typeof flight.duration === "number" ? flight.duration : 0
+  return flight.duration || 0
 }
